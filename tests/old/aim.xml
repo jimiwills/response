@@ -1,0 +1,25 @@
+<perltk>
+  <script>
+# some perlscript goes here
+  </script>
+  <notepad>
+    <page label="Page 1">
+      <grid default-opts="-sticky=>'nw'">
+        <label>Here's a column</label>
+        <label>Here's another</label>
+        <br/>
+        <button command="perlCodeHere();">This is in a new row</button>
+        <entry textvariable="\$perlCodeHere"/>
+        <br/>
+        <optionmenu variable="\$myref">
+          name : Label
+          this : is like YAML
+          or   : coffeescript
+          or   : a bit like JSON 
+        </optionmenu>
+      </grid>
+    </page>
+    <page label="Page 2">
+    </page>
+  </notepad>
+</perltk>    
