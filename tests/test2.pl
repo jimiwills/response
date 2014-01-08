@@ -56,13 +56,13 @@ sub myScriptSub {
 }
 
 sub getObjectList {
-  my @shelf = @Tk::MDTextBook::Shelf;
+  my @shelf = @Tk::MIMEApp::Shelf;
   my $object = $shelf[$#shelf]; # get the last one!
   return $object->{Objects};
 }
 
 sub getMW {
-  return $Tk::MDTextBook::Data2Tk::MW;
+  return $Tk::MIMEApp::DataToTk::MW;
 }
 
 sub getPreamble {

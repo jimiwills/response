@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Carp;
 
 use Math::Geometry::Multidimensional qw/distanceToLineN diagonalComponentsN diagonalDistancesFromOriginN/;
-use Statistics::TheilSen qw/theilsen/;
+use Statistics::TheilSenEstimator qw/theilsen/;
 use Statistics::QuickMedian qw/qmedian/;
 use Statistics::Distributions;
 
@@ -16,11 +16,11 @@ Statistics::Reproducibility - Reproducibility measurement between multiple repli
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 =head1 SYNOPSIS

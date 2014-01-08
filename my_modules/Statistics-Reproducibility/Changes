@@ -1,5 +1,8 @@
 Revision history for Statistics-Reproducibility
 
+0.04    20140108/07:25
+        Updated to reflect change of name of Statistics::TheilSenEstimator
+
 0.01    Date/time
         First version, released on an unsuspecting world.
 
