@@ -1,0 +1,9 @@
+Revision history for Statistics-TheilSenEstimator
+
+0.04    20140108/07:07
+        Changed name from TheilSen to TheilSenEstimator, which is what
+        is actually registered!
+
+0.01    Date/time
+        First version, released on an unsuspecting world.
+

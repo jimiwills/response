@@ -1,0 +1,45 @@
+{
+   "abstract" : "Reproducibility measurement between multiple replicate experiments",
+   "author" : [
+      "Jimi Wills <jimi@webu.co.uk>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "ExtUtils::MakeMaker version 6.74, CPAN::Meta::Converter version 2.120351",
+   "license" : [
+      "unknown"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Statistics-Reproducibility",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Test::More" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Math::Geometry::Multidimensional" : "0.01",
+            "Statistics::Distributions" : "1.02",
+            "Statistics::QuickMedian" : "0.03",
+            "Statistics::TheilSenEstimator" : "0.04",
+            "perl" : "5.006"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "0.04"
+}
