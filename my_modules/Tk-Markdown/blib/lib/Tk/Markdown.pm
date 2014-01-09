@@ -10,11 +10,11 @@ Tk::Markdown - display markdown in a Text
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use base qw(Tk::Derived Tk::Text);
 use Tk::Font;

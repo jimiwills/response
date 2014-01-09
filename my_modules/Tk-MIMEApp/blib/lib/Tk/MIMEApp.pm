@@ -1,7 +1,7 @@
 package Tk::MIMEApp;
 use base qw(Tk::Derived Tk::NoteBook);
 use IO::File;
-use MIME::Multipart::ParseSimple;
+use MIME::Multipart::Parse::Ordered;
 use Tk::MarkdownTk;
 use YAML::Perl;
 use Tk qw(Ev);
@@ -16,11 +16,11 @@ Tk::MIMEApp - The great new Tk::MIMEApp!
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 our @Shelf = (); # we'll put our books here!
 
@@ -47,7 +47,7 @@ sub loadMultipart {
   my ($o,$fh) = @_;
   $o->{Objects} = {};
   push @Shelf, $o;
-  my $mmps = MIME::Multipart::ParseSimple->new();
+  my $mmps = MIME::Multipart::Parse::Ordered->new();
   my $parts = $o->{parts} = $mmps->parse($fh); # now an array... content is in $parts->[$i]->{Body}
 
   foreach my $part(@$parts){

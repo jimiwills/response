@@ -20,6 +20,9 @@ WriteMakefile(
     PREREQ_PM => {
         #'ABC'              => 1.6,
         #'Foo::Bar::Module' => 5.0401,
+        'YAML::Perl' => 0.02,
+        'Tk::MarkdownTk' => 0.07,
+        'Tk' => 5.0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Tk-MIMEApp-*' },

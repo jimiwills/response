@@ -1,14 +1,15 @@
 ---
-abstract: unknown
+abstract: ~
 author:
   - 'jimi <jimi@webu.co.uk>'
 build_requires:
   Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 0
+distribution_type: module
 dynamic_config: 0
-generated_by: 'ExtUtils::MakeMaker version 6.74, CPAN::Meta::Converter version 2.120351'
-license: unknown
+generated_by: 'ExtUtils::MakeMaker version 6.57_05'
+license: Artistic_2_0
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
@@ -18,5 +19,6 @@ no_index:
     - t
     - inc
 requires:
+  Statistics::QuickMedian: 0.03
   perl: 5.006
-version: 0.04
+version: 0.05

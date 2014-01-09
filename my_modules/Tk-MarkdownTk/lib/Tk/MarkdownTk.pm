@@ -10,12 +10,13 @@ Tk::MarkdownTk - a Tk::Markdown with tk widget tag support
 
 =head1 VERSION
 
-Version 0.06
+Version 0.07
 
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
+use Tk::Markdown;
 use base qw(Tk::Derived Tk::Markdown);
 Construct Tk::Widget 'MarkdownTk';
 
