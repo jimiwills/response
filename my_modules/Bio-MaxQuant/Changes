@@ -1,6 +1,0 @@
-Revision history for Perl extension Bio::MaxQuant.
-
-0.01  Thu Jun 16 13:43:06 2011
-	- original version; created by h2xs 1.23 with options
-		-AXc -n Bio::MaxQuant
-
