@@ -19,6 +19,8 @@ The modules are:
 * Tk::MIMEApp::DataToTk
 
 NOTE: MIME-Multipart-ParseSimple has been requested renamed to -Ordered.
+NOTE: MIME-Multipart-ParseSimple has been granted as a namespace!
+
 
 
 
