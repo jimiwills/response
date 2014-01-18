@@ -202,13 +202,15 @@ sub parseEssentials {
 					: ($_ => '') # it's a scalar
 			} keys %h
 		} unless exists $data{$expt};
-
-        $data{$expt}->{$key} = map {
-			exists $l{$_} && $l{$_}
-                ? ($_ => $data{$expt}->{$key}->{$_} .';'.$h{$_})
-                : ($_ => $h{$_})
-            
-        } keys %h;
+		# add the data...
+		foreach (keys %h){ # each column
+            if(exists $l{$_} && $l{$_}){ # is it a list column?
+                push @{$data{$expt}->{$key}->{$_}}, $h{$_}; # push it
+            }
+            else {
+                $data{$expt}->{$key}->{$_} = $h{$_}; # set it
+            }
+		}
     }
     $o->{data} = \%data;
     $o->{ids} = \%ids;
