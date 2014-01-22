@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "Bio::MaxQuant::Evidence::Statistics 3"
-.TH Bio::MaxQuant::Evidence::Statistics 3 "2014-01-18" "perl v5.16.3" "User Contributed Perl Documentation"
+.TH Bio::MaxQuant::Evidence::Statistics 3 "2014-01-22" "perl v5.16.3" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -162,7 +162,7 @@ analyses.
 Create a new object:
 .PP
 .Vb 1
-\&        my $foo = Bio::MaxQuant::Evidence::Statistics\->new();
+\&    my $foo = Bio::MaxQuant::Evidence::Statistics\->new();
 .Ve
 .SS "parseEssentials(%options)"
 .IX Subsection "parseEssentials(%options)"
@@ -225,7 +225,23 @@ options:
 .IX Item "key_column_name - change the column keyed on (default is id)"
 .IP "experiment_column_name \- change the column the data are split on" 4
 .IX Item "experiment_column_name - change the column the data are split on"
+.IP "list_column_names \- change the columns stored as lists" 4
+.IX Item "list_column_names - change the columns stored as lists"
 .PD
+.PP
+\fIlist_column_names\fR
+.IX Subsection "list_column_names"
+.PP
+Some columns are the same across all the evidence in a protein group, 
+eg, the id is obviously the same, Contaminant and Reverse, Protein IDs, 
+and so on.  The default, therefore, is to overwrite the column with
+the value seen in an evidence.  \s-1BUT\s0, some columns have a different value
+in each evidence, e.g. Ratio H/L or \s-1PEP\s0.  Whatever columns are given in 
+list_column_names, which true values, will be appended as lists, so in the
+final data, there will be one row per protein and any column bearing multiple
+evidences for that protein will be a list.
+.PP
+If that makes no sense, write to me and I'll try to change it.
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 jimi, \f(CW\*(C`<j at 0na.me>\*(C'\fR

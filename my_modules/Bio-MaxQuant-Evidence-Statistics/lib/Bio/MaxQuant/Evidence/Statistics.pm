@@ -48,7 +48,7 @@ analyses.
 
 Create a new object:
 
-	my $foo = Bio::MaxQuant::Evidence::Statistics->new();
+    my $foo = Bio::MaxQuant::Evidence::Statistics->new();
 
 =cut
 
@@ -68,18 +68,19 @@ sub new {
             'Contaminant'       => 1,
             'Reverse'           => 1,
         },
-		list_column_names      => {
-			'Modified'          => 1,
+        list_column_names      => {
+            'Modified'          => 1,
             'PEP'               => 1,
             'Ratio H/L'         => 1,
             'Intensity H'       => 1,
             'Intensity L'       => 1,
-		},
+        },
         key_column_name        => 'id',
         experiment_column_name => 'Experiment',
+        csv_options            => {sep_char=>"\t"},
     );
     my %options = (%defaults, @_);
-    my $o = {defaults=>%options};
+    my $o = {defaults=>\%options};
     bless $o, $c;
     return $o;
 }
@@ -170,16 +171,16 @@ sub parseEssentials {
     my $o = shift;
     my %defaults = %{$o->{defaults}};
     my %options = (%defaults, @_);
-    my $io = IO::File($options{filename}, 'r');
-    my $csv = Text::CSV->new();
+    my $io = IO::File->new($options{filename}, 'r');
+    my $csv = Text::CSV->new($options{csv_options});
     # read the column names, just like in the pod...
     $csv->column_names ($csv->getline ($io));
     # now getline_hr will give us hashrefs :-)
     # we just need to know which to keep...
-    my %k = %{$o->{essential_column_names}};
-    my $i = $o->{key_column_name};
-    my $e = $o->{experiment_column_name};
-	my %l = %{$o->{list_column_names}};
+    my %k = %{$options{essential_column_names}};
+    my $i = $options{key_column_name};
+    my $e = $options{experiment_column_name};
+	my %l = %{$options{list_column_names}};
     my %data = ();
     my %ids = ();
     
@@ -191,7 +192,7 @@ sub parseEssentials {
                  : ()                   # empty
             } keys %$hr;
         my $key = $hr->{$i};
-        my $expt = $hr -> {$e};
+        my $expt = $hr->{$e};
         # store it...
         $ids{$key} = 1; # keep track of what we've got
         # store stuff by expt, then id, then column

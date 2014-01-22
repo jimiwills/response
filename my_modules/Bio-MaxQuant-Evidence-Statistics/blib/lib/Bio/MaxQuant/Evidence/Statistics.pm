@@ -48,7 +48,7 @@ analyses.
 
 Create a new object:
 
-	my $foo = Bio::MaxQuant::Evidence::Statistics->new();
+    my $foo = Bio::MaxQuant::Evidence::Statistics->new();
 
 =cut
 
@@ -58,11 +58,9 @@ sub new {
     my %defaults = (
         separator => "\t",
         essential_column_names => {
-            'id'                => 1,
             'Protein group IDs' => 1,
             'Modified'          => 1,
             'Leading Proteins'  => 1,
-            'Experiment'        => 1,
             'PEP'               => 1,
             'Ratio H/L'         => 1,
             'Intensity H'       => 1,
@@ -70,11 +68,19 @@ sub new {
             'Contaminant'       => 1,
             'Reverse'           => 1,
         },
+        list_column_names      => {
+            'Modified'          => 1,
+            'PEP'               => 1,
+            'Ratio H/L'         => 1,
+            'Intensity H'       => 1,
+            'Intensity L'       => 1,
+        },
         key_column_name        => 'id',
         experiment_column_name => 'Experiment',
+        csv_options            => {sep_char=>"\t"},
     );
     my %options = (%defaults, @_);
-    my $o = {defaults=>%options};
+    my $o = {defaults=>\%options};
     bless $o, $c;
     return $o;
 }
@@ -142,7 +148,22 @@ options:
 
 =item experiment_column_name - change the column the data are split on
 
+=item list_column_names - change the columns stored as lists
+
 =back
+
+=head3 list_column_names
+
+Some columns are the same across all the evidence in a protein group, 
+eg, the id is obviously the same, Contaminant and Reverse, Protein IDs, 
+and so on.  The default, therefore, is to overwrite the column with
+the value seen in an evidence.  BUT, some columns have a different value
+in each evidence, e.g. Ratio H/L or PEP.  Whatever columns are given in 
+list_column_names, which true values, will be appended as lists, so in the
+final data, there will be one row per protein and any column bearing multiple
+evidences for that protein will be a list.
+
+If that makes no sense, write to me and I'll try to change it.
 
 =cut
 
@@ -150,15 +171,16 @@ sub parseEssentials {
     my $o = shift;
     my %defaults = %{$o->{defaults}};
     my %options = (%defaults, @_);
-    my $io = IO::File($options{filename}, 'r');
-    my $csv = Text::CSV->new();
+    my $io = IO::File->new($options{filename}, 'r');
+    my $csv = Text::CSV->new($options{csv_options});
     # read the column names, just like in the pod...
     $csv->column_names ($csv->getline ($io));
     # now getline_hr will give us hashrefs :-)
     # we just need to know which to keep...
-    my %k = %{$o->{essential_column_names}};
-    my $i = $o->{key_column_name};
-    my $e = $o->{experiment_column_name};
+    my %k = %{$options{essential_column_names}};
+    my $i = $options{key_column_name};
+    my $e = $options{experiment_column_name};
+	my %l = %{$options{list_column_names}};
     my %data = ();
     my %ids = ();
     
@@ -170,17 +192,26 @@ sub parseEssentials {
                  : ()                   # empty
             } keys %$hr;
         my $key = $hr->{$i};
-        my $expt = $hr -> {$e};
+        my $expt = $hr->{$e};
         # store it...
         $ids{$key} = 1; # keep track of what we've got
         # store stuff by expt, then id, then column
-        $data{$expt} = {} unless exists $data{$expt};
-        $data{$expt}->{$key} = map {
-                exists $data{$expt}->{$key}->{$_}
-                 ? ($data{$expt}->{$key}->{$_} .';'.$h{$_})
-                 : ($_=>$h{$_})
+        $data{$expt} = { # set up this expt... unless it exists
+			map {
+				exists $l{$_} && $l{$_} 
+					? ($_ => []) # it's an array
+					: ($_ => '') # it's a scalar
+			} keys %h
+		} unless exists $data{$expt};
+		# add the data...
+		foreach (keys %h){ # each column
+            if(exists $l{$_} && $l{$_}){ # is it a list column?
+                push @{$data{$expt}->{$key}->{$_}}, $h{$_}; # push it
             }
-            keys %h;
+            else {
+                $data{$expt}->{$key}->{$_} = $h{$_}; # set it
+            }
+		}
     }
     $o->{data} = \%data;
     $o->{ids} = \%ids;

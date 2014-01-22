@@ -1,9 +1,15 @@
 Changes
+ignore.txt
 lib/Bio/MaxQuant/Evidence/Statistics.pm
 Makefile.PL
 MANIFEST			This list of files
 README
 t/00-load.t
+t/boilerplate.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
+t/readdata.t
+t/selectedEvidence.txt
+t/selectedProteinGroups.txt
+t/testdata-plan.txt
