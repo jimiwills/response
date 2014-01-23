@@ -28,7 +28,7 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
                 '',
                 'protein names');
             is( join(';', sort $o->proteinGroupIds()),
-                '',
+                '1371;1485;1775;1846;2111;2111;1485;2131;2913',
                 'protein group ids'
             );
         };
