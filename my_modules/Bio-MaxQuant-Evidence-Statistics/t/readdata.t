@@ -96,7 +96,7 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
             'MCF7.ET.r2' => -0.599624918592486,
             'MCF7.ET.r3' => -0.630974698103695,
     };
-    my $ratios_individual = { # Q05655
+    my $medians_individual = { # Q05655
             'LCC1.nE.r1' => -0.63509986575466,
             'LCC1.nE.r2' => -0.556789022536737,
             'LCC1.nE.r3' => -0.98459034333131,
@@ -232,7 +232,7 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
             is($d->{sd_via_mad}, 0.290865838140269, 'standard deviation via m.a.d.');
             is($d->{n}, 10, 'count');
             # R2 SD=0.357498874489868; MAD=0.236642882466628; SD via MAD=0.350847132598894; n=12
-            my $d = $o->replicateDeviations(replicate=>'MCF7.ET.r2',filter=>[qw/Q05655/]);
+            $d = $o->replicateDeviations(replicate=>'MCF7.ET.r2',filter=>[qw/Q05655/]);
             is($d->{sd}, 0.357498874489868, 'standard deviation');
             is($d->{mad}, 0.236642882466628, 'median absolute deviation');
             is($d->{sd_via_mad}, 0.350847132598894, 'standard deviation via m.a.d.');
@@ -240,6 +240,9 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         };
     };
     context 'pairwise comparisons' => sub {
+        my $o = Bio::MaxQuant::Evidence::Statistics->new();
+        $o->loadEssentials(filename=>'t/serialized');
+        $o->logRatios(); # should be log 2!
         it 'should give p-value for two items' => sub {
             #TTEST 0.7002150622
             is($o->ttest(replicate1=>'MCF7.ET.r2',replicate2=>'MCF7.ET.r3',filter=>[qw/Q05655/]), 0.7002150622, 'ttest p-value');
@@ -249,12 +252,18 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         };
     };
     context 'differential response detection' => sub {
+        my $o = Bio::MaxQuant::Evidence::Statistics->new();
+        $o->loadEssentials(filename=>'t/serialized');
+        $o->logRatios(); # should be log 2!
         it 'should compare orthogonal items' => sub {
         };
         it 'should report on threshold-breaking sets' => sub {
         };
     };
     context 'summary stats and p-values' => sub {
+        my $o = Bio::MaxQuant::Evidence::Statistics->new();
+        $o->loadEssentials(filename=>'t/serialized');
+        $o->logRatios(); # should be log 2!
         it '' => sub {
         };
         it '' => sub {

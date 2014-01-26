@@ -363,6 +363,35 @@ sub getLeadingProteins {
     return sort shift()->extractColumnValues(column=>'Leading Proteins');
 }
 
+=head2 logRatios
+
+Logs ratios (base 2) throughout the dataset, and sets a flag so it can't get logged again.
+
+Treatment of "special values": empty string, <= 0, NaN, and any other non-number are removed
+from the data!
+
+=cut
+
+sub logRatios {
+    my $o = shift;
+    return 0 if $o->{logged};
+    $o->{logged} = 1;
+    my $data = $o->{data};
+    foreach my $exptname(keys %$data){
+        my $experiment = $data->{$exptname};
+        foreach my $proteinGroupId(keys %$experiment){
+            my $proteinGroup = $experiment->{$proteinGroupId};
+            my $ratios = $proteinGroup->{'Ratio H/L'};
+            my @newRatios = ();
+            foreach (0..$#$ratios){
+                $ratios->[$_] = $ratios->[$_] =~ /^\d+\.?\d*$/
+                    ? log($ratios->[$_])/log(2)
+                    : '';
+            }
+        }
+    }
+    return 1;
+}
 
 
 =head1 AUTHOR
