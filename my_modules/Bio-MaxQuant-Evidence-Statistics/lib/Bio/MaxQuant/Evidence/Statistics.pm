@@ -6,6 +6,7 @@ use warnings;
 
 use Text::CSV;
 use Carp;
+use Storable;
 
 =head1 NAME
 
@@ -173,16 +174,18 @@ sub parseEssentials {
     my %options = (%defaults, @_);
     my $io = IO::File->new($options{filename}, 'r');
     my $csv = Text::CSV->new($options{csv_options});
-    # read the column names, just like in the pod...
+    # head the column names, just like in the pod...
     $csv->column_names ($csv->getline ($io));
     # now getline_hr will give us hashrefs :-)
     # we just need to know which to keep...
     my %k = %{$options{essential_column_names}};
     my $i = $options{key_column_name};
     my $e = $options{experiment_column_name};
-	my %l = %{$options{list_column_names}};
+    my %l = %{$options{list_column_names}};
     my %data = ();
-    my %ids = ();
+    my @ids = ();
+    my @sharedids = ();
+    my @uniqueids = ();
     
     while(! eof($io)){
         my $hr = $csv->getline_hr($io);
@@ -194,28 +197,173 @@ sub parseEssentials {
         my $key = $hr->{$i};
         my $expt = $hr->{$e};
         # store it...
-        $ids{$key} = 1; # keep track of what we've got
+        push @ids, $key; # keep track of what we've got
         # store stuff by expt, then id, then column
-        $data{$expt} = { # set up this expt... unless it exists
-			map {
-				exists $l{$_} && $l{$_} 
-					? ($_ => []) # it's an array
-					: ($_ => '') # it's a scalar
-			} keys %h
-		} unless exists $data{$expt};
-		# add the data...
-		foreach (keys %h){ # each column
+        $data{$expt} = {} unless exists $data{$expt};
+        $data{$expt}->{$key} = { # set up this expt/key... unless it exists
+            map {
+                exists $l{$_} && $l{$_} 
+                    ? ($_ => []) # it's an array
+                    : ($_ => '') # it's a scalar
+            } keys %h
+        } unless exists $data{$expt}->{$key};
+        # add the data...
+        foreach (keys %h){ # each column
             if(exists $l{$_} && $l{$_}){ # is it a list column?
                 push @{$data{$expt}->{$key}->{$_}}, $h{$_}; # push it
             }
             else {
                 $data{$expt}->{$key}->{$_} = $h{$_}; # set it
             }
-		}
+        }
+        if($data{$expt}->{$key}->{'Protein group IDs'} =~ /;/){
+            push @sharedids, $key;
+        }
+        else {
+            push @uniqueids, $key;
+        }
     }
     $o->{data} = \%data;
-    $o->{ids} = \%ids;
+    $o->{ids} = [sort {$a <=> $b} @ids];
+    $o->{sharedids} = [sort {$a <=> $b} @sharedids];
+    $o->{uniqueids} = [sort {$a <=> $b} @uniqueids];
 }
+
+=head2 experiments
+
+Returns a list of the experiments in the data.
+
+=cut
+
+sub experiments {
+    my $o = shift;
+    my $data = $o->{data};
+    return  keys %$data;
+}
+
+=head2 ids 
+
+Returns a list of evidence ids in the data.
+
+=cut
+
+sub ids {
+    return @{shift()->{ids}};
+}
+
+=head2 sharedIds 
+
+Returns a list containing the ids of those evidences shared between protein groups.
+
+=cut
+
+sub sharedIds {
+    return @{shift()->{sharedids}};
+}
+
+=head2 uniqueIds 
+
+Returns a list containing the ids of those evidences unique to one protein group.
+
+=cut
+
+sub uniqueIds {
+    return @{shift()->{uniqueids}};
+}
+
+=head2 saveEssentials(%options)
+
+Save the essential data (quicker to read again in future)
+
+=cut
+
+sub saveEssentials {
+    my $o = shift;
+    my %defaults = %{$o->{defaults}};
+    my %options = (%defaults, @_);
+    # here we want to save everything
+    store $o, $options{filename};
+}
+
+=head2 loadEssentials
+
+Load up previously saved essentials
+
+=cut
+
+sub loadEssentials {
+    my $o = shift;
+    my %defaults = %{$o->{defaults}};
+    my %options = (%defaults, @_);
+    my $p = retrieve($options{filename});
+    %$o = %$p;
+    return $o;
+}
+
+
+=head2 extractColumnValues
+
+=cut
+
+sub extractColumnValues {
+    my ($o, %options) = @_;
+    # options: 
+    my %defaults = (
+        column      => 'id', # which column to collect
+        experiment  => '',   # only extract this expt (all if false)
+        'split'     => 1,    # true = split cell on ; before adding to results
+        'nodup'     => 1,    # true = remove duplicates
+    );
+    %options = (%defaults, %options);
+    my $data = $o->{data};
+    my $results = $options{nodup} ? {} : [];
+    my @expts = $options{experiment} ? ($options{experiment}) : (keys %$data);
+    foreach my $e(@expts){
+        foreach my $k(keys %{$data->{$e}}){
+            my $value = $data->{$e}->{$k}->{$options{column}};
+            if(ref($value) eq ''){
+                $value = [split /;/, $value];
+            }
+            my @values = $options{'split'} ? (@$value) : (join(';',@$value));
+            foreach (@values){
+                if($options{nodup}){
+                    $results->{$_} = 1;
+                }
+                else {
+                    push @$results, $_;
+                }
+            }
+        }
+    }
+    return $options{nodup} ? (keys %$results) : (@$results);
+}
+
+=head2 proteinCount
+
+=cut
+
+sub proteinCount {
+    my @proteins = shift()->getLeadingProteins();
+    return scalar @proteins;
+}
+
+=head2 getProteinGroupIds
+
+=cut
+
+sub getProteinGroupIds {
+    return sort shift()->extractColumnValues(column=>'Protein group IDs');
+}
+
+=head2 getLeadingProteins
+
+=cut
+
+sub getLeadingProteins {
+    return sort shift()->extractColumnValues(column=>'Leading Proteins');
+}
+
+
 
 =head1 AUTHOR
 
