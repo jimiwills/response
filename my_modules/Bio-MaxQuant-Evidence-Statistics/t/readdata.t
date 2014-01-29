@@ -208,12 +208,12 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         };
         it 'should allow median calculation on a filtered subset, e.g. reference proteins' => sub {
             foreach my $rep(sort keys %$medians_filter){
-                is($o->replicateMedian(replicate=>$rep,filter=>[qw/Q05655 P11388/]), $medians_filter->{$rep}, "filter median for $rep");
+                is($o->replicateMedian(replicate=>$rep,filter=>'^Q05655$|^P11388$'), $medians_filter->{$rep}, "filter median for $rep");
             }
         };
         it 'should allow median on an excluded set, e.g. contaminants' => sub {
             foreach my $rep(sort keys %$medians_exclude){
-                is($o->replicateMedian(replicate=>$rep,filter=>[qw/Q05655/]), $medians_exclude->{$rep}, "exclude median for $rep");
+                is($o->replicateMedian(replicate=>$rep,exclude=>'^Q05655$'), $medians_exclude->{$rep}, "exclude median for $rep");
             }
         };
     };
@@ -223,16 +223,16 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         $o->logRatios(); # should be log 2!
         it 'should calculate ratio, MAD, SD, etc for each protein in each replicate' => sub {
             foreach my $rep(sort keys %$medians_individual){
-                is($o->replicateMedian(replicate=>$rep,filter=>[qw/Q05655/]), $medians_individual->{$rep}, "individual median for $rep");
+                is($o->replicateMedian(replicate=>$rep,filter=>'^Q05655$'), $medians_individual->{$rep}, "individual median for $rep");
             }
             # R3 stdev=0.294588165594879 mad=0.19618609916723 sd-via-mad=0.290865838140269 n=10
-            my $d = $o->replicateDeviations(replicate=>'MCF7.ET.r3',filter=>[qw/Q05655/]);
+            my $d = $o->replicateDeviations(replicate=>'MCF7.ET.r3',filter=>'^Q05655$');
             is($d->{sd}, 0.294588165594879, 'standard deviation');
             is($d->{mad}, 0.19618609916723, 'median absolute deviation');
             is($d->{sd_via_mad}, 0.290865838140269, 'standard deviation via m.a.d.');
             is($d->{n}, 10, 'count');
             # R2 SD=0.357498874489868; MAD=0.236642882466628; SD via MAD=0.350847132598894; n=12
-            $d = $o->replicateDeviations(replicate=>'MCF7.ET.r2',filter=>[qw/Q05655/]);
+            $d = $o->replicateDeviations(replicate=>'MCF7.ET.r2',filter=>'^Q05655$');
             is($d->{sd}, 0.357498874489868, 'standard deviation');
             is($d->{mad}, 0.236642882466628, 'median absolute deviation');
             is($d->{sd_via_mad}, 0.350847132598894, 'standard deviation via m.a.d.');
@@ -245,10 +245,10 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         $o->logRatios(); # should be log 2!
         it 'should give p-value for two items' => sub {
             #TTEST 0.7002150622
-            is($o->ttest(replicate1=>'MCF7.ET.r2',replicate2=>'MCF7.ET.r3',filter=>[qw/Q05655/]), 0.7002150622, 'ttest p-value');
+            is($o->ttest(replicate1=>'MCF7.ET.r2',replicate2=>'MCF7.ET.r3',filter=>'^Q05655$'), 0.7002150622, 'ttest p-value');
         };
         it 'should give maximum p-value among two sets of compared replicates' => sub {
-            $o->experimentMaximumPvalue(experiment1=>'MCF7.ET',experiment2=>'MCF7.wE',filter=>[qw/Q05655/]);
+            $o->experimentMaximumPvalue(experiment1=>'MCF7.ET',experiment2=>'MCF7.wE',filter=>'^Q05655$');
         };
     };
     context 'differential response detection' => sub {

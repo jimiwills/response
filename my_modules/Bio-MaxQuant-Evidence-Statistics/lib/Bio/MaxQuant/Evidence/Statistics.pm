@@ -313,6 +313,7 @@ sub extractColumnValues {
         experiment  => '',   # only extract this expt (all if false)
         'split'     => 1,    # true = split cell on ; before adding to results
         'nodup'     => 1,    # true = remove duplicates
+        'emptiesok' => 0,    # true = include empty values in output
     );
     %options = (%defaults, %options);
     my $data = $o->{data};
@@ -326,6 +327,7 @@ sub extractColumnValues {
             }
             my @values = $options{'split'} ? (@$value) : (join(';',@$value));
             foreach (@values){
+                next unless $_ ne '' || $options{'emptiesok'};
                 if($options{nodup}){
                     $results->{$_} = 1;
                 }
@@ -335,6 +337,8 @@ sub extractColumnValues {
             }
         }
     }
+#    use Data::Dumper;
+#    print STDERR Dumper $results;
     return $options{nodup} ? (keys %$results) : (@$results);
 }
 
@@ -393,9 +397,91 @@ sub logRatios {
     return 1;
 }
 
-=head2 replicateMedian
+=head2 filter
+
+returns a set of protein records based on filter parameters...
+
+=head3 options
+
+=over
+
+=item experiment - regular expression to match experiment name
+
+=item proteinGroupId - regular expression to match protein group id 
+
+=item leadingProteins - regular expression to match leading protein ids
+
+=back
+
+Returns a filtered object of the same type, with relevant flags set (e.g. whether
+data has been logged, etc).
+
+Warning, some does not perform a deep clone!
 
 =cut
+
+sub filter {
+    my ($o,%opts) = @_;
+    my $data = $o->{data};
+    my $result = {};
+#    die Dumper  (\%opts);
+    foreach my $experiment(keys %$data){
+        if(! exists $opts{experiment} || $experiment =~ /$opts{experiment}/){
+            $result->{$experiment} = {};
+            my $exptdata = $data->{$experiment};
+            foreach my $pgid(keys %$exptdata){
+                if(! exists $opts{proteinGroupId} || $pgid =~ /$opts{proteinGroupId}/){
+                    my $pgdata = $exptdata->{$pgid};
+                    if(! exists $opts{leadingProteins} || $pgdata->{'Leading Proteins'} =~ /$opts{leadingProteins}/){
+                        $result->{$experiment}->{$pgid} = $pgdata;
+                    }
+                }
+            }
+        }
+    }
+   use Data::Dumper;
+   print STDERR Dumper $result if $opts{experiment} eq 'LCC1.nE.r2';
+    my $p = $o->new;
+    %$p = %$o;
+    $p->{data} = $result;
+    return $p;
+}
+
+=head2 replicateMedian
+
+options include replicate ( the full experiment name ) and filter ( protein )
+
+=cut
+
+sub replicateMedian {
+    my ($o,%opts) = @_;
+    # opts should contain 'replicate' and 'filter'
+    # filter is used to select protein
+    # replicate is used to select experiment
+    my %filter = ();
+    if(exists $opts{replicate}){
+        $filter{experiment} = qr/^$opts{replicate}$/;
+    }
+    if(exists $opts{filter}){
+        if(ref $opts{filter}){
+            $opts{filter} = join('|', @{$opts{filter}});
+        }
+        $filter{leadingProteins} = qr/$opts{filter}/;
+    }
+    my $f = $o->filter(%filter);
+    my @ratios = sort {$a <=> $b} # numerical
+    $f->extractColumnValues(
+            column=>'Ratio H/L',   # ratios
+            nodup=>0               # do not remove duplicates
+        );
+    my $n = scalar @ratios;
+    if($n % 2){ # it's odd
+        return $ratios[($n-1) / 2]; # index of last over 2, e.g. 21 items, last index 20, return 10
+    }
+    else { # it's even
+        return ($ratios[$n/2 - 1] + $ratios[$n/2]) / 2; # length over 2, e.g. 20 items, we want 9 and 10.
+    }
+}
 
 =head2 replicateMedianSubtractions
 
