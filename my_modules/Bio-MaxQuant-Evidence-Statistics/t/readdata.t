@@ -10,33 +10,33 @@ BEGIN {
 
 describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
     my $medians = {
-            'LCC1.nE.r1' => -1.63648125984708,
-            'LCC1.nE.r2' => -0.760662584225348,
-            'LCC1.nE.r3' => -1.17496248821031,
-            'LCC1.wE.r1' => -1.75742769084347,
-            'LCC1.wE.r2' => -1.48236893250806,
-            'LCC1.wE.r3' => -1.35363466330692,
-            'LCC1.ET.r1' => -1.16782156198554,
-            'LCC1.ET.r2' => -0.799040767571155,
-            'LCC1.ET.r3' => -1.40763147067625,
-            'LCC9.nE.r1' => -1.37627215538279,
-            'LCC9.nE.r2' => -1.49366210724807,
-            'LCC9.nE.r3' => -1.01148411915581,
-            'LCC9.wE.r1' => -1.03364967993477,
-            'LCC9.wE.r2' => -0.849128423079465,
-            'LCC9.wE.r3' => -0.67013012768234,
-            'LCC9.ET.r1' => -1.6490049675735,
-            'LCC9.ET.r2' => -1.7099059320793,
-            'LCC9.ET.r3' => -0.954991099698264,
-            'MCF7.nE.r1' => -0.163833476364181,
-            'MCF7.nE.r2' => -0.842335352988528,
-            'MCF7.nE.r3' => -0.648597816370036,
-            'MCF7.wE.r1' => -0.672636102487885,
-            'MCF7.wE.r2' => -0.961462164740981,
-            'MCF7.wE.r3' => -0.53009319073457,
-            'MCF7.ET.r1' => -1.30993649579144,
-            'MCF7.ET.r2' => -1.15174663712211,
-            'MCF7.ET.r3' => -0.986602137029225,
+        'LCC1.nE.r1' => -1.63648125984708,
+        'LCC1.nE.r2' => -1.24002732928225,
+        'LCC1.nE.r3' => -1.17496248821031,
+        'LCC1.wE.r1' => -1.75742769084347,
+        'LCC1.wE.r2' => -1.48236893250806,
+        'LCC1.wE.r3' => -1.35363466330692,
+        'LCC1.ET.r1' => -1.16782156198554,
+        'LCC1.ET.r2' => -0.799040767571155,
+        'LCC1.ET.r3' => -1.40763147067625,
+        'LCC9.nE.r1' => -1.37627215538279,
+        'LCC9.nE.r2' => -1.49366210724807,
+        'LCC9.nE.r3' => -1.01148411915581,
+        'LCC9.wE.r1' => -1.03364967993477,
+        'LCC9.wE.r2' => -0.849128423079465,
+        'LCC9.wE.r3' => -0.67013012768234,
+        'LCC9.ET.r1' => -1.6490049675735,
+        'LCC9.ET.r2' => -1.7099059320793,
+        'LCC9.ET.r3' => -0.954991099698264,
+        'MCF7.nE.r1' => -0.163833476364181,
+        'MCF7.nE.r2' => -0.842335352988528,
+        'MCF7.nE.r3' => -0.648597816370036,
+        'MCF7.wE.r1' => -0.672636102487885,
+        'MCF7.wE.r2' => -0.961462164740981,
+        'MCF7.wE.r3' => -0.53009319073457,
+        'MCF7.ET.r1' => -1.30993649579144,
+        'MCF7.ET.r2' => -1.15174663712211,
+        'MCF7.ET.r3' => -0.986602137029225,
     };
     my $medians_exclude = { # exclude Q05655
             'LCC1.nE.r1' => -1.74714840094933,
@@ -169,25 +169,37 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         };
         it 'should have correctly loaded serialized data' => sub {
             # deep comparison between $o and $p data??
-            is($o->proteinCount(), 7, 'counting proteins');
-            is( scalar($o->experiments), 27, 'experiments');
-            is( scalar($o->ids), 2793, 'ids');
-            is( scalar($o->sharedIds), 400, 'shared');
-            is( scalar($o->uniqueIds), 2393, 'unique');
-            is( join(';', sort $o->getLeadingProteins()), 
+            is_deeply($p, $o, 'loaded vs pre saved.');
+            is($p->proteinCount(), 7, 'counting proteins');
+            is( scalar($p->experiments), 27, 'experiments');
+            is( scalar($p->ids), 2793, 'ids');
+            is( scalar($p->sharedIds), 400, 'shared');
+            is( scalar($p->uniqueIds), 2393, 'unique');
+            is( join(';', sort $p->getLeadingProteins()), 
                 'P03372;P11388;P41743;P49454;Q02880-2;Q05655;Q92547',
                 'leading proteins');
-            is( join(';', sort $o->getProteinGroupIds()),
+            is( join(';', sort $p->getProteinGroupIds()),
                 '1371;1485;1775;1846;2111;2131;2913',
                 'protein group ids'
             );
         };
     };
+    context 'independent subs' => sub {
+        my $o = Bio::MaxQuant::Evidence::Statistics->new();
+        it 'should get correct medians' => sub {
+            is($o->median(qw/0 2 3 4 5 6 10/), 4, 'middle sorted');
+            is($o->median(qw/5 2 3 6 0 4 10/), 4, 'middle unsorted');
+            is($o->median(qw/0 2 3 4 6 7 8 20/), 5, 'mean of middles sorted');
+            is($o->median(qw/3 7 0 4 8 2 6 20/), 5, 'mean of middles unsorted');
+        };
+    };
     context 'data prep' => sub {
         my $o = Bio::MaxQuant::Evidence::Statistics->new();
         $o->loadEssentials(filename=>'t/serialized');
+        $o->{data}->{'MCF7.ET.r1'}->{'Q05655'}->{'Ratio H/L'}->[0] = 1;
         it 'should log all the ratios' => sub {
             is($o->logRatios(),1,'log ratios');
+            is($o->{data}->{'MCF7.ET.r1'}->{'Q05655'}->{'Ratio H/L'}->[0], 0, 'log check');
         };
         it 'should not log the ratios twice' => sub {
             is($o->logRatios(),0,'2nd try should fail');
@@ -200,7 +212,10 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
 
         it 'should give median for a replicate' => sub {
             foreach my $rep(sort keys %$medians){
-                is($o->replicateMedian(replicate=>$rep), $medians->{$rep}, "median for $rep");
+                is(
+                    sprintf("%.10f", $o->replicateMedian(replicate=>$rep)),
+                    sprintf("%.10f", $medians->{$rep}),
+                    "median for $rep");
             }
         };
         it 'should subtract median from all columns' => sub {

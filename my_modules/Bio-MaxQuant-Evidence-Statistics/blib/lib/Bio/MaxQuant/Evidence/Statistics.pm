@@ -440,10 +440,11 @@ sub filter {
         }
     }
    use Data::Dumper;
-   print STDERR Dumper $result if $opts{experiment} eq 'LCC1.ET.r1';
+   print STDERR Dumper $result if $opts{experiment} eq 'LCC1.nE.r2';
     my $p = $o->new;
     %$p = %$o;
     $p->{data} = $result;
+    $o->{lastfiltered} = $p;
     return $p;
 }
 
@@ -482,6 +483,49 @@ sub replicateMedian {
         return ($ratios[$n/2 - 1] + $ratios[$n/2]) / 2; # length over 2, e.g. 20 items, we want 9 and 10.
     }
 }
+
+=head2 replicateMedianSubtractions 
+
+Logs data, if not already done, calculates median for each replicate, and subtracts median from each evidence in that replicate.
+
+=cut
+
+sub replicateMedianSubtractions {
+    my ($o, %opts) = @_; # can set filter here
+    $o->logRatios();
+    foreach my $replicate($o->experiments()){
+        my $median = $o->replicateMedian(%opts, replicate=>$replicate);
+        my $p = $o->{lastfiltered};
+        foreach my $pgid(keys %{$p->{data}->{$replicate}}){
+            foreach my $i(0.. $#{$p->{data}->{$replicate}->{$pgid}->{'Ratio H/L'}}){
+                if($p->{data}->{$replicate}->{$pgid}->{'Ratio H/L'}->[$i] =~ /\d/){
+                    $p->{data}->{$replicate}->{$pgid}->{'Ratio H/L'}->[$i] -= $median;
+                }
+            }
+        }
+    }
+    # i guess we should do something better with generating this status:
+    return 1;
+}
+
+=head2 median 
+
+given a list of numbers, returns the median... assumes all items are numbers!
+
+=cut
+
+sub median {
+    my $o = shift;
+    my @list = sort {$a <=> $b} @_;
+    my $n = scalar @list;
+    if($n % 2){ # remainder on division by two -> it's odd!
+        return $list[($n-1)/2]; # index of last over 2, e.g. 21 items, last index 20, return 10.
+    }
+    else { # it's not odd... so it's even
+        return ($list[$n/2 - 1] + $list[$n/2]) / 2; # length over 2 and the same minus 1, e.g. 20 items, we want 9 and 10.  
+    }
+}
+
 
 =head2 replicateMedianSubtractions
 
