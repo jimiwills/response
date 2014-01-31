@@ -7,6 +7,7 @@ use warnings;
 use Text::CSV;
 use Carp;
 use Storable;
+use Statistics::Distributions;
 
 =head1 NAME
 
@@ -411,20 +412,24 @@ returns a set of protein records based on filter parameters...
 
 =item leadingProteins - regular expression to match leading protein ids
 
+=item notLeadingProteins - regular expression to not match leading protein ids
+
 =back
 
 Returns a filtered object of the same type, with relevant flags set (e.g. whether
 data has been logged, etc).
 
-Warning, some does not perform a deep clone!
+Warning, intentionally does not perform a deep clone!
 
 =cut
 
 sub filter {
     my ($o,%opts) = @_;
+    # options : 
+#    use Data::Dumper;
+#    print STDERR 'OPTS: ', Dumper \%opts;
     my $data = $o->{data};
     my $result = {};
-#    die Dumper  (\%opts);
     foreach my $experiment(keys %$data){
         if(! exists $opts{experiment} || $experiment =~ /$opts{experiment}/){
             $result->{$experiment} = {};
@@ -433,14 +438,15 @@ sub filter {
                 if(! exists $opts{proteinGroupId} || $pgid =~ /$opts{proteinGroupId}/){
                     my $pgdata = $exptdata->{$pgid};
                     if(! exists $opts{leadingProteins} || $pgdata->{'Leading Proteins'} =~ /$opts{leadingProteins}/){
-                        $result->{$experiment}->{$pgid} = $pgdata;
+                        if(! exists $opts{notLeadingProteins} || $pgdata->{'Leading Proteins'} !~ /$opts{notLeadingProteins}/){
+                            $result->{$experiment}->{$pgid} = $pgdata;
+                        }
                     }
                 }
             }
         }
     }
-   use Data::Dumper;
-   print STDERR Dumper $result if $opts{experiment} eq 'LCC1.nE.r2';
+#   print STDERR Dumper $result if $opts{experiment} eq qr/^LCC1.nE.r2$/;
     my $p = $o->new;
     %$p = %$o;
     $p->{data} = $result;
@@ -450,38 +456,185 @@ sub filter {
 
 =head2 replicateMedian
 
-options include replicate ( the full experiment name ) and filter ( protein )
+options are passed to filter.
 
 =cut
 
 sub replicateMedian {
     my ($o,%opts) = @_;
-    # opts should contain 'replicate' and 'filter'
-    # filter is used to select protein
-    # replicate is used to select experiment
-    my %filter = ();
-    if(exists $opts{replicate}){
-        $filter{experiment} = qr/^$opts{replicate}$/;
-    }
-    if(exists $opts{filter}){
-        if(ref $opts{filter}){
-            $opts{filter} = join('|', @{$opts{filter}});
-        }
-        $filter{leadingProteins} = qr/$opts{filter}/;
-    }
-    my $f = $o->filter(%filter);
-    my @ratios = sort {$a <=> $b} # numerical
-    $f->extractColumnValues(
-            column=>'Ratio H/L',   # ratios
-            nodup=>0               # do not remove duplicates
-        );
-    my $n = scalar @ratios;
-    if($n % 2){ # it's odd
-        return $ratios[($n-1) / 2]; # index of last over 2, e.g. 21 items, last index 20, return 10
-    }
-    else { # it's even
-        return ($ratios[$n/2 - 1] + $ratios[$n/2]) / 2; # length over 2, e.g. 20 items, we want 9 and 10.
-    }
+    my $f = $o->filter(%opts);
+    return $f->median(
+        $f->extractColumnValues(
+            column => 'Ratio H/L',
+            nodup  => 0,
+        )
+    );
+}
+
+=head2 deviations 
+
+returns an hashref with the following keys
+
+=over
+
+=item n - the number of items
+
+=item sd - the standard deviation (from the mean)
+
+=item mad - the median absolute deviation (from the median)
+
+=item sd_via_mad - the standard deviation estimated from the median absolute deviation
+
+=back
+
+=cut
+
+sub deviations {
+    my ($o,%opts) = @_;
+    my $f = $o->filter(%opts);
+    my @values = $f->extractColumnValues(
+            column => 'Ratio H/L',
+            nodup  => 0,
+    );
+    my $d = $o->sd(@values);
+    $d->{'values'} = \@values;
+    $d->{mad} = $o->mad(@values);
+    $d->{sd_from_mad} = $d->{sd_via_mad} = $d->{mad} * 1.4826016694;
+    $d->{usv_mad} = $d->{sd_from_mad} ** 2;
+    $d->{median} = $o->median(@values);
+    # I should think about caching here!!!
+    return $d;
+}
+
+=head2 mean
+
+given a list of values, returns the mean
+
+=cut
+
+sub mean {
+    my ($o,@values) = @_;
+    return $o->sum(@values) / scalar @values;
+}
+
+=head2 sd (unbiased standard deviation)
+
+given a list of values, returns a hash with keys mean and sd (standard deviation).
+
+=cut
+
+sub sd {
+    my ($o,@values) = @_;
+    my $n = scalar(@values);
+    my $mean = $o->mean(@values);
+    my $sos = $o->sum(map {($_ - $mean)**2} @values);
+    $sos /= ($n-1);
+    return {
+        sd => sqrt($sos),
+        usv => $sos,
+        mean => $mean,
+        n => $n,
+    };
+}
+
+=head2 sum
+
+given a list of values, returns the sum
+
+=cut
+
+sub sum {
+    my ($o,@values) = @_;
+    my $t = 0;
+    $t += $_ foreach @values;
+    return $t;
+}
+
+=head2 mad
+
+given a list of values, returns the median absolute deviation
+
+=cut
+
+sub mad {
+    my ($o,@values) = @_;
+    my $median = $o->median(@values);
+    my @ads = map {abs ($_ - $median)} @values;
+    return $o->median(@ads);
+}
+
+=head2 ttest
+
+Given options, experiment1, experiment2 and optional filters,
+returns a hash of statistics...
+
+stats1 and stats2 are hashes of deviations: sd, mad, sd_via_mad, usv, n, values
+
+ttest is hash of Welch's ttest results: t, df, p
+
+ttest_mad is like ttest but based on median and median absolute deviateions.
+
+The p-values are derived using Welch's Ttest and the t-distribution function from 
+Statistics::Distributions.
+
+MAD and medians are much more robust to outliers, which are significant in peptide ratios.
+
+
+=cut
+
+sub ttest {
+    my ($o,%opts) = @_;
+    $opts{experiment} = $opts{experiment1};
+    my $d1 = $o->deviations(%opts);
+    $opts{experiment} = $opts{experiment2};
+    my $d2 = $o->deviations(%opts);
+    my $tt = $o->welchs_ttest(
+        mean1 => $d1->{mean},
+        mean2 => $d2->{mean},
+        usv1  => $d1->{usv},
+        usv2  => $d2->{usv},
+        n1    => $d1->{n},
+        n2    => $d2->{n},
+    );
+    $tt->{p} = Statistics::Distributions::tprob($tt->{df}, $tt->{t});
+    my $tm = $o->welchs_ttest(
+        mean1 => $d1->{median},
+        mean2 => $d2->{median},
+        usv1  => $d1->{usv_mad},
+        usv2  => $d2->{usv_mad},
+        n1    => $d1->{n},
+        n2    => $d2->{n},
+    );
+    $tm->{p} = Statistics::Distributions::tprob($tm->{df}, $tm->{t});
+    
+    return {
+        stats1 => $d1, stats2 => $d2, ttest => $tt, ttest_mad => $tm 
+    };
+}
+
+=head2 welchs_ttest
+
+performs Welch's ttest, given mean1, mean2, usv1, usv2, n1 and n2 in a hash.
+
+e.g. 
+
+    $o->welchs_ttest( mean1 => 4, mean2 => 3,  # sample mean
+                      usv1 => 1,  usv2 => 1.1, # unbiased sample variance (returned as usv from $o->sd
+                      n1 => 4,    n2=> 7       # number of observations
+                      
+also performs Welch-Satterthwaite to calculate degrees of freedom (to look up in t-statistic table)
+
+Returns hashref containing t and df.
+
+=cut
+
+sub welchs_ttest {
+    my ($o, %t) = @_;
+    my ($x1,$x2,$v1,$v2,$n1,$n2) = map {$t{$_}} qw/mean1 mean2 usv1 usv2 n1 n2/;
+    my ($vn1,$vn2) = ($v1/$n1,  $v2/$n2);
+    my $t = ($x1 - $x2) / sqrt( $vn1 + $vn2 );
+    my $df = ($vn1 + $vn2)**2 / (  $vn1**2/($n1-1) + $vn2**2/($n2-1)  );
+    return {t => $t, df => $df};
 }
 
 =head2 replicateMedianSubtractions 
@@ -494,8 +647,8 @@ sub replicateMedianSubtractions {
     my ($o, %opts) = @_; # can set filter here
     $o->logRatios();
     foreach my $replicate($o->experiments()){
-        my $median = $o->replicateMedian(%opts, replicate=>$replicate);
-        my $p = $o->{lastfiltered};
+        my $median = $o->replicateMedian(%opts, experiment=>$replicate);
+        my $p = $o->filter(experiment=>$replicate);
         foreach my $pgid(keys %{$p->{data}->{$replicate}}){
             foreach my $i(0.. $#{$p->{data}->{$replicate}->{$pgid}->{'Ratio H/L'}}){
                 if($p->{data}->{$replicate}->{$pgid}->{'Ratio H/L'}->[$i] =~ /\d/){
