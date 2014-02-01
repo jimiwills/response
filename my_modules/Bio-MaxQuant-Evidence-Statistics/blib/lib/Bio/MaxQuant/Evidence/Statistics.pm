@@ -596,7 +596,7 @@ sub ttest {
         n1    => $d1->{n},
         n2    => $d2->{n},
     );
-    $tt->{p} = Statistics::Distributions::tprob($tt->{df}, $tt->{t});
+    $tt->{p} = Statistics::Distributions::tprob(int ($tt->{df}), $tt->{t});
     my $tm = $o->welchs_ttest(
         mean1 => $d1->{median},
         mean2 => $d2->{median},
@@ -605,7 +605,7 @@ sub ttest {
         n1    => $d1->{n},
         n2    => $d2->{n},
     );
-    $tm->{p} = Statistics::Distributions::tprob($tm->{df}, $tm->{t});
+    $tm->{p} = Statistics::Distributions::tprob(int ($tm->{df}), $tm->{t});
     
     return {
         stats1 => $d1, stats2 => $d2, ttest => $tt, ttest_mad => $tm 
@@ -632,7 +632,7 @@ sub welchs_ttest {
     my ($o, %t) = @_;
     my ($x1,$x2,$v1,$v2,$n1,$n2) = map {$t{$_}} qw/mean1 mean2 usv1 usv2 n1 n2/;
     my ($vn1,$vn2) = ($v1/$n1,  $v2/$n2);
-    my $t = ($x1 - $x2) / sqrt( $vn1 + $vn2 );
+    my $t = abs($x1 - $x2) / sqrt( $vn1 + $vn2 );
     my $df = ($vn1 + $vn2)**2 / (  $vn1**2/($n1-1) + $vn2**2/($n2-1)  );
     return {t => $t, df => $df};
 }
@@ -680,9 +680,67 @@ sub median {
 }
 
 
-=head2 replicateMedianSubtractions
+=head2 experimentMaximumPvalue 
 
 =cut
+
+sub experimentMaximumPvalue {
+    my ($o,%opts) = @_;
+    # run through experiments and collect replicate names for comparisons...
+    # this should be filtered for individual proteins using the leadingProteins option.
+    my @reps1 = ();
+    my @reps2 = ();
+    foreach my $rep($o->experiments){
+        if($rep =~ /$opts{experiment1}/){
+            push @reps1, $rep;
+        }
+        if($rep =~ /$opts{experiment2}/){
+            push @reps2, $rep;
+        }
+    }
+    # compare each combination of replicates
+    my $p_max = 0;
+    my $p_mad_max = 0;
+    foreach my $r1(@reps1){
+        foreach my $r2(@reps2){
+            my $tt = $o->ttest(%opts, experiment1=>$r1, experiment2=>$r2);
+            $p_max = $tt->{ttest}->{p} if $tt->{ttest}->{p} > $p_max;
+            $p_mad_max = $tt->{ttest_mad}->{p} if $tt->{ttest_mad}->{p} > $p_mad_max;
+        }
+    }
+    # compare experiments overall
+    my $tt = $o->ttest(%opts);
+    $p_max = $tt->{ttest}->{p} if $tt->{ttest}->{p} > $p_max;
+    $p_mad_max = $tt->{ttest_mad}->{p} if $tt->{ttest_mad}->{p} > $p_mad_max;
+    
+    # report the maxima
+    return {p_max=>$p_max, p_mad_max=>$p_mad_max};
+}
+
+
+=head2 direction
+
+given two values, returns whether the different between first and second is positive or negative
+
+returns '+' or '-'
+
+=cut
+
+sub direction {
+    return $_[1] > $_[2] ? '-' : '+';
+}
+
+=head2 directionsDisagree
+
+given two directions, which could be '+', '-' or '', returns true if one is '+' and the other is '-'
+
+=cut
+
+sub directionsDisagree {
+    return if $_[1] eq '-' && $_[2] eq '+';
+    return if $_[1] eq '+' && $_[2] eq '-';
+    return 1; # must be the same or one is blank.
+}
 
 
 

@@ -80,6 +80,27 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
             is($o->median(qw/0 2 3 4 6 7 8 20/), 5, 'mean of middles sorted');
             is($o->median(qw/3 7 0 4 8 2 6 20/), 5, 'mean of middles unsorted');
         };
+        it 'should give correct summary stats' => sub {
+            my $d1 = $o->sd(qw/1 2 3 4 5/);
+            my $d2 = $o->sd(qw/5 6 7 8 9/);
+            is($d1->{sd}, 1.58113883008419, 'sd');
+            is($d1->{usv}, 2.5, 'usv');
+            
+            my $tt = $o->welchs_ttest(
+                usv1=>$d1->{usv},  usv2=>$d2->{usv},
+                n1=>$d1->{n},  n2=>$d2->{n},
+                mean1=>$d1->{mean},  mean2=>$d2->{mean},
+            );
+            is($tt->{df}, 8, 'df');
+            print STDERR $tt->{t};
+            use Statistics::Distributions;
+            cmp_ok(
+                sprintf("%.7f", Statistics::Distributions::tprob($tt->{df}, $tt->{t})), 
+                '==', 
+                sprintf("%.7f", 0.00197488640172266), 
+                'welchs ttest'
+            );
+        };
     };
     context 'data prep' => sub {
         my $o = Bio::MaxQuant::Evidence::Statistics->new();
@@ -112,7 +133,7 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
             n => [qw/18 16 18 15 22 17 13 11 19 9 7 8 10 10 6 19 12 14 4 3 4 13 /],
             sd_from_mad => [qw/0.483581989796736 0.40787333475383 0.441259164810879 0.198638247906392 0.321944252150699 0.315660469894928 0.464832126712712 0.237542085194986 0.359104626036244 0.600791824556382 0.391975076838372 0.466859414840518 0.217154814931712 0.189890269085041 0.260785285805637 0.211717918241972 0.787101987439075 0.262047288433958 0.0946390642907358 0.651293035896203 0.107927319405304 0.18904541567798 /],
             mad => [qw/0.326171216300086 0.27510648555987 0.297624894075193 0.133979511831239 0.217148178634513 0.212909830340791 0.313524621148462 0.16021976104419 0.242212479216735 0.405228077747625 0.264383269578404 0.314892006717794 0.146468751124227 0.128079087595988 0.175897067424169 0.14280161867594 0.530892419511176 0.176748275576951 0.0638331024738665 0.439290639784439 0.0727958976661491 0.127509242421456 /],
-
+            ttest => [qw/0.5 0.271919673640303 0.00766648743371879 0.136812819839709 0.212148797535008 0.0355343267407489 0.214911057469358 0.0265099735906373 0.071460291745273 0.00085095250022874 0.00000859587352900664 0.03376253263921 0.000000000477164004049282 0.0000000131663595111315 0.000461805862444748 0.0459979947041725 0.0490562684359915 0.110766448353591 0.000000000210727200822708 0.0439282009042248 0.00000000000162947915915658 0.000000202063127352644 /],
         );
         my %medians_rules = (
             All => {},
@@ -185,9 +206,18 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         $o->loadEssentials(filename=>'t/serialized');
         $o->logRatios(); # should be log 2!
         it 'should give p-value for two items' => sub {
-            #TTEST 0.7002150622
-            my $ttest = $o->ttest(replicate1=>'MCF7.ET.r2',replicate2=>'MCF7.ET.r3',filter=>'^Q05655$');
-            is($ttest->{ttest}->{p}, 0.7002150622, 'ttest p-value');
+            my (%p);
+            @p{@{$medians_data{Expts}}} = @{$medians_data{'ttest'}};
+            foreach my $rep(@{$medians_data{Expts}}){
+                my $ttest = $o->ttest(experiment1=>'LCC1.nE.r1', experiment2=>$rep, leadingProteins=>'^Q05655$');
+                # allow 10% deviation because we're using a different method...
+                my $ttp = $ttest->{ttest}->{p};
+                my $p = $p{$rep};
+                my $lttp = log($ttp)/log(2);
+                my $lp = log($p)/log(2);
+                my $pd = abs($lttp-$lp);
+                ok($pd < 0.5 || $lp < 0.0000001 && $lttp < 0.0000001  , "ttest p-value for Q05655 LCC1.nE.r1 v $rep: $pd v 0.1 ($p $ttp/ $lp $lttp)");
+            }
         };
         it 'should give maximum p-value among two sets of compared replicates' => sub {
             $o->experimentMaximumPvalue(experiment1=>'MCF7.ET',experiment2=>'MCF7.wE',filter=>'^Q05655$');
