@@ -220,7 +220,19 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
             }
         };
         it 'should give maximum p-value among two sets of compared replicates' => sub {
-            $o->experimentMaximumPvalue(experiment1=>'MCF7.ET',experiment2=>'MCF7.wE',filter=>'^Q05655$');
+            cmp_ok(sprintf("%.4f",
+                    $o->experimentMaximumPvalue(experiment1=>'LCC1.ET',experiment2=>'LCC1.wE',filter=>'^Q05655$')->{p_max}
+                ),
+                '==',
+                sprintf("%.4f",0.167794288667676)
+            );
+
+            cmp_ok(sprintf("%.4f",
+                    $o->experimentMaximumPvalue(experiment1=>'LCC1.nE',experiment2=>'LCC1.wE',filter=>'^Q05655$')->{p_max}
+                ),
+                '==',
+                sprintf("%.4f", 0.287775626830834)
+            );
         };
     };
     context 'differential response detection' => sub {
@@ -228,8 +240,12 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         $o->loadEssentials(filename=>'t/serialized');
         $o->logRatios(); # should be log 2!
         it 'should compare orthogonal items' => sub {
-        };
-        it 'should report on threshold-breaking sets' => sub {
+            my $expts = 'LCC1.ET.r1,LCC1.ET.r2,LCC1.ET.r3,LCC1.nE.r1,LCC1.nE.r2,LCC1.nE.r3,LCC1.wE.r1,LCC1.wE.r2,LCC1.wE.r3,LCC9.ET.r1,LCC9.ET.r2,LCC9.ET.r3,LCC9.nE.r1,LCC9.nE.r2,LCC9.nE.r3,LCC9.wE.r1,LCC9.wE.r2,LCC9.wE.r3,MCF7.ET.r1,MCF7.ET.r2,MCF7.ET.r3,MCF7.nE.r1,MCF7.nE.r2,MCF7.nE.r3,MCF7.wE.r1,MCF7.wE.r2,MCF7.wE.r3';
+            my $replicated = 'LCC1.ET,LCC1.nE,LCC1.wE,LCC9.ET,LCC9.nE,LCC9.wE,MCF7.ET,MCF7.nE,MCF7.wE';
+            my $orthogonals = 'LCC1.ET LCC1.nE LCC9.ET,LCC1.ET LCC1.nE MCF7.ET,LCC1.ET LCC1.wE LCC9.ET,LCC1.ET LCC1.wE MCF7.ET,LCC1.nE LCC1.ET LCC9.nE,LCC1.nE LCC1.ET MCF7.nE,LCC1.nE LCC1.wE LCC9.nE,LCC1.nE LCC1.wE MCF7.nE,LCC1.wE LCC1.ET LCC9.wE,LCC1.wE LCC1.ET MCF7.wE,LCC1.wE LCC1.nE LCC9.wE,LCC1.wE LCC1.nE MCF7.wE,LCC9.ET LCC9.nE LCC1.ET,LCC9.ET LCC9.nE MCF7.ET,LCC9.ET LCC9.wE LCC1.ET,LCC9.ET LCC9.wE MCF7.ET,LCC9.nE LCC9.ET LCC1.nE,LCC9.nE LCC9.ET MCF7.nE,LCC9.nE LCC9.wE LCC1.nE,LCC9.nE LCC9.wE MCF7.nE,LCC9.wE LCC9.ET LCC1.wE,LCC9.wE LCC9.ET MCF7.wE,LCC9.wE LCC9.nE LCC1.wE,LCC9.wE LCC9.nE MCF7.wE,MCF7.ET MCF7.nE LCC1.ET,MCF7.ET MCF7.nE LCC9.ET,MCF7.ET MCF7.wE LCC1.ET,MCF7.ET MCF7.wE LCC9.ET,MCF7.nE MCF7.ET LCC1.nE,MCF7.nE MCF7.ET LCC9.nE,MCF7.nE MCF7.wE LCC1.nE,MCF7.nE MCF7.wE LCC9.nE,MCF7.wE MCF7.ET LCC1.wE,MCF7.wE MCF7.ET LCC9.wE,MCF7.wE MCF7.nE LCC1.wE,MCF7.wE MCF7.nE LCC9.wE';
+            is( join(',', sort $o->experiments()), $expts, 'experiments');
+            is( join(',', sort $o->replicated()), $replicated, 'replicated');
+            is( join(',', sort $o->orthogonals()), $orthogonals, 'orthogonals');
         };
     };
     context 'summary stats and p-values' => sub {

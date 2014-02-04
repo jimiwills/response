@@ -242,6 +242,61 @@ sub experiments {
     return  keys %$data;
 }
 
+=head2 replicated
+
+Returns a list of the experiment names without the replicate portion.
+
+The names are assumed to be Cell.Condition.Replicate, i.e. full-stop (period) separated.
+
+=cut
+
+sub replicated {
+    my $o = shift;
+    my %repl = ();
+    my @expts = $o->experiments();
+    foreach (@expts){
+        s/\.[^.]+$//;
+        $repl{$_} = 1;
+    }
+    return keys %repl;
+}
+
+=head2 orthogonals 
+
+Returns a list of sets of orthogonal experiments, that is 3 experiments in which the first has
+one condition in common with the other two, but they have nothing in common with each other.
+
+e.g.   A.X A.Y B.X
+
+The rationale behind this is that quantitative differences across this set indicate mechanistic
+links between, for example, cell line and drug treatment.  If a reponse is seen to a drug, and
+a different repsonse is seen in a different cell-type, this system will pick that up.  The
+fourth member of the comparison (in the example that would be B.Y) could be anything... and the
+interpretation would still be that there is a differential response.
+
+=cut
+
+sub orthogonals {
+    my $o = shift;
+    my @repls = $o->replicated();
+    my @orths = ();
+    foreach my $c1(@repls){
+        my ($p,$x) = split(/\./, $c1, 2);
+        foreach my $c2(@repls){
+            next if $c2 eq $c1;
+            my ($q,$y) = split(/\./, $c2, 2);
+            next unless $p eq $q;
+            foreach my $c3(@repls){
+                next if $c3 eq $c1 || $c3 eq $c2;
+                my ($r,$z) = split(/\./, $c3, 2);
+                next unless $x eq $z;
+                push @orths, "$c1 $c2 $c3";
+            }
+        }
+    }
+    return @orths;
+}
+
 =head2 ids 
 
 Returns a list of evidence ids in the data.
