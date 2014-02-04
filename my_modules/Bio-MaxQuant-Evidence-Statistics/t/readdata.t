@@ -242,9 +242,11 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         it 'should compare orthogonal items' => sub {
             my $expts = 'LCC1.ET.r1,LCC1.ET.r2,LCC1.ET.r3,LCC1.nE.r1,LCC1.nE.r2,LCC1.nE.r3,LCC1.wE.r1,LCC1.wE.r2,LCC1.wE.r3,LCC9.ET.r1,LCC9.ET.r2,LCC9.ET.r3,LCC9.nE.r1,LCC9.nE.r2,LCC9.nE.r3,LCC9.wE.r1,LCC9.wE.r2,LCC9.wE.r3,MCF7.ET.r1,MCF7.ET.r2,MCF7.ET.r3,MCF7.nE.r1,MCF7.nE.r2,MCF7.nE.r3,MCF7.wE.r1,MCF7.wE.r2,MCF7.wE.r3';
             my $replicated = 'LCC1.ET,LCC1.nE,LCC1.wE,LCC9.ET,LCC9.nE,LCC9.wE,MCF7.ET,MCF7.nE,MCF7.wE';
+            my $exptpairs = 'LCC1.ET LCC1.nE,LCC1.ET LCC1.wE,LCC1.ET LCC9.ET,LCC1.ET LCC9.nE,LCC1.ET LCC9.wE,LCC1.ET MCF7.ET,LCC1.ET MCF7.nE,LCC1.ET MCF7.wE,LCC1.nE LCC1.wE,LCC1.nE LCC9.ET,LCC1.nE LCC9.nE,LCC1.nE LCC9.wE,LCC1.nE MCF7.ET,LCC1.nE MCF7.nE,LCC1.nE MCF7.wE,LCC1.wE LCC9.ET,LCC1.wE LCC9.nE,LCC1.wE LCC9.wE,LCC1.wE MCF7.ET,LCC1.wE MCF7.nE,LCC1.wE MCF7.wE,LCC9.ET LCC9.nE,LCC9.ET LCC9.wE,LCC9.ET MCF7.ET,LCC9.ET MCF7.nE,LCC9.ET MCF7.wE,LCC9.nE LCC9.wE,LCC9.nE MCF7.ET,LCC9.nE MCF7.nE,LCC9.nE MCF7.wE,LCC9.wE MCF7.ET,LCC9.wE MCF7.nE,LCC9.wE MCF7.wE,MCF7.ET MCF7.nE,MCF7.ET MCF7.wE,MCF7.nE MCF7.wE';
             my $orthogonals = 'LCC1.ET LCC1.nE LCC9.ET,LCC1.ET LCC1.nE MCF7.ET,LCC1.ET LCC1.wE LCC9.ET,LCC1.ET LCC1.wE MCF7.ET,LCC1.nE LCC1.ET LCC9.nE,LCC1.nE LCC1.ET MCF7.nE,LCC1.nE LCC1.wE LCC9.nE,LCC1.nE LCC1.wE MCF7.nE,LCC1.wE LCC1.ET LCC9.wE,LCC1.wE LCC1.ET MCF7.wE,LCC1.wE LCC1.nE LCC9.wE,LCC1.wE LCC1.nE MCF7.wE,LCC9.ET LCC9.nE LCC1.ET,LCC9.ET LCC9.nE MCF7.ET,LCC9.ET LCC9.wE LCC1.ET,LCC9.ET LCC9.wE MCF7.ET,LCC9.nE LCC9.ET LCC1.nE,LCC9.nE LCC9.ET MCF7.nE,LCC9.nE LCC9.wE LCC1.nE,LCC9.nE LCC9.wE MCF7.nE,LCC9.wE LCC9.ET LCC1.wE,LCC9.wE LCC9.ET MCF7.wE,LCC9.wE LCC9.nE LCC1.wE,LCC9.wE LCC9.nE MCF7.wE,MCF7.ET MCF7.nE LCC1.ET,MCF7.ET MCF7.nE LCC9.ET,MCF7.ET MCF7.wE LCC1.ET,MCF7.ET MCF7.wE LCC9.ET,MCF7.nE MCF7.ET LCC1.nE,MCF7.nE MCF7.ET LCC9.nE,MCF7.nE MCF7.wE LCC1.nE,MCF7.nE MCF7.wE LCC9.nE,MCF7.wE MCF7.ET LCC1.wE,MCF7.wE MCF7.ET LCC9.wE,MCF7.wE MCF7.nE LCC1.wE,MCF7.wE MCF7.nE LCC9.wE';
             is( join(',', sort $o->experiments()), $expts, 'experiments');
             is( join(',', sort $o->replicated()), $replicated, 'replicated');
+            is( join(',', sort $o->pairs()), $exptpairs, 'pairs');
             is( join(',', sort $o->orthogonals()), $orthogonals, 'orthogonals');
         };
     };
@@ -252,7 +254,10 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         my $o = Bio::MaxQuant::Evidence::Statistics->new();
         $o->loadEssentials(filename=>'t/serialized');
         $o->logRatios(); # should be log 2!
-        it '' => sub {
+        it 'should use pairs and orthogonals to generate p-values for each protein in each comparison' => sub {
+            # orthongals should report the maximum of the two p-values returned
+            # pairs should be indexed and that index used by orthogonals.
+            # also... any replicate with no (or only one) observations for a protein should give a p-value of 1!
         };
         it '' => sub {
         };

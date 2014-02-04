@@ -297,6 +297,26 @@ sub orthogonals {
     return @orths;
 }
 
+=head2 pairs
+
+Returns a list of pairs of replicated experiments (e.g. A.X A.Y, A.X B.X ...)
+that represents all possible comparisons.
+
+=cut
+
+sub pairs {
+    my $o = shift;
+    my @r = $o->replicated();
+    my @pairs = ();
+    foreach my $r1(sort @r){
+        foreach my $r2(sort @r){
+            next unless $r1 lt $r2;
+            push @pairs, "$r1 $r2";
+        }
+    }
+    return @pairs;
+}
+
 =head2 ids 
 
 Returns a list of evidence ids in the data.
