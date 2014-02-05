@@ -257,7 +257,9 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
         it 'should use pairs and orthogonals to generate p-values for each protein in each comparison' => sub {
             # orthongals should report the maximum of the two p-values returned
             # pairs should be indexed and that index used by orthogonals.
-            # also... any replicate with no (or only one) observations for a protein should give a p-value of 1!
+            # also... any replicate with no (or only one) observations for a protein should give a p-value of -1!
+            # in addition, should give option to use proteotypic peptides or not. ( /$protein/ vs /^$protein$/ )
+            
         };
         it '' => sub {
         };

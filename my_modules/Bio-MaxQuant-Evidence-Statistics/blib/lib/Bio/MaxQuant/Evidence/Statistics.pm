@@ -228,6 +228,7 @@ sub parseEssentials {
     $o->{ids} = [sort {$a <=> $b} @ids];
     $o->{sharedids} = [sort {$a <=> $b} @sharedids];
     $o->{uniqueids} = [sort {$a <=> $b} @uniqueids];
+    $o->{cache} = {};
 }
 
 =head2 experiments
@@ -252,13 +253,15 @@ The names are assumed to be Cell.Condition.Replicate, i.e. full-stop (period) se
 
 sub replicated {
     my $o = shift;
+    return @{$o->{cache}->{replicated}} if exists $o->{cache}->{replicated};
     my %repl = ();
     my @expts = $o->experiments();
     foreach (@expts){
         s/\.[^.]+$//;
         $repl{$_} = 1;
     }
-    return keys %repl;
+    $o->{cache}->{replicated} = [keys %repl];
+    return @{$o->{cache}->{replicated}};
 }
 
 =head2 orthogonals 
@@ -278,6 +281,7 @@ interpretation would still be that there is a differential response.
 
 sub orthogonals {
     my $o = shift;
+    return @{$o->{cache}->{orthogonals}} if exists $o->{cache}->{orthogonals};
     my @repls = $o->replicated();
     my @orths = ();
     foreach my $c1(@repls){
@@ -294,6 +298,7 @@ sub orthogonals {
             }
         }
     }
+    $o->{cache}->{orthogonals} = \@orths;
     return @orths;
 }
 
@@ -306,6 +311,7 @@ that represents all possible comparisons.
 
 sub pairs {
     my $o = shift;
+    return @{$o->{cache}->{pairs}} if exists $o->{cache}->{pairs};
     my @r = $o->replicated();
     my @pairs = ();
     foreach my $r1(sort @r){
@@ -314,6 +320,7 @@ sub pairs {
             push @pairs, "$r1 $r2";
         }
     }
+    $o->{cache}->{pairs} = \@pairs;
     return @pairs;
 }
 
@@ -432,7 +439,8 @@ sub proteinCount {
 =cut
 
 sub getProteinGroupIds {
-    return sort shift()->extractColumnValues(column=>'Protein group IDs');
+    $o->{cache}->{proteinGroupIds} = [sort shift()->extractColumnValues(column=>'Protein group IDs')] unless exists $o->{cache}->{proteinGroupIds};
+    return @{$o->{cache}->{proteinGroupIds}}
 }
 
 =head2 getLeadingProteins
@@ -440,7 +448,8 @@ sub getProteinGroupIds {
 =cut
 
 sub getLeadingProteins {
-    return sort shift()->extractColumnValues(column=>'Leading Proteins');
+    $o->{cache}->{leadingProteins} = [sort shift()->extractColumnValues(column=>'Leading Proteins')] unless exists $o->{cache}->{proteinGroupIds};
+    return @{$o->{cache}->{leadingProteins}};
 }
 
 =head2 logRatios
@@ -566,6 +575,11 @@ returns an hashref with the following keys
 
 sub deviations {
     my ($o,%opts) = @_;
+    # cache
+    $o->{cache}->{deviations} = {} unless exists $o->{cache}->{deviations};
+    my $cachekey = join('::', sort %opts);
+    return $o->{cache}->{deviations}->{$cachekey} if exists $o->{cache}->{deviations}->{$cachekey};
+    ##
     my $f = $o->filter(%opts);
     my @values = $f->extractColumnValues(
             column => 'Ratio H/L',
@@ -579,7 +593,8 @@ sub deviations {
     $d->{sd_from_mad} = $d->{sd_via_mad} = $n ? $d->{mad} * 1.4826016694 : '';
     $d->{usv_mad} = $n ? $d->{sd_from_mad} ** 2 : '';
     $d->{median} = $n ? $o->median(@values) : '';
-    # I should think about caching here!!!
+    # I should think about caching here!!!  DONE!
+    $o->{cache}->{deviations}->{$cachekey} = $d;
     return $d;
 }
 
@@ -820,6 +835,17 @@ sub experimentMaximumPvalue {
     return {p_max=>$p_max, p_mad_max=>$p_mad_max};
 }
 
+=head2 fullProteinComparison
+
+Does a full comparison on a particular protein, i.e. compares all pairs of conditions, also does
+differential response analysis.  Allows limitation of analysis to proteotypic peptides.
+
+=cut
+
+sub fullProteinComparison {
+    my ($o, %opts) = @_;
+    
+}
 
 =head2 direction
 
