@@ -18,7 +18,7 @@
 #     LICENSE => q[artistic2]
 #     NAME => q[Bio::MaxQuant::Evidence::Statistics]
 #     PL_FILES => {  }
-#     PREREQ_PM => { Test::More=>q[0], Text::CSV=>q[0], Carp=>q[0] }
+#     PREREQ_PM => { Test::More=>q[0], Statistics::Distributions=>q[0], Text::CSV=>q[0], Carp=>q[0], Test::More::Behaviour=>q[0] }
 #     VERSION_FROM => q[lib/Bio/MaxQuant/Evidence/Statistics.pm]
 #     clean => { FILES=>q[Bio-MaxQuant-Evidence-Statistics-*] }
 #     dist => { COMPRESS=>q[gzip -9f], SUFFIX=>q[gz] }
@@ -499,7 +499,9 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '    - inc' >> META_new.yml
 	$(NOECHO) $(ECHO) 'requires:' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Carp: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Statistics::Distributions: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Test::More: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Test::More::Behaviour: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Text::CSV: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) 'version: 0.01' >> META_new.yml
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
@@ -539,7 +541,9 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '      "runtime" : {' >> META_new.json
 	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
 	$(NOECHO) $(ECHO) '            "Carp" : "0",' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Statistics::Distributions" : "0",' >> META_new.json
 	$(NOECHO) $(ECHO) '            "Test::More" : "0",' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Test::More::Behaviour" : "0",' >> META_new.json
 	$(NOECHO) $(ECHO) '            "Text::CSV" : "0"' >> META_new.json
 	$(NOECHO) $(ECHO) '         }' >> META_new.json
 	$(NOECHO) $(ECHO) '      }' >> META_new.json
@@ -846,7 +850,9 @@ ppd :
 	$(NOECHO) $(ECHO) '    <AUTHOR>jimi &lt;j@0na.me&gt;</AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Carp::" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Statistics::Distributions" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Test::More" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Test::More::Behaviour" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Text::CSV" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <ARCHITECTURE NAME="i486-linux-thread-multi-5.16" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <CODEBASE HREF="" />' >> $(DISTNAME).ppd

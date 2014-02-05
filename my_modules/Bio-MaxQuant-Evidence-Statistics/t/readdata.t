@@ -259,14 +259,10 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
             # pairs should be indexed and that index used by orthogonals.
             # also... any replicate with no (or only one) observations for a protein should give a p-value of -1!
             # in addition, should give option to use proteotypic peptides or not. ( /$protein/ vs /^$protein$/ )
-            
+            ok($o->fullProteinComparison(filter=>'Q05655'), 'full protein comparison');
         };
-        it '' => sub {
-        };
-    };
-    context 'always fail' => sub {
-        it 'should always fail' => sub {
-            ok(0, 'failing on purpose');
+        it 'should do comparisons across all proteins...' => sub {
+            ok($o->fullComparison());
         };
     };
 };

@@ -33,7 +33,9 @@
       "runtime" : {
          "requires" : {
             "Carp" : "0",
+            "Statistics::Distributions" : "0",
             "Test::More" : "0",
+            "Test::More::Behaviour" : "0",
             "Text::CSV" : "0"
          }
       }

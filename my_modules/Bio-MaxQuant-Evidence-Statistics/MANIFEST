@@ -6,10 +6,13 @@ MANIFEST			This list of files
 README
 t/00-load.t
 t/boilerplate.t
+t/expected-sets.ods
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
 t/readdata.t
+t/selectedEvidence-Medians.ods
 t/selectedEvidence.txt
 t/selectedProteinGroups.txt
+t/serialized
 t/testdata-plan.txt

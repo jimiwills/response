@@ -16,6 +16,8 @@ WriteMakefile(
         'Test::More' => 0,
         'Carp' => 0,
         'Text::CSV' => 0,
+        'Test::More::Behaviour' => 0,
+        'Statistics::Distributions' =>0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Bio-MaxQuant-Evidence-Statistics-*' },

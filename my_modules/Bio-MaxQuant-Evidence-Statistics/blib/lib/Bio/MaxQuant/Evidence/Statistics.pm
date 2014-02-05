@@ -430,8 +430,11 @@ sub extractColumnValues {
 =cut
 
 sub proteinCount {
-    my @proteins = shift()->getLeadingProteins();
-    return scalar @proteins;
+    my $o = shift;
+    return $o->{cache}->{proteinCount} if exists $o->{cache}->{proteinCount};
+    my @proteins = $o->getLeadingProteins();
+    $o->{cache}->{proteinCount} = scalar @proteins;
+    return $o->{cache}->{proteinCount};
 }
 
 =head2 getProteinGroupIds
@@ -439,7 +442,8 @@ sub proteinCount {
 =cut
 
 sub getProteinGroupIds {
-    $o->{cache}->{proteinGroupIds} = [sort shift()->extractColumnValues(column=>'Protein group IDs')] unless exists $o->{cache}->{proteinGroupIds};
+    my $o = shift;
+    $o->{cache}->{proteinGroupIds} = [sort $o->extractColumnValues(column=>'Protein group IDs')] unless exists $o->{cache}->{proteinGroupIds};
     return @{$o->{cache}->{proteinGroupIds}}
 }
 
@@ -448,7 +452,8 @@ sub getProteinGroupIds {
 =cut
 
 sub getLeadingProteins {
-    $o->{cache}->{leadingProteins} = [sort shift()->extractColumnValues(column=>'Leading Proteins')] unless exists $o->{cache}->{proteinGroupIds};
+    my $o = shift;
+    $o->{cache}->{leadingProteins} = [sort $o->extractColumnValues(column=>'Leading Proteins')] unless exists $o->{cache}->{proteinGroupIds};
     return @{$o->{cache}->{leadingProteins}};
 }
 
@@ -577,7 +582,8 @@ sub deviations {
     my ($o,%opts) = @_;
     # cache
     $o->{cache}->{deviations} = {} unless exists $o->{cache}->{deviations};
-    my $cachekey = join('::', sort %opts);
+    my $cachekey = join('::', map {"$_=$opts{$_}"} sort keys %opts);
+   # print STDERR "$cachekey\n";
     return $o->{cache}->{deviations}->{$cachekey} if exists $o->{cache}->{deviations}->{$cachekey};
     ##
     my $f = $o->filter(%opts);
@@ -685,6 +691,14 @@ MAD and medians are much more robust to outliers, which are significant in pepti
 
 sub ttest {
     my ($o,%opts) = @_;
+    # cache
+    if($opts{experiment1} gt $opts{experiment2}){ # sort requested expts
+        ($opts{experiment1}, $opts{experiment2}) = ($opts{experiment2}, $opts{experiment1});
+    }
+    $o->{cache}->{ttests} = {} unless exists $o->{cache}->{ttests};
+    my $cachekey = join('::', map {"$_=$opts{$_}"} sort keys %opts);
+    return $o->{cache}->{ttests}->{$cachekey} if exists $o->{cache}->{ttests}->{$cachekey};
+    ##
     $opts{experiment} = $opts{experiment1};
     my $d1 = $o->deviations(%opts);
     $opts{experiment} = $opts{experiment2};
@@ -708,9 +722,11 @@ sub ttest {
     );
     $tm->{p} = ($d1->{n} && $d2->{n}) ? Statistics::Distributions::tprob(int ($tm->{df}), $tm->{t}) : '';
     
-    return {
+    my $r =   {
         stats1 => $d1, stats2 => $d2, ttest => $tt, ttest_mad => $tm 
     };
+    $o->{cache}->{ttests}->{$cachekey} = $r;
+    return $r;
 }
 
 =head2 welchs_ttest
@@ -844,7 +860,49 @@ differential response analysis.  Allows limitation of analysis to proteotypic pe
 
 sub fullProteinComparison {
     my ($o, %opts) = @_;
-    
+    # %opts should have our protein listed as "filter"
+    my @pairs = $o->pairs();
+    my @orths = $o->orthogonals();
+    my %results = ();
+    foreach my $p(@pairs){
+        my ($e1,$e2) = split(/\s+/, $p);
+        $results{$p} = $o->experimentMaximumPvalue(%opts, experiment1=>$e1, experiment2=>$e2);
+    }
+    foreach my $p(@orths){
+        my ($e1,$e2,$e3) = split(/\s+/, $p);
+        my $r1 = $o->experimentMaximumPvalue(%opts, experiment1=>$e1, experiment2=>$e2);
+        my $r2 = $o->experimentMaximumPvalue(%opts, experiment1=>$e1, experiment2=>$e3);
+        if($r1->{p_max} < 0 || $r2->{p_max} < 0){
+            $r1->{p_max} = -1;
+        }
+        elsif($r2->{p_max} > $r1->{p_max}) {
+            $r1->{p_max} = $r2->{p_max};
+        }
+        if($r1->{p_mad_max} < 0 || $r2->{p_mad_max} < 0){
+            $r1->{p_mad_max} = -1;
+        }
+        elsif($r2->{p_mad_max} > $r1->{p_mad_max}) {
+            $r1->{p_mad_max} = $r2->{p_mad_max};
+        }
+        $results{$p} = $r1;
+    }
+    return \%results;
+}
+
+=head2 fullComparison
+
+Does a full comparison for each protein.  Returns hash of hashes.
+
+=cut
+
+sub fullComparison {
+    my $o = shift;
+    my @leadingProteins = $o->getLeadingProteins();
+    my %results = ();
+    foreach my $lp(@leadingProteins){
+        $results{$lp} = $o->fullProteinComparison(filter=>$lp);
+    }
+    return \%results;
 }
 
 =head2 direction
