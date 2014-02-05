@@ -571,12 +571,14 @@ sub deviations {
             column => 'Ratio H/L',
             nodup  => 0,
     );
-    my $d = $o->sd(@values);
+    my $n = scalar @values;
+    my $d = $n > 1 ? $o->sd(@values) : '';
     $d->{'values'} = \@values;
-    $d->{mad} = $o->mad(@values);
-    $d->{sd_from_mad} = $d->{sd_via_mad} = $d->{mad} * 1.4826016694;
-    $d->{usv_mad} = $d->{sd_from_mad} ** 2;
-    $d->{median} = $o->median(@values);
+    $d->{mad} = $n ? $o->mad(@values) : '';
+    
+    $d->{sd_from_mad} = $d->{sd_via_mad} = $n ? $d->{mad} * 1.4826016694 : '';
+    $d->{usv_mad} = $n ? $d->{sd_from_mad} ** 2 : '';
+    $d->{median} = $n ? $o->median(@values) : '';
     # I should think about caching here!!!
     return $d;
 }
@@ -589,6 +591,7 @@ given a list of values, returns the mean
 
 sub mean {
     my ($o,@values) = @_;
+    if(scalar(@values) < 1){ return ''; }
     return $o->sum(@values) / scalar @values;
 }
 
@@ -601,9 +604,14 @@ given a list of values, returns a hash with keys mean and sd (standard deviation
 sub sd {
     my ($o,@values) = @_;
     my $n = scalar(@values);
-    my $mean = $o->mean(@values);
+    my $mean = $n ? $o->mean(@values) : '';
     my $sos = $o->sum(map {($_ - $mean)**2} @values);
-    $sos /= ($n-1);
+    if($n > 1){
+        $sos /= ($n-1);
+    }
+    else {
+        $sos = '';
+    }
     return {
         sd => sqrt($sos),
         usv => $sos,
@@ -633,6 +641,9 @@ given a list of values, returns the median absolute deviation
 
 sub mad {
     my ($o,@values) = @_;
+    if(scalar(@values) < 1){
+        return '';
+    }
     my $median = $o->median(@values);
     my @ads = map {abs ($_ - $median)} @values;
     return $o->median(@ads);
@@ -671,7 +682,7 @@ sub ttest {
         n1    => $d1->{n},
         n2    => $d2->{n},
     );
-    $tt->{p} = Statistics::Distributions::tprob(int ($tt->{df}), $tt->{t});
+    $tt->{p} = ($d1->{n} && $d2->{n}) ? Statistics::Distributions::tprob(int ($tt->{df}), $tt->{t}) : '';
     my $tm = $o->welchs_ttest(
         mean1 => $d1->{median},
         mean2 => $d2->{median},
@@ -680,7 +691,7 @@ sub ttest {
         n1    => $d1->{n},
         n2    => $d2->{n},
     );
-    $tm->{p} = Statistics::Distributions::tprob(int ($tm->{df}), $tm->{t});
+    $tm->{p} = ($d1->{n} && $d2->{n}) ? Statistics::Distributions::tprob(int ($tm->{df}), $tm->{t}) : '';
     
     return {
         stats1 => $d1, stats2 => $d2, ttest => $tt, ttest_mad => $tm 
@@ -766,13 +777,30 @@ sub experimentMaximumPvalue {
     my @reps1 = ();
     my @reps2 = ();
     foreach my $rep($o->experiments){
-        if($rep =~ /$opts{experiment1}/){
+        if($rep =~ /^$opts{experiment1}/){
             push @reps1, $rep;
         }
-        if($rep =~ /$opts{experiment2}/){
+        if($rep =~ /^$opts{experiment2}/){
             push @reps2, $rep;
         }
     }
+    # now there must be enough replicates with enough observations in each...
+    $opts{minimum_observations} = 2 unless exists $opts{minimum_observations};
+    $opts{minimum_replicates} = 2 unless exists $opts{minimum_replicates};
+    my $reps1 = 0;
+    my $reps2 = 0;
+    foreach my $rep(@reps1){
+        my $f = $o->filter(experiment=>$rep, leadingProteins=>$opts{filter});
+        my @values = $f->extractColumnValues(column => 'Ratio H/L');
+        $reps1 ++ if scalar(@values) > $opts{minimum_observations};
+    }
+    foreach my $rep(@reps2){
+        my $f = $o->filter(experiment=>$rep, leadingProteins=>$opts{filter});
+        my @values = $f->extractColumnValues(column => 'Ratio H/L', nodup  => 0);
+        $reps2 ++ if scalar(@values) > $opts{minimum_observations};
+    }
+    return {p_max => -1, p_mad_max => -1} if $reps1 < $opts{minimum_replicates} || $reps2 < $opts{minimum_replicates};
+    
     # compare each combination of replicates
     my $p_max = 0;
     my $p_mad_max = 0;
