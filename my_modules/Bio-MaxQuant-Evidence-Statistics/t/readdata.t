@@ -56,8 +56,6 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
             $p->loadEssentials(filename=>'t/serialized');
         };
         it 'should have correctly loaded serialized data' => sub {
-            # deep comparison between $o and $p data??
-            is_deeply($p, $o, 'loaded vs pre saved.');
             is($p->proteinCount(), 7, 'counting proteins');
             is( scalar($p->experiments), 27, 'experiments');
             is( scalar($p->ids), 2793, 'ids');
@@ -70,6 +68,10 @@ describe 'Bio::MaxQuant::Evidence::Statistics' => sub {
                 '1371;1485;1775;1846;2111;2131;2913',
                 'protein group ids'
             );
+            # deep comparison between $o and $p data??
+	    delete $p->{ih};
+	    delete $o->{ih}; # because these will definitely be different!
+            is_deeply($p, $o, 'loaded vs pre saved.');
         };
     };
     context 'independent subs' => sub {

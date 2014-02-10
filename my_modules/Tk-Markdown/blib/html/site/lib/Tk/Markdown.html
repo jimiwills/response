@@ -21,11 +21,18 @@
   <li><a href="#NAME">NAME</a></li>
   <li><a href="#VERSION">VERSION</a></li>
   <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
-  <li><a href="#EXPORT">EXPORT</a></li>
-  <li><a href="#SUBROUTINES-METHODS">SUBROUTINES/METHODS</a>
+  <li><a href="#METHODS">METHODS</a>
     <ul>
-      <li><a href="#function1">function1</a></li>
-      <li><a href="#function2">function2</a></li>
+      <li><a href="#insert">insert</a></li>
+      <li><a href="#defaultStyles">defaultStyles</a></li>
+      <li><a href="#setStyles">setStyles</a></li>
+      <li><a href="#FormatMarkdown">FormatMarkdown</a></li>
+      <li><a href="#FormatMarkdownTable">FormatMarkdownTable</a></li>
+      <li><a href="#PaintMarkdown">PaintMarkdown</a></li>
+      <li><a href="#clipEvents">clipEvents</a></li>
+      <li><a href="#ClassInit">ClassInit</a></li>
+      <li><a href="#Populate">Populate</a></li>
+      <li><a href="#Tk::Widget::ScrlMardown">Tk::Widget::ScrlMardown</a></li>
     </ul>
   </li>
   <li><a href="#AUTHOR">AUTHOR</a></li>
@@ -37,33 +44,90 @@
 
 <h1 id="NAME">NAME</h1>
 
-<p>Tk::Markdown - The great new Tk::Markdown!</p>
+<p>Tk::Markdown - display markdown in a Text</p>
 
 <h1 id="VERSION">VERSION</h1>
 
-<p>Version 0.01</p>
+<p>Version 0.05</p>
 
 <h1 id="SYNOPSIS">SYNOPSIS</h1>
 
-<p>Quick summary of what the module does.</p>
-
-<p>Perhaps a little code snippet.</p>
-
-<pre><code><code>    <span class="keyword">use</span> <span class="variable">Tk::Markdown</span><span class="operator">;</span>
-    
-    <span class="keyword">my</span> <span class="variable">$foo</span> <span class="operator">=</span> <span class="variable">Tk::Markdown</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">();</span>
-    <span class="operator">...</span>
+<pre><code><code>  <span class="keyword">use</span> <span class="variable">Tk</span><span class="operator">;</span>
+  <span class="keyword">use</span> <span class="variable">Tk::MarkdownTk</span><span class="operator">;</span>
+  
+  <span class="keyword">my</span> <span class="variable">$mw</span> <span class="operator">=</span> <span class="variable">new</span> <span class="variable">MainWindow</span><span class="operator">();</span>
+    <span class="keyword">my</span> <span class="variable">$mdt</span> <span class="operator">=</span> <span class="variable">$mw</span><span class="operator">-&gt;</span><span class="variable">MarkdownTk</span><span class="operator">();</span>
+  
+  <span class="variable">$mdt</span><span class="operator">-&gt;</span><span class="variable">insert</span><span class="operator">(</span><span class="string">q{
+    some markdown here
+  }</span><span class="operator">);</span>
 </code></code></pre>
 
-<h1 id="EXPORT">EXPORT</h1>
+<h1 id="METHODS">METHODS</h1>
 
-<p>A list of functions that can be exported. You can delete this section if you don&#39;t export anything, such as for a purely object-oriented module.</p>
+<h2 id="insert">insert</h2>
 
-<h1 id="SUBROUTINES-METHODS">SUBROUTINES/METHODS</h1>
+<p>Whenever insert is called on the Markdown, some translation is done on the text in order to diplay it nicely as markdown. Tables are reformatted (if the line starts with a bar) and headers are tagged with different fonts.</p>
 
-<h2 id="function1">function1</h2>
+<p>This module is currently under development and there&#39;s plenty to do, e.g. links, images, etc.</p>
 
-<h2 id="function2">function2</h2>
+<h2 id="defaultStyles">defaultStyles</h2>
+
+<p>Called internally. You can access the styles like this:</p>
+
+<pre><code><code>        <span class="keyword">use</span> <span class="variable">Data::Dumper</span><span class="operator">;</span>
+        <span class="keyword">print</span> <span class="variable">Dumper</span> <span class="variable">$o</span><span class="operator">-&gt;</span><span class="operator">{</span><span class="string">styles</span><span class="operator">}</span><span class="operator">;</span>
+</code></code></pre>
+
+<p>To set styles, use $o-&gt;setStyles</p>
+
+<h2 id="setStyles">setStyles</h2>
+
+<p>The argument is a hash of styles. The keys are predefined names, currently:</p>
+
+<dl>
+
+<dt id="body-item-h1-item-h2-item-h3-item-h4-item-h5-item-h6-item-code-item-list">body =item h1 =item h2 =item h3 =item h4 =item h5 =item h6 =item code =item list</dt>
+<dd>
+
+</dd>
+</dl>
+
+<p>and the values are listrefs, in which the first element is the -foreground color, and the remainder are options for the Tk::Font object. For example:</p>
+
+<pre><code><code>        $o-&gt;setStyles(
+                &#39;h1&#39; =&gt; [ qw/ red -family Times -weight bold -size 32 / ],
+        )</code></code></pre>
+
+<h2 id="FormatMarkdown">FormatMarkdown</h2>
+
+<p>This is called internally. It prettifies markdown prior to insertion.</p>
+
+<p>&lt;% perl code here %&gt; is interpretted here, so if you want to have perl code that results in formatted markdown, you&#39;ll need to put it inside &lt;% %&gt; (as opposed to the &lt;? ?&gt; that will get run by MarkdownTk)</p>
+
+<h2 id="FormatMarkdownTable">FormatMarkdownTable</h2>
+
+<p>This is called internally. It prettifies markdown tables.</p>
+
+<h2 id="PaintMarkdown">PaintMarkdown</h2>
+
+<p>This is call internally. It applies the styles.</p>
+
+<h2 id="clipEvents">clipEvents</h2>
+
+<p>This copied directly from Tk::ROText</p>
+
+<h2 id="ClassInit">ClassInit</h2>
+
+<p>This is copied directly from Tk::ROText.</p>
+
+<h2 id="Populate">Populate</h2>
+
+<p>This is copied and modified from Tk::ROText. The modification is the addition of a call to setDefaultStyles. That&#39;s all.</p>
+
+<h2 id="Tk::Widget::ScrlMardown">Tk::Widget::ScrlMardown</h2>
+
+<p>Copied and adapted from Tk::ROText</p>
 
 <h1 id="AUTHOR">AUTHOR</h1>
 

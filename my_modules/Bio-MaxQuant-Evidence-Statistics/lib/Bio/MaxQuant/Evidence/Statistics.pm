@@ -8,6 +8,7 @@ use Text::CSV;
 use Carp;
 use Storable;
 use Statistics::Distributions;
+use IO::Handle;
 
 =head1 NAME
 
@@ -81,8 +82,16 @@ sub new {
         experiment_column_name => 'Experiment',
         csv_options            => {sep_char=>"\t"},
     );
+    my $io = IO::Handle->new();
+    $io->fdopen(fileno(STDERR),"w");
     my %options = (%defaults, @_);
-    my $o = {defaults=>\%options};
+    my $o = {
+	defaults=>\%options,
+	quiet               => 0,
+	ih                   => $io,
+	max_p             => 0.1, # gets rid of excess unusable data.
+	min_p              => -0.1, # excludes -1, which is missing values
+    };
     bless $o, $c;
     return $o;
 }
@@ -171,8 +180,10 @@ If that makes no sense, write to me and I'll try to change it.
 
 sub parseEssentials {
     my $o = shift;
+    $o->info('parseEssentials:');
     my %defaults = %{$o->{defaults}};
     my %options = (%defaults, @_);
+    my $filesize = (stat $options{filename})[7];
     my $io = IO::File->new($options{filename}, 'r');
     my $csv = Text::CSV->new($options{csv_options});
     # head the column names, just like in the pod...
@@ -188,6 +199,7 @@ sub parseEssentials {
     my @sharedids = ();
     my @uniqueids = ();
     
+    my $percent = 0;
     while(! eof($io)){
         my $hr = $csv->getline_hr($io);
         my %h = map {
@@ -223,12 +235,39 @@ sub parseEssentials {
         else {
             push @uniqueids, $key;
         }
+	
+	my $nextpercent = 100 * tell($io)/$filesize;
+	if($nextpercent >= $percent+1){
+		$percent = int($nextpercent);
+		print STDERR "\rparseEssentials: $percent % read";
+	}
     }
+    $o->info("parseEssentials: 100 % read");
+    $o->info("parseEssentials: assigning and sorting data...");
     $o->{data} = \%data;
     $o->{ids} = [sort {$a <=> $b} @ids];
     $o->{sharedids} = [sort {$a <=> $b} @sharedids];
     $o->{uniqueids} = [sort {$a <=> $b} @uniqueids];
     $o->{cache} = {};
+    $o->info("parseEssentials: done");
+}
+
+=head2 info
+
+used internally, prints to $o->{ih}, which is initially set to an IO::Handle object writing to STDERR, 
+but you might change that if you wanted.  Returns immediately if $o->{quiet} is true, otherwise
+prints the remaining contents of @_, comma separated, to the handle, followed by a newline.
+
+=cut
+
+sub info {
+	my $o = shift;
+	if(! defined $o->{ih}){
+		my $io = IO::Handle->new();
+		$io->fdopen(fileno(STDERR),"w");
+		$o->{ih} = $io;
+	}
+	$o->{ih}->print(join(',',@_),"\n") unless $o->{quiet};
 }
 
 =head2 experiments
@@ -254,12 +293,14 @@ The names are assumed to be Cell.Condition.Replicate, i.e. full-stop (period) se
 sub replicated {
     my $o = shift;
     return @{$o->{cache}->{replicated}} if exists $o->{cache}->{replicated};
+    $o->info("replicated: calculating");
     my %repl = ();
     my @expts = $o->experiments();
     foreach (@expts){
         s/\.[^.]+$//;
         $repl{$_} = 1;
     }
+    $o->info("replicated: caching");
     $o->{cache}->{replicated} = [keys %repl];
     return @{$o->{cache}->{replicated}};
 }
@@ -282,6 +323,7 @@ interpretation would still be that there is a differential response.
 sub orthogonals {
     my $o = shift;
     return @{$o->{cache}->{orthogonals}} if exists $o->{cache}->{orthogonals};
+    $o->info("orthogonals: calculating");
     my @repls = $o->replicated();
     my @orths = ();
     foreach my $c1(@repls){
@@ -298,6 +340,7 @@ sub orthogonals {
             }
         }
     }
+    $o->info("orthogonals: caching");
     $o->{cache}->{orthogonals} = \@orths;
     return @orths;
 }
@@ -312,6 +355,7 @@ that represents all possible comparisons.
 sub pairs {
     my $o = shift;
     return @{$o->{cache}->{pairs}} if exists $o->{cache}->{pairs};
+    $o->info("pairs: calculating");
     my @r = $o->replicated();
     my @pairs = ();
     foreach my $r1(sort @r){
@@ -320,6 +364,7 @@ sub pairs {
             push @pairs, "$r1 $r2";
         }
     }
+    $o->info("pairs: caching");
     $o->{cache}->{pairs} = \@pairs;
     return @pairs;
 }
@@ -362,10 +407,15 @@ Save the essential data (quicker to read again in future)
 
 sub saveEssentials {
     my $o = shift;
+    $o->info("saveEssentials: saving");
     my %defaults = %{$o->{defaults}};
     my %options = (%defaults, @_);
     # here we want to save everything
+    my $ih = $o->{ih};
+    delete $o->{ih}; # can't save glob!
     store $o, $options{filename};
+    $o->{ih} = $ih;
+    $o->info("saveEssentials: done");
 }
 
 =head2 loadEssentials
@@ -376,10 +426,12 @@ Load up previously saved essentials
 
 sub loadEssentials {
     my $o = shift;
+    $o->info("loadEssentials: loading");
     my %defaults = %{$o->{defaults}};
     my %options = (%defaults, @_);
     my $p = retrieve($options{filename});
     %$o = %$p;
+    $o->info("loadEssentials: done");
     return $o;
 }
 
@@ -432,7 +484,9 @@ sub extractColumnValues {
 sub proteinCount {
     my $o = shift;
     return $o->{cache}->{proteinCount} if exists $o->{cache}->{proteinCount};
+    $o->info("proteinCount: calculating");
     my @proteins = $o->getLeadingProteins();
+    $o->info("proteinCount: caching");
     $o->{cache}->{proteinCount} = scalar @proteins;
     return $o->{cache}->{proteinCount};
 }
@@ -443,7 +497,11 @@ sub proteinCount {
 
 sub getProteinGroupIds {
     my $o = shift;
-    $o->{cache}->{proteinGroupIds} = [sort $o->extractColumnValues(column=>'Protein group IDs')] unless exists $o->{cache}->{proteinGroupIds};
+    if(! exists $o->{cache}->{proteinGroupIds}){
+	$o->info("proteinCount: calculating/caching");
+	$o->{cache}->{proteinGroupIds} = [sort $o->extractColumnValues(column=>'Protein group IDs')];
+	$o->info("proteinCount: done");
+    }
     return @{$o->{cache}->{proteinGroupIds}}
 }
 
@@ -453,7 +511,11 @@ sub getProteinGroupIds {
 
 sub getLeadingProteins {
     my $o = shift;
-    $o->{cache}->{leadingProteins} = [sort $o->extractColumnValues(column=>'Leading Proteins')] unless exists $o->{cache}->{proteinGroupIds};
+    if(! exists $o->{cache}->{proteinGroupIds}){
+	$o->info("getLeadingProteins: calculating/caching");
+	$o->{cache}->{leadingProteins} = [sort $o->extractColumnValues(column=>'Leading Proteins')];
+	$o->info("getLeadingProteins: done");
+    }
     return @{$o->{cache}->{leadingProteins}};
 }
 
@@ -469,6 +531,7 @@ from the data!
 sub logRatios {
     my $o = shift;
     return 0 if $o->{logged};
+    $o->info("logRatios: calculating");
     $o->{logged} = 1;
     my $data = $o->{data};
     foreach my $exptname(keys %$data){
@@ -484,6 +547,7 @@ sub logRatios {
             }
         }
     }
+    $o->info("logRatios: done");
     return 1;
 }
 
@@ -861,14 +925,25 @@ differential response analysis.  Allows limitation of analysis to proteotypic pe
 sub fullProteinComparison {
     my ($o, %opts) = @_;
     # %opts should have our protein listed as "filter"
+    $o->info("fullProteinComparison: calculating");
     my @pairs = $o->pairs();
     my @orths = $o->orthogonals();
     my %results = ();
+    my $i = 0;  
+    my $paircount = @pairs;    
     foreach my $p(@pairs){
+	$i++;
+	$o->info("fullProteinComparison: pair $i/$paircount");
         my ($e1,$e2) = split(/\s+/, $p);
-        $results{$p} = $o->experimentMaximumPvalue(%opts, experiment1=>$e1, experiment2=>$e2);
+	my $emp = $o->experimentMaximumPvalue(%opts, experiment1=>$e1, experiment2=>$e2);
+	$results{$p} = $emp if (exists $emp->{p_max} && $emp->{p_max} ne '' && $o->{min_p} < $emp->{p_max} && $emp->{p_max} < $o->{max_p}) 
+			|| ( exists $emp->{p_mad_max} && $emp->{p_mad_max} ne '' && $o->{min_p} < $emp->{p_mad_max} && $emp->{p_mad_max} < $o->{max_p} );
     }
+    $i = 0;
+    my $orthcount = @orths;
     foreach my $p(@orths){
+	$i++;
+	$o->info("fullProteinComparison: orthogonal $i/$orthcount");
         my ($e1,$e2,$e3) = split(/\s+/, $p);
         my $r1 = $o->experimentMaximumPvalue(%opts, experiment1=>$e1, experiment2=>$e2);
         my $r2 = $o->experimentMaximumPvalue(%opts, experiment1=>$e1, experiment2=>$e3);
@@ -884,8 +959,10 @@ sub fullProteinComparison {
         elsif($r2->{p_mad_max} > $r1->{p_mad_max}) {
             $r1->{p_mad_max} = $r2->{p_mad_max};
         }
-        $results{$p} = $r1;
+        $results{$p} = $r1 if (exists $r1->{p_max} && $r1->{p_max} ne '' && $o->{min_p} < $r1->{p_max} && $r1->{p_max} < $o->{max_p}) 
+			|| ( exists $r1->{p_mad_max} && $r1->{p_mad_max} ne '' && $o->{min_p} < $r1->{p_mad_max} && $r1->{p_mad_max} < $o->{max_p} );
     }
+    $o->info("fullProteinComparison: done");
     return \%results;
 }
 
@@ -897,11 +974,17 @@ Does a full comparison for each protein.  Returns hash of hashes.
 
 sub fullComparison {
     my $o = shift;
+    $o->info("fullComparison: calculating");
     my @leadingProteins = $o->getLeadingProteins();
     my %results = ();
+    my $lpcount = @leadingProteins;
+    my $i = 0;
     foreach my $lp(@leadingProteins){
+	$i ++;
+	$o->info("fullComparison: leading protein $i/$lpcount");
         $results{$lp} = $o->fullProteinComparison(filter=>$lp);
     }
+    $o->info("fullComparison: done");
     return \%results;
 }
 

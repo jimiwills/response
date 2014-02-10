@@ -28,35 +28,39 @@
 
 # --- MakeMaker const_config section:
 
-# These definitions are from config.sh (via /usr/local/lib/perl5/5.16.3/i486-linux-thread-multi/Config.pm).
+# These definitions are from config.sh (via C:/Perl64/lib/Config.pm).
 # They may have been overridden via Makefile.PL or on the command line.
-AR = ar
-CC = cc
-CCCDLFLAGS = -fPIC
-CCDLFLAGS = -Wl,-E -Wl,-rpath,/usr/local/lib/perl5/5.16.3/i486-linux-thread-multi/CORE
-DLEXT = so
-DLSRC = dl_dlopen.xs
-EXE_EXT = 
-FULL_AR = /usr/local/bin/ar
-LD = cc
-LDDLFLAGS = -shared -O2 -L/usr/local/lib -fstack-protector
-LDFLAGS =  -fstack-protector -L/usr/local/lib
-LIBC = /lib/libc-2.17.so
+AR = C:\Perl64\site\bin\ar.exe
+CC = C:\Perl64\site\bin\gcc.exe
+CCCDLFLAGS =  
+CCDLFLAGS =  
+DLEXT = dll
+DLSRC = dl_win32.xs
+EXE_EXT = .exe
+FULL_AR = 
+LD = C:\Perl64\site\bin\g++.exe
+LDDLFLAGS = -mdll -L"C:\Perl64\lib\CORE"
+LDFLAGS = -L"C:\Perl64\lib\CORE"
+LIBC = msvcrt.lib
 LIB_EXT = .a
 OBJ_EXT = .o
-OSNAME = linux
-OSVERS = 3.0.21-tinycore64
-RANLIB = :
-SITELIBEXP = /usr/local/lib/perl5/site_perl/5.16.3
-SITEARCHEXP = /usr/local/lib/perl5/site_perl/5.16.3/i486-linux-thread-multi
-SO = so
-VENDORARCHEXP = /usr/local/lib/perl5/vendor_perl/5.16.3/i486-linux-thread-multi
-VENDORLIBEXP = /usr/local/lib/perl5/vendor_perl/5.16.3
+OSNAME = MSWin32
+OSVERS = 5.2
+RANLIB = rem
+SITELIBEXP = C:\Perl64\site\lib
+SITEARCHEXP = C:\Perl64\site\lib
+SO = dll
+VENDORARCHEXP = 
+VENDORLIBEXP = 
 
 
 # --- MakeMaker constants section:
+
+# Get dmake to read long commands like PM_TO_BLIB
+MAXLINELENGTH = 65536
+
 AR_STATIC_ARGS = cr
-DIRFILESEP = /
+DIRFILESEP = \\
 DFSEP = $(DIRFILESEP)
 NAME = Bio::MaxQuant::Evidence::Statistics
 NAME_SYM = Bio_MaxQuant_Evidence_Statistics
@@ -67,66 +71,73 @@ DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
 XS_VERSION = 0.01
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
-INST_ARCHLIB = blib/arch
-INST_SCRIPT = blib/script
-INST_BIN = blib/bin
-INST_LIB = blib/lib
-INST_MAN1DIR = blib/man1
-INST_MAN3DIR = blib/man3
+INST_ARCHLIB = blib\arch
+INST_SCRIPT = blib\script
+INST_BIN = blib\bin
+INST_LIB = blib\lib
+INST_MAN1DIR = blib\man1
+INST_MAN3DIR = blib\man3
+INST_HTMLDIR = blib\html
 MAN1EXT = 1
 MAN3EXT = 3
 INSTALLDIRS = site
 DESTDIR = 
 PREFIX = $(SITEPREFIX)
-PERLPREFIX = /usr/local
-SITEPREFIX = /usr/local
-VENDORPREFIX = /usr/local
-INSTALLPRIVLIB = /usr/local/lib/perl5/5.16.3
+PERLPREFIX = C:\Perl64
+SITEPREFIX = C:\Perl64\site
+VENDORPREFIX = 
+INSTALLPRIVLIB = C:\Perl64\lib
 DESTINSTALLPRIVLIB = $(DESTDIR)$(INSTALLPRIVLIB)
-INSTALLSITELIB = /usr/local/lib/perl5/site_perl/5.16.3
+INSTALLSITELIB = C:\Perl64\site\lib
 DESTINSTALLSITELIB = $(DESTDIR)$(INSTALLSITELIB)
-INSTALLVENDORLIB = /usr/local/lib/perl5/vendor_perl/5.16.3
+INSTALLVENDORLIB = 
 DESTINSTALLVENDORLIB = $(DESTDIR)$(INSTALLVENDORLIB)
-INSTALLARCHLIB = /usr/local/lib/perl5/5.16.3/i486-linux-thread-multi
+INSTALLARCHLIB = C:\Perl64\lib
 DESTINSTALLARCHLIB = $(DESTDIR)$(INSTALLARCHLIB)
-INSTALLSITEARCH = /usr/local/lib/perl5/site_perl/5.16.3/i486-linux-thread-multi
+INSTALLSITEARCH = C:\Perl64\site\lib
 DESTINSTALLSITEARCH = $(DESTDIR)$(INSTALLSITEARCH)
-INSTALLVENDORARCH = /usr/local/lib/perl5/vendor_perl/5.16.3/i486-linux-thread-multi
+INSTALLVENDORARCH = 
 DESTINSTALLVENDORARCH = $(DESTDIR)$(INSTALLVENDORARCH)
-INSTALLBIN = /usr/local/bin
+INSTALLBIN = C:\Perl64\bin
 DESTINSTALLBIN = $(DESTDIR)$(INSTALLBIN)
-INSTALLSITEBIN = /usr/local/bin
+INSTALLSITEBIN = C:\Perl64\site\bin
 DESTINSTALLSITEBIN = $(DESTDIR)$(INSTALLSITEBIN)
-INSTALLVENDORBIN = /usr/local/bin
+INSTALLVENDORBIN = 
 DESTINSTALLVENDORBIN = $(DESTDIR)$(INSTALLVENDORBIN)
-INSTALLSCRIPT = /usr/local/bin
+INSTALLSCRIPT = C:\Perl64\bin
 DESTINSTALLSCRIPT = $(DESTDIR)$(INSTALLSCRIPT)
-INSTALLSITESCRIPT = /usr/local/bin
+INSTALLSITESCRIPT = C:\Perl64\site\bin
 DESTINSTALLSITESCRIPT = $(DESTDIR)$(INSTALLSITESCRIPT)
-INSTALLVENDORSCRIPT = /usr/local/bin
+INSTALLVENDORSCRIPT = 
 DESTINSTALLVENDORSCRIPT = $(DESTDIR)$(INSTALLVENDORSCRIPT)
-INSTALLMAN1DIR = /usr/local/share/man/man1
+INSTALLMAN1DIR = C:\Perl64\man\man1
 DESTINSTALLMAN1DIR = $(DESTDIR)$(INSTALLMAN1DIR)
-INSTALLSITEMAN1DIR = /usr/local/share/man/man1
+INSTALLSITEMAN1DIR = $(INSTALLMAN1DIR)
 DESTINSTALLSITEMAN1DIR = $(DESTDIR)$(INSTALLSITEMAN1DIR)
-INSTALLVENDORMAN1DIR = /usr/local/share/man/man1
+INSTALLVENDORMAN1DIR = 
 DESTINSTALLVENDORMAN1DIR = $(DESTDIR)$(INSTALLVENDORMAN1DIR)
-INSTALLMAN3DIR = /usr/local/share/man/man3
+INSTALLMAN3DIR = C:\Perl64\man\man3
 DESTINSTALLMAN3DIR = $(DESTDIR)$(INSTALLMAN3DIR)
-INSTALLSITEMAN3DIR = /usr/local/share/man/man3
+INSTALLSITEMAN3DIR = $(INSTALLMAN3DIR)
 DESTINSTALLSITEMAN3DIR = $(DESTDIR)$(INSTALLSITEMAN3DIR)
-INSTALLVENDORMAN3DIR = /usr/local/share/man/man3
+INSTALLVENDORMAN3DIR = 
 DESTINSTALLVENDORMAN3DIR = $(DESTDIR)$(INSTALLVENDORMAN3DIR)
-PERL_LIB = /usr/local/lib/perl5/5.16.3
-PERL_ARCHLIB = /usr/local/lib/perl5/5.16.3/i486-linux-thread-multi
+INSTALLHTMLDIR = C:\Perl64\html
+DESTINSTALLHTMLDIR = $(DESTDIR)$(INSTALLHTMLDIR)
+INSTALLSITEHTMLDIR = C:\Perl64\html
+DESTINSTALLSITEHTMLDIR = $(DESTDIR)$(INSTALLSITEHTMLDIR)
+INSTALLVENDORHTMLDIR = C:\Perl64\html
+DESTINSTALLVENDORHTMLDIR = $(DESTDIR)$(INSTALLVENDORHTMLDIR)
+PERL_LIB = C:\Perl64\lib
+PERL_ARCHLIB = C:\Perl64\lib
 LIBPERL_A = libperl.a
 FIRST_MAKEFILE = Makefile
 MAKEFILE_OLD = Makefile.old
 MAKE_APERL_FILE = Makefile.aperl
 PERLMAINCC = $(CC)
-PERL_INC = /usr/local/lib/perl5/5.16.3/i486-linux-thread-multi/CORE
-PERL = /tmp/tcloop/perl5/usr/local/bin/perl
-FULLPERL = /tmp/tcloop/perl5/usr/local/bin/perl
+PERL_INC = C:\Perl64\lib\CORE
+PERL = C:\Perl64\bin\perl.exe
+FULLPERL = C:\Perl64\bin\perl.exe
 ABSPERL = $(PERL)
 PERLRUN = $(PERL)
 FULLPERLRUN = $(FULLPERL)
@@ -139,7 +150,7 @@ PERM_DIR = 755
 PERM_RW = 644
 PERM_RWX = 755
 
-MAKEMAKER   = /usr/local/lib/perl5/5.16.3/ExtUtils/MakeMaker.pm
+MAKEMAKER   = C:/Perl64/lib/ExtUtils/MakeMaker.pm
 MM_VERSION  = 6.6302
 MM_REVISION = 66302
 
@@ -147,8 +158,8 @@ MM_REVISION = 66302
 # BASEEXT = Basename part of FULLEXT. May be just equal FULLEXT. (eg Oracle)
 # PARENT_NAME = NAME without BASEEXT and no trailing :: (eg Foo::Bar)
 # DLBASE  = Basename part of dynamic library. May be just equal BASEEXT.
-MAKE = make
-FULLEXT = Bio/MaxQuant/Evidence/Statistics
+MAKE = C:\Perl64\site\bin\dmake.exe
+FULLEXT = Bio\MaxQuant\Evidence\Statistics
 BASEEXT = Statistics
 PARENT_NAME = Bio::MaxQuant::Evidence
 DLBASE = $(BASEEXT)
@@ -170,36 +181,35 @@ MAN3PODS = lib/Bio/MaxQuant/Evidence/Statistics.pm
 CONFIGDEP = $(PERL_ARCHLIB)$(DFSEP)Config.pm $(PERL_INC)$(DFSEP)config.h
 
 # Where to build things
-INST_LIBDIR      = $(INST_LIB)/Bio/MaxQuant/Evidence
-INST_ARCHLIBDIR  = $(INST_ARCHLIB)/Bio/MaxQuant/Evidence
+INST_LIBDIR      = $(INST_LIB)\Bio\MaxQuant\Evidence
+INST_ARCHLIBDIR  = $(INST_ARCHLIB)\Bio\MaxQuant\Evidence
 
-INST_AUTODIR     = $(INST_LIB)/auto/$(FULLEXT)
-INST_ARCHAUTODIR = $(INST_ARCHLIB)/auto/$(FULLEXT)
+INST_AUTODIR     = $(INST_LIB)\auto\$(FULLEXT)
+INST_ARCHAUTODIR = $(INST_ARCHLIB)\auto\$(FULLEXT)
 
 INST_STATIC      = 
 INST_DYNAMIC     = 
 INST_BOOT        = 
 
 # Extra linker info
-EXPORT_LIST        = 
-PERL_ARCHIVE       = 
+EXPORT_LIST        = $(BASEEXT).def
+PERL_ARCHIVE       = $(PERL_INC)\perl516.lib
 PERL_ARCHIVE_AFTER = 
 
 
 TO_INST_PM = lib/Bio/MaxQuant/Evidence/Statistics.pm
 
 PM_TO_BLIB = lib/Bio/MaxQuant/Evidence/Statistics.pm \
-	blib/lib/Bio/MaxQuant/Evidence/Statistics.pm
+	blib\lib\Bio\MaxQuant\Evidence\Statistics.pm
 
 
 # --- MakeMaker platform_constants section:
-MM_Unix_VERSION = 6.6302
-PERL_MALLOC_DEF = -DPERL_EXTMALLOC_DEF -Dmalloc=Perl_malloc -Dfree=Perl_mfree -Drealloc=Perl_realloc -Dcalloc=Perl_calloc
+MM_Win32_VERSION = 6.63_02
 
 
 # --- MakeMaker tool_autosplit section:
 # Usage: $(AUTOSPLITFILE) FileToSplit AutoDirToSplitInto
-AUTOSPLITFILE = $(ABSPERLRUN)  -e 'use AutoSplit;  autosplit($$$$ARGV[0], $$$$ARGV[1], 0, 1, 1)' --
+AUTOSPLITFILE = $(ABSPERLRUN)  -e "use AutoSplit;  autosplit($$$$ARGV[0], $$$$ARGV[1], 0, 1, 1)" --
 
 
 
@@ -207,34 +217,33 @@ AUTOSPLITFILE = $(ABSPERLRUN)  -e 'use AutoSplit;  autosplit($$$$ARGV[0], $$$$AR
 
 
 # --- MakeMaker tools_other section:
-SHELL = /bin/sh
-CHMOD = chmod
-CP = cp
-MV = mv
-NOOP = $(TRUE)
+CHMOD = $(ABSPERLRUN) -MExtUtils::Command -e chmod --
+CP = $(ABSPERLRUN) -MExtUtils::Command -e cp --
+MV = $(ABSPERLRUN) -MExtUtils::Command -e mv --
+NOOP = rem
 NOECHO = @
-RM_F = rm -f
-RM_RF = rm -rf
-TEST_F = test -f
-TOUCH = touch
+RM_F = $(ABSPERLRUN) -MExtUtils::Command -e rm_f --
+RM_RF = $(ABSPERLRUN) -MExtUtils::Command -e rm_rf --
+TEST_F = $(ABSPERLRUN) -MExtUtils::Command -e test_f --
+TOUCH = $(ABSPERLRUN) -MExtUtils::Command -e touch --
 UMASK_NULL = umask 0
-DEV_NULL = > /dev/null 2>&1
-MKPATH = $(ABSPERLRUN) -MExtUtils::Command -e 'mkpath' --
-EQUALIZE_TIMESTAMP = $(ABSPERLRUN) -MExtUtils::Command -e 'eqtime' --
-FALSE = false
-TRUE = true
-ECHO = echo
-ECHO_N = echo -n
+DEV_NULL = > NUL
+MKPATH = $(ABSPERLRUN) -MExtUtils::Command -e mkpath --
+EQUALIZE_TIMESTAMP = $(ABSPERLRUN) -MExtUtils::Command -e eqtime --
+FALSE = $(ABSPERLRUN)  -e "exit 1" --
+TRUE = $(ABSPERLRUN)  -e "exit 0" --
+ECHO = $(ABSPERLRUN) -l -e "print qq{{@ARGV}}" --
+ECHO_N = $(ABSPERLRUN)  -e "print qq{{@ARGV}}" --
 UNINST = 0
 VERBINST = 0
-MOD_INSTALL = $(ABSPERLRUN) -MExtUtils::Install -e 'install([ from_to => {@ARGV}, verbose => '\''$(VERBINST)'\'', uninstall_shadows => '\''$(UNINST)'\'', dir_mode => '\''$(PERM_DIR)'\'' ]);' --
-DOC_INSTALL = $(ABSPERLRUN) -MExtUtils::Command::MM -e 'perllocal_install' --
-UNINSTALL = $(ABSPERLRUN) -MExtUtils::Command::MM -e 'uninstall' --
-WARN_IF_OLD_PACKLIST = $(ABSPERLRUN) -MExtUtils::Command::MM -e 'warn_if_old_packlist' --
+MOD_INSTALL = $(ABSPERLRUN) -MExtUtils::Install -e "install([ from_to => {{@ARGV}}, verbose => '$(VERBINST)', uninstall_shadows => '$(UNINST)', dir_mode => '$(PERM_DIR)' ]);" --
+DOC_INSTALL = $(ABSPERLRUN) -MExtUtils::Command::MM -e perllocal_install --
+UNINSTALL = $(ABSPERLRUN) -MExtUtils::Command::MM -e uninstall --
+WARN_IF_OLD_PACKLIST = $(ABSPERLRUN) -MExtUtils::Command::MM -e warn_if_old_packlist --
 MACROSTART = 
 MACROEND = 
 USEMAKEFILE = -f
-FIXIN = $(ABSPERLRUN) -MExtUtils::MY -e 'MY->fixin(shift)' --
+FIXIN = pl2bat.bat
 
 
 # --- MakeMaker makemakerdflt section:
@@ -280,17 +289,14 @@ DISTVNAME = Bio-MaxQuant-Evidence-Statistics-0.01
 
 
 # --- MakeMaker pasthru section:
-
-PASTHRU = LIBPERL_A="$(LIBPERL_A)"\
-	LINKTYPE="$(LINKTYPE)"\
-	PREFIX="$(PREFIX)"
-
+PASTHRU = 
 
 # --- MakeMaker special_targets section:
 .SUFFIXES : .xs .c .C .cpp .i .s .cxx .cc $(OBJ_EXT)
 
 .PHONY: all config static dynamic test linkext manifest blibdirs clean realclean disttest distdir
 
+.USESHELL :
 
 
 # --- MakeMaker c_o section:
@@ -303,7 +309,7 @@ PASTHRU = LIBPERL_A="$(LIBPERL_A)"\
 
 
 # --- MakeMaker top_targets section:
-all :: pure_all manifypods
+all :: pure_all htmlifypods
 	$(NOECHO) $(NOOP)
 
 
@@ -378,6 +384,10 @@ linkext :: $(LINKTYPE)
 
 # --- MakeMaker dlsyms section:
 
+Statistics.def: Makefile.PL
+	$(PERLRUN) -MExtUtils::Mksymlists \
+     -e "Mksymlists('NAME'=>\"Bio::MaxQuant::Evidence::Statistics\", 'DLBASE' => '$(BASEEXT)', 'DL_FUNCS' => {  }, 'FUNCLIST' => [], 'IMPORTS' => {  }, 'DL_VARS' => []);"
+
 
 # --- MakeMaker dynamic section:
 
@@ -413,8 +423,20 @@ POD2MAN = $(POD2MAN_EXE)
 manifypods : pure_all  \
 	lib/Bio/MaxQuant/Evidence/Statistics.pm
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
-	  lib/Bio/MaxQuant/Evidence/Statistics.pm $(INST_MAN3DIR)/Bio::MaxQuant::Evidence::Statistics.$(MAN3EXT) 
+	  lib/Bio/MaxQuant/Evidence/Statistics.pm $(INST_MAN3DIR)\Bio.MaxQuant.Evidence.Statistics.$(MAN3EXT) 
 
+
+
+
+# --- MakeMaker htmlifypods section:
+
+POD2HTML_EXE = $(PERLRUN) "-MActivePerl::DocTools" -e "UpdateHTML_blib(installdirs => "$(INSTALLDIRS)")"
+POD2HTML = $(POD2HTML_EXE)
+
+
+htmlifypods :  \
+	lib/Bio/MaxQuant/Evidence/Statistics.pm
+	$(NOECHO) $(POD2HTML)
 
 
 
@@ -441,14 +463,14 @@ clean_subdirs :
 clean :: clean_subdirs
 	- $(RM_F) \
 	  *$(LIB_EXT) core \
-	  core.[0-9] $(INST_ARCHAUTODIR)/extralibs.all \
-	  core.[0-9][0-9] $(BASEEXT).bso \
+	  core.[0-9] core.[0-9][0-9] \
+	  $(BASEEXT).bso $(INST_ARCHAUTODIR)\extralibs.ld \
 	  pm_to_blib.ts MYMETA.json \
 	  core.[0-9][0-9][0-9][0-9] MYMETA.yml \
 	  $(BASEEXT).x $(BOOTSTRAP) \
 	  perl$(EXE_EXT) tmon.out \
-	  *$(OBJ_EXT) pm_to_blib \
-	  $(INST_ARCHAUTODIR)/extralibs.ld blibdirs.ts \
+	  $(INST_ARCHAUTODIR)\extralibs.all *$(OBJ_EXT) \
+	  pm_to_blib blibdirs.ts \
 	  core.[0-9][0-9][0-9][0-9][0-9] *perl.core \
 	  core.*perl.*.? $(MAKE_APERL_FILE) \
 	  $(BASEEXT).def perl \
@@ -457,7 +479,8 @@ clean :: clean_subdirs
 	  perl.exe so_locations \
 	  $(BASEEXT).exp 
 	- $(RM_RF) \
-	  Bio-MaxQuant-Evidence-Statistics-* blib 
+	  Bio-MaxQuant-Evidence-Statistics-* dll.exp \
+	  dll.base blib 
 	- $(MV) $(FIRST_MAKEFILE) $(MAKEFILE_OLD) $(DEV_NULL)
 
 
@@ -478,79 +501,79 @@ realclean purge ::  clean realclean_subdirs
 # --- MakeMaker metafile section:
 metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
-	$(NOECHO) $(ECHO) '---' > META_new.yml
-	$(NOECHO) $(ECHO) 'abstract: '\''Additional statistics on your SILAC evidence'\''' >> META_new.yml
-	$(NOECHO) $(ECHO) 'author:' >> META_new.yml
-	$(NOECHO) $(ECHO) '  - '\''jimi <j@0na.me>'\''' >> META_new.yml
-	$(NOECHO) $(ECHO) 'build_requires:' >> META_new.yml
-	$(NOECHO) $(ECHO) '  ExtUtils::MakeMaker: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) 'configure_requires:' >> META_new.yml
-	$(NOECHO) $(ECHO) '  ExtUtils::MakeMaker: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) 'dynamic_config: 1' >> META_new.yml
-	$(NOECHO) $(ECHO) 'generated_by: '\''ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120630'\''' >> META_new.yml
-	$(NOECHO) $(ECHO) 'license: artistic_2' >> META_new.yml
-	$(NOECHO) $(ECHO) 'meta-spec:' >> META_new.yml
-	$(NOECHO) $(ECHO) '  url: http://module-build.sourceforge.net/META-spec-v1.4.html' >> META_new.yml
-	$(NOECHO) $(ECHO) '  version: 1.4' >> META_new.yml
-	$(NOECHO) $(ECHO) 'name: Bio-MaxQuant-Evidence-Statistics' >> META_new.yml
-	$(NOECHO) $(ECHO) 'no_index:' >> META_new.yml
-	$(NOECHO) $(ECHO) '  directory:' >> META_new.yml
-	$(NOECHO) $(ECHO) '    - t' >> META_new.yml
-	$(NOECHO) $(ECHO) '    - inc' >> META_new.yml
-	$(NOECHO) $(ECHO) 'requires:' >> META_new.yml
-	$(NOECHO) $(ECHO) '  Carp: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) '  Statistics::Distributions: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) '  Test::More: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) '  Test::More::Behaviour: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) '  Text::CSV: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version: 0.01' >> META_new.yml
+	$(NOECHO) $(ECHO) --- > META_new.yml
+	$(NOECHO) $(ECHO) "abstract: 'Additional statistics on your SILAC evidence'" >> META_new.yml
+	$(NOECHO) $(ECHO) author: >> META_new.yml
+	$(NOECHO) $(ECHO) "  - 'jimi <j@0na.me>'" >> META_new.yml
+	$(NOECHO) $(ECHO) build_requires: >> META_new.yml
+	$(NOECHO) $(ECHO) "  ExtUtils::MakeMaker: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) configure_requires: >> META_new.yml
+	$(NOECHO) $(ECHO) "  ExtUtils::MakeMaker: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) "dynamic_config: 1" >> META_new.yml
+	$(NOECHO) $(ECHO) "generated_by: 'ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120921'" >> META_new.yml
+	$(NOECHO) $(ECHO) "license: artistic_2" >> META_new.yml
+	$(NOECHO) $(ECHO) meta-spec: >> META_new.yml
+	$(NOECHO) $(ECHO) "  url: http://module-build.sourceforge.net/META-spec-v1.4.html" >> META_new.yml
+	$(NOECHO) $(ECHO) "  version: 1.4" >> META_new.yml
+	$(NOECHO) $(ECHO) "name: Bio-MaxQuant-Evidence-Statistics" >> META_new.yml
+	$(NOECHO) $(ECHO) no_index: >> META_new.yml
+	$(NOECHO) $(ECHO) "  directory:" >> META_new.yml
+	$(NOECHO) $(ECHO) "    - t" >> META_new.yml
+	$(NOECHO) $(ECHO) "    - inc" >> META_new.yml
+	$(NOECHO) $(ECHO) requires: >> META_new.yml
+	$(NOECHO) $(ECHO) "  Carp: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) "  Statistics::Distributions: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) "  Test::More: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) "  Test::More::Behaviour: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) "  Text::CSV: 0" >> META_new.yml
+	$(NOECHO) $(ECHO) "version: 0.01" >> META_new.yml
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
 	$(NOECHO) $(ECHO) Generating META.json
-	$(NOECHO) $(ECHO) '{' > META_new.json
-	$(NOECHO) $(ECHO) '   "abstract" : "Additional statistics on your SILAC evidence",' >> META_new.json
-	$(NOECHO) $(ECHO) '   "author" : [' >> META_new.json
-	$(NOECHO) $(ECHO) '      "jimi <j@0na.me>"' >> META_new.json
-	$(NOECHO) $(ECHO) '   ],' >> META_new.json
-	$(NOECHO) $(ECHO) '   "dynamic_config" : 1,' >> META_new.json
-	$(NOECHO) $(ECHO) '   "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120630",' >> META_new.json
-	$(NOECHO) $(ECHO) '   "license" : [' >> META_new.json
-	$(NOECHO) $(ECHO) '      "artistic_2"' >> META_new.json
-	$(NOECHO) $(ECHO) '   ],' >> META_new.json
-	$(NOECHO) $(ECHO) '   "meta-spec" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",' >> META_new.json
-	$(NOECHO) $(ECHO) '      "version" : "2"' >> META_new.json
-	$(NOECHO) $(ECHO) '   },' >> META_new.json
-	$(NOECHO) $(ECHO) '   "name" : "Bio-MaxQuant-Evidence-Statistics",' >> META_new.json
-	$(NOECHO) $(ECHO) '   "no_index" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '      "directory" : [' >> META_new.json
-	$(NOECHO) $(ECHO) '         "t",' >> META_new.json
-	$(NOECHO) $(ECHO) '         "inc"' >> META_new.json
-	$(NOECHO) $(ECHO) '      ]' >> META_new.json
-	$(NOECHO) $(ECHO) '   },' >> META_new.json
-	$(NOECHO) $(ECHO) '   "prereqs" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '      "build" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '            "ExtUtils::MakeMaker" : "0"' >> META_new.json
-	$(NOECHO) $(ECHO) '         }' >> META_new.json
-	$(NOECHO) $(ECHO) '      },' >> META_new.json
-	$(NOECHO) $(ECHO) '      "configure" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '            "ExtUtils::MakeMaker" : "0"' >> META_new.json
-	$(NOECHO) $(ECHO) '         }' >> META_new.json
-	$(NOECHO) $(ECHO) '      },' >> META_new.json
-	$(NOECHO) $(ECHO) '      "runtime" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
-	$(NOECHO) $(ECHO) '            "Carp" : "0",' >> META_new.json
-	$(NOECHO) $(ECHO) '            "Statistics::Distributions" : "0",' >> META_new.json
-	$(NOECHO) $(ECHO) '            "Test::More" : "0",' >> META_new.json
-	$(NOECHO) $(ECHO) '            "Test::More::Behaviour" : "0",' >> META_new.json
-	$(NOECHO) $(ECHO) '            "Text::CSV" : "0"' >> META_new.json
-	$(NOECHO) $(ECHO) '         }' >> META_new.json
-	$(NOECHO) $(ECHO) '      }' >> META_new.json
-	$(NOECHO) $(ECHO) '   },' >> META_new.json
-	$(NOECHO) $(ECHO) '   "release_status" : "stable",' >> META_new.json
-	$(NOECHO) $(ECHO) '   "version" : "0.01"' >> META_new.json
-	$(NOECHO) $(ECHO) '}' >> META_new.json
+	$(NOECHO) $(ECHO) {{ > META_new.json
+	$(NOECHO) $(ECHO) "   \"abstract\" : \"Additional statistics on your SILAC evidence\"," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"author\" : [" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"jimi ^<j^@0na.me^>\"" >> META_new.json
+	$(NOECHO) $(ECHO) "   ]," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"dynamic_config\" : 1," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"generated_by\" : \"ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120921\"," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"license\" : [" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"artistic_2\"" >> META_new.json
+	$(NOECHO) $(ECHO) "   ]," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"meta-spec\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"url\" : \"http://search.cpan.org/perldoc?CPAN::Meta::Spec\"," >> META_new.json
+	$(NOECHO) $(ECHO) "      \"version\" : \"2\"" >> META_new.json
+	$(NOECHO) $(ECHO) "   }}," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"name\" : \"Bio-MaxQuant-Evidence-Statistics\"," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"no_index\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"directory\" : [" >> META_new.json
+	$(NOECHO) $(ECHO) "         \"t\"," >> META_new.json
+	$(NOECHO) $(ECHO) "         \"inc\"" >> META_new.json
+	$(NOECHO) $(ECHO) "      ]" >> META_new.json
+	$(NOECHO) $(ECHO) "   }}," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"prereqs\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "      \"build\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "         \"requires\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "            \"ExtUtils::MakeMaker\" : \"0\"" >> META_new.json
+	$(NOECHO) $(ECHO) "         }}" >> META_new.json
+	$(NOECHO) $(ECHO) "      }}," >> META_new.json
+	$(NOECHO) $(ECHO) "      \"configure\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "         \"requires\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "            \"ExtUtils::MakeMaker\" : \"0\"" >> META_new.json
+	$(NOECHO) $(ECHO) "         }}" >> META_new.json
+	$(NOECHO) $(ECHO) "      }}," >> META_new.json
+	$(NOECHO) $(ECHO) "      \"runtime\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "         \"requires\" : {{" >> META_new.json
+	$(NOECHO) $(ECHO) "            \"Carp\" : \"0\"," >> META_new.json
+	$(NOECHO) $(ECHO) "            \"Statistics::Distributions\" : \"0\"," >> META_new.json
+	$(NOECHO) $(ECHO) "            \"Test::More\" : \"0\"," >> META_new.json
+	$(NOECHO) $(ECHO) "            \"Test::More::Behaviour\" : \"0\"," >> META_new.json
+	$(NOECHO) $(ECHO) "            \"Text::CSV\" : \"0\"" >> META_new.json
+	$(NOECHO) $(ECHO) "         }}" >> META_new.json
+	$(NOECHO) $(ECHO) "      }}" >> META_new.json
+	$(NOECHO) $(ECHO) "   }}," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"release_status\" : \"stable\"," >> META_new.json
+	$(NOECHO) $(ECHO) "   \"version\" : \"0.01\"" >> META_new.json
+	$(NOECHO) $(ECHO) }} >> META_new.json
 	-$(NOECHO) $(MV) META_new.json $(DISTVNAME)/META.json
 
 
@@ -580,8 +603,8 @@ veryclean : realclean
 # --- MakeMaker dist_core section:
 
 dist : $(DIST_DEFAULT) $(FIRST_MAKEFILE)
-	$(NOECHO) $(ABSPERLRUN) -l -e 'print '\''Warning: Makefile possibly out of date with $(VERSION_FROM)'\''' \
-	  -e '    if -e '\''$(VERSION_FROM)'\'' and -M '\''$(VERSION_FROM)'\'' < -M '\''$(FIRST_MAKEFILE)'\'';' --
+	$(NOECHO) $(ABSPERLRUN) -l -e "print 'Warning: Makefile possibly out of date with $(VERSION_FROM)'\
+    if -e '$(VERSION_FROM)' and -M '$(VERSION_FROM)' < -M '$(FIRST_MAKEFILE)';" --
 
 tardist : $(DISTVNAME).tar$(SUFFIX)
 	$(NOECHO) $(NOOP)
@@ -643,19 +666,19 @@ ci :
 
 # --- MakeMaker distmeta section:
 distmeta : create_distdir metafile
-	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'exit unless -e q{META.yml};' \
-	  -e 'eval { maniadd({q{META.yml} => q{Module YAML meta-data (added by MakeMaker)}}) }' \
-	  -e '    or print "Could not add META.yml to MANIFEST: $$$${'\''@'\''}\n"' --
-	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'exit unless -f q{META.json};' \
-	  -e 'eval { maniadd({q{META.json} => q{Module JSON meta-data (added by MakeMaker)}}) }' \
-	  -e '    or print "Could not add META.json to MANIFEST: $$$${'\''@'\''}\n"' --
+	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e "exit unless -e q{{META.yml}};\
+eval {{ maniadd({{q{{META.yml}} => q{{Module YAML meta-data (added by MakeMaker)}}}}) }}\
+    or print \"Could not add META.yml to MANIFEST: $$$${{'^@'}}\n\"" --
+	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e "exit unless -f q{{META.json}};\
+eval {{ maniadd({{q{{META.json}} => q{{Module JSON meta-data (added by MakeMaker)}}}}) }}\
+    or print \"Could not add META.json to MANIFEST: $$$${{'^@'}}\n\"" --
 
 
 
 # --- MakeMaker distsignature section:
 distsignature : create_distdir
-	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'eval { maniadd({q{SIGNATURE} => q{Public-key signature (added by MakeMaker)}}) } ' \
-	  -e '    or print "Could not add SIGNATURE to MANIFEST: $$$${'\''@'\''}\n"' --
+	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e "eval {{ maniadd({{q{{SIGNATURE}} => q{{Public-key signature (added by MakeMaker)}}}}) }} \
+    or print \"Could not add SIGNATURE to MANIFEST: $$$${{'^@'}}\n\"" --
 	$(NOECHO) cd $(DISTVNAME) && $(TOUCH) SIGNATURE
 	cd $(DISTVNAME) && cpansign -s
 
@@ -663,7 +686,7 @@ distsignature : create_distdir
 
 # --- MakeMaker install section:
 
-install :: pure_install doc_install
+install :: pure_install doc_install doc_update
 	$(NOECHO) $(NOOP)
 
 install_perl :: pure_perl_install doc_perl_install
@@ -681,6 +704,9 @@ pure_install :: pure_$(INSTALLDIRS)_install
 doc_install :: doc_$(INSTALLDIRS)_install
 	$(NOECHO) $(NOOP)
 
+doc_update ::
+	$(NOECHO) $(PERLRUN) "-MActivePerl::DocTools" -e ActivePerl::DocTools::WriteTOC
+
 pure__install : pure_site_install
 	$(NOECHO) $(ECHO) INSTALLDIRS not defined, defaulting to INSTALLDIRS=site
 
@@ -689,41 +715,44 @@ doc__install : doc_site_install
 
 pure_perl_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
-		read $(PERL_ARCHLIB)/auto/$(FULLEXT)/.packlist \
-		write $(DESTINSTALLARCHLIB)/auto/$(FULLEXT)/.packlist \
+		read $(PERL_ARCHLIB)\auto\$(FULLEXT)\.packlist \
+		write $(DESTINSTALLARCHLIB)\auto\$(FULLEXT)\.packlist \
 		$(INST_LIB) $(DESTINSTALLPRIVLIB) \
 		$(INST_ARCHLIB) $(DESTINSTALLARCHLIB) \
 		$(INST_BIN) $(DESTINSTALLBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLSCRIPT) \
 		$(INST_MAN1DIR) $(DESTINSTALLMAN1DIR) \
-		$(INST_MAN3DIR) $(DESTINSTALLMAN3DIR)
+		$(INST_MAN3DIR) $(DESTINSTALLMAN3DIR) \
+		$(INST_HTMLDIR) $(DESTINSTALLHTMLDIR)
 	$(NOECHO) $(WARN_IF_OLD_PACKLIST) \
-		$(SITEARCHEXP)/auto/$(FULLEXT)
+		$(SITEARCHEXP)\auto\$(FULLEXT)
 
 
 pure_site_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
-		read $(SITEARCHEXP)/auto/$(FULLEXT)/.packlist \
-		write $(DESTINSTALLSITEARCH)/auto/$(FULLEXT)/.packlist \
+		read $(SITEARCHEXP)\auto\$(FULLEXT)\.packlist \
+		write $(DESTINSTALLSITEARCH)\auto\$(FULLEXT)\.packlist \
 		$(INST_LIB) $(DESTINSTALLSITELIB) \
 		$(INST_ARCHLIB) $(DESTINSTALLSITEARCH) \
 		$(INST_BIN) $(DESTINSTALLSITEBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLSITESCRIPT) \
 		$(INST_MAN1DIR) $(DESTINSTALLSITEMAN1DIR) \
-		$(INST_MAN3DIR) $(DESTINSTALLSITEMAN3DIR)
+		$(INST_MAN3DIR) $(DESTINSTALLSITEMAN3DIR) \
+		$(INST_HTMLDIR) $(DESTINSTALLSITEHTMLDIR)
 	$(NOECHO) $(WARN_IF_OLD_PACKLIST) \
-		$(PERL_ARCHLIB)/auto/$(FULLEXT)
+		$(PERL_ARCHLIB)\auto\$(FULLEXT)
 
 pure_vendor_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
-		read $(VENDORARCHEXP)/auto/$(FULLEXT)/.packlist \
-		write $(DESTINSTALLVENDORARCH)/auto/$(FULLEXT)/.packlist \
+		read $(VENDORARCHEXP)\auto\$(FULLEXT)\.packlist \
+		write $(DESTINSTALLVENDORARCH)\auto\$(FULLEXT)\.packlist \
 		$(INST_LIB) $(DESTINSTALLVENDORLIB) \
 		$(INST_ARCHLIB) $(DESTINSTALLVENDORARCH) \
 		$(INST_BIN) $(DESTINSTALLVENDORBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLVENDORSCRIPT) \
 		$(INST_MAN1DIR) $(DESTINSTALLVENDORMAN1DIR) \
-		$(INST_MAN3DIR) $(DESTINSTALLVENDORMAN3DIR)
+		$(INST_MAN3DIR) $(DESTINSTALLVENDORMAN3DIR) \
+		$(INST_HTMLDIR) $(DESTINSTALLVENDORHTMLDIR)
 
 doc_perl_install :: all
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
@@ -734,7 +763,7 @@ doc_perl_install :: all
 		LINKTYPE "$(LINKTYPE)" \
 		VERSION "$(VERSION)" \
 		EXE_FILES "$(EXE_FILES)" \
-		>> $(DESTINSTALLARCHLIB)/perllocal.pod
+		>> $(DESTINSTALLARCHLIB)\perllocal.pod
 
 doc_site_install :: all
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
@@ -745,7 +774,7 @@ doc_site_install :: all
 		LINKTYPE "$(LINKTYPE)" \
 		VERSION "$(VERSION)" \
 		EXE_FILES "$(EXE_FILES)" \
-		>> $(DESTINSTALLARCHLIB)/perllocal.pod
+		>> $(DESTINSTALLARCHLIB)\perllocal.pod
 
 doc_vendor_install :: all
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
@@ -756,20 +785,20 @@ doc_vendor_install :: all
 		LINKTYPE "$(LINKTYPE)" \
 		VERSION "$(VERSION)" \
 		EXE_FILES "$(EXE_FILES)" \
-		>> $(DESTINSTALLARCHLIB)/perllocal.pod
+		>> $(DESTINSTALLARCHLIB)\perllocal.pod
 
 
-uninstall :: uninstall_from_$(INSTALLDIRS)dirs
+uninstall :: uninstall_from_$(INSTALLDIRS)dirs doc_update
 	$(NOECHO) $(NOOP)
 
 uninstall_from_perldirs ::
-	$(NOECHO) $(UNINSTALL) $(PERL_ARCHLIB)/auto/$(FULLEXT)/.packlist
+	$(NOECHO) $(UNINSTALL) $(PERL_ARCHLIB)\auto\$(FULLEXT)\.packlist
 
 uninstall_from_sitedirs ::
-	$(NOECHO) $(UNINSTALL) $(SITEARCHEXP)/auto/$(FULLEXT)/.packlist
+	$(NOECHO) $(UNINSTALL) $(SITEARCHEXP)\auto\$(FULLEXT)\.packlist
 
 uninstall_from_vendordirs ::
-	$(NOECHO) $(UNINSTALL) $(VENDORARCHEXP)/auto/$(FULLEXT)/.packlist
+	$(NOECHO) $(UNINSTALL) $(VENDORARCHEXP)\auto\$(FULLEXT)\.packlist
 
 
 # --- MakeMaker force section:
@@ -801,7 +830,7 @@ $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
 
 # --- MakeMaker makeaperl section ---
 MAP_TARGET    = perl
-FULLPERL      = /tmp/tcloop/perl5/usr/local/bin/perl
+FULLPERL      = C:\Perl64\bin\perl.exe
 
 $(MAP_TARGET) :: static $(MAKE_APERL_FILE)
 	$(MAKE) $(USEMAKEFILE) $(MAKE_APERL_FILE) $@
@@ -831,10 +860,10 @@ subdirs-test ::
 
 
 test_dynamic :: pure_all
-	PERL_DL_NONLAZY=1 $(FULLPERLRUN) "-MExtUtils::Command::MM" "-e" "test_harness($(TEST_VERBOSE), '$(INST_LIB)', '$(INST_ARCHLIB)')" $(TEST_FILES)
+	$(FULLPERLRUN) "-MExtUtils::Command::MM" "-e" "test_harness($(TEST_VERBOSE), '$(INST_LIB)', '$(INST_ARCHLIB)')" $(TEST_FILES)
 
 testdb_dynamic :: pure_all
-	PERL_DL_NONLAZY=1 $(FULLPERLRUN) $(TESTDB_SW) "-I$(INST_LIB)" "-I$(INST_ARCHLIB)" $(TEST_FILE)
+	$(FULLPERLRUN) $(TESTDB_SW) "-I$(INST_LIB)" "-I$(INST_ARCHLIB)" $(TEST_FILE)
 
 test_ : test_dynamic
 
@@ -845,26 +874,26 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="$(VERSION)">' > $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '    <ABSTRACT>Additional statistics on your SILAC evidence</ABSTRACT>' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '    <AUTHOR>jimi &lt;j@0na.me&gt;</AUTHOR>' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Carp::" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Statistics::Distributions" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Test::More" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Test::More::Behaviour" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Text::CSV" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <ARCHITECTURE NAME="i486-linux-thread-multi-5.16" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '        <CODEBASE HREF="" />' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '    </IMPLEMENTATION>' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '</SOFTPKG>' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "<SOFTPKG NAME=\"$(DISTNAME)\" VERSION=\"$(VERSION)\">" > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "    <ABSTRACT>Additional statistics on your SILAC evidence</ABSTRACT>" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "    <AUTHOR>jimi &lt;j@0na.me&gt;</AUTHOR>" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "    <IMPLEMENTATION>" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Carp::\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Statistics::Distributions\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Test::More\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Test::More::Behaviour\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Text::CSV\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <ARCHITECTURE NAME=\"MSWin32-x64-multi-thread-5.16\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <CODEBASE HREF=\"\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "    </IMPLEMENTATION>" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) ^</SOFTPKG^> >> $(DISTNAME).ppd
 
 
 # --- MakeMaker pm_to_blib section:
 
 pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
-	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', q[$(PM_FILTER)], '\''$(PERM_DIR)'\'')' -- \
-	  lib/Bio/MaxQuant/Evidence/Statistics.pm blib/lib/Bio/MaxQuant/Evidence/Statistics.pm 
+	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e "pm_to_blib({{@ARGV}}, '$(INST_LIB)\auto', q[$(PM_FILTER)], '$(PERM_DIR)')" -- \
+	  lib/Bio/MaxQuant/Evidence/Statistics.pm blib\lib\Bio\MaxQuant\Evidence\Statistics.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
 

@@ -1,0 +1,194 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../scineplex.css">
+<title></title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#VERSION">VERSION</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#EXPORT-SUBROUTINES">EXPORT/SUBROUTINES</a>
+    <ul>
+      <li><a href="#theilsen">theilsen</a></li>
+    </ul>
+  </li>
+  <li><a href="#METHODS">METHODS</a>
+    <ul>
+      <li><a href="#new">new</a></li>
+      <li><a href="#addData">addData</a></li>
+      <li><a href="#run">run</a></li>
+      <li><a href="#m">m</a></li>
+      <li><a href="#c">c</a></li>
+    </ul>
+  </li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#SUPPORT">SUPPORT</a></li>
+  <li><a href="#ACKNOWLEDGEMENTS">ACKNOWLEDGEMENTS</a></li>
+  <li><a href="#LICENSE-AND-COPYRIGHT">LICENSE AND COPYRIGHT</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>Statistics::TheilSen - Perl implementation of Theil Sen Estimator</p>
+
+<h1 id="VERSION">VERSION</h1>
+
+<p>Version 0.05</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<p>This is a perl implementation of the Theil Sen Estimator, which is a method of linear regression that uses medians. All of the gradients of the lines between all points are calculated, and hte median is the one reported. Sounds trivial. If you have 1000s of points, then you have millions of lines, and sort-based median methods can take ages, so Statistics::TheilSen uses the partition-based Statistics::QuickMedian.</p>
+
+<pre><code><code>    <span class="comment"># OOP...</span>
+    
+    <span class="keyword">use</span> <span class="variable">Statistics::TheilSenEstimator</span><span class="operator">;</span>
+    
+    <span class="keyword">my</span> <span class="variable">$tse</span> <span class="operator">=</span> <span class="variable">Statistics::TheilSenEstimator</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">(\</span><span class="variable">$y_values</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">$x_values</span><span class="operator">);</span>
+    <span class="comment"># which is really a shortcut for:</span>
+    <span class="keyword">my</span> <span class="variable">$tse</span> <span class="operator">=</span> <span class="variable">Statistics::TheilSenEstimator</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">();</span>
+    <span class="variable">$tse</span><span class="operator">-&gt;</span><span class="variable">addData</span><span class="operator">(\</span><span class="variable">@y_values</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">@x_values</span><span class="operator">);</span> <span class="comment"># listrefs of numeric scalars</span>
+    
+    <span class="keyword">my</span> <span class="variable">$status_line</span> <span class="operator">=</span> <span class="variable">$tse</span><span class="operator">-&gt;</span><span class="variable">run</span><span class="operator">();</span> <span class="comment"># might tell if you had bad values, etc</span>
+    <span class="keyword">print</span> <span class="string">"y = "</span><span class="operator">,</span> <span class="variable">$tse</span><span class="operator">-&gt;</span>m<span class="operator">(),</span> <span class="string">"x + "</span><span class="operator">,</span> <span class="variable">$tse</span><span class="operator">-&gt;</span>c<span class="operator">();</span> <span class="comment"># y = mx + c</span>
+    
+    <span class="comment"># or procedural...</span>
+    
+    <span class="keyword">use</span> <span class="variable">Statistics::TheilSenEstimator</span> <span class="string">qw/theilsen/</span><span class="operator">;</span>
+    
+    <span class="keyword">my</span> <span class="operator">(</span><span class="variable">$m</span><span class="operator">,</span><span class="variable">$c</span><span class="operator">)</span> <span class="operator">=</span> <span class="variable">theilsen</span><span class="operator">(\</span><span class="variable">@y_values</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">@x_values</span><span class="operator">);</span>
+</code></code></pre>
+
+<h1 id="EXPORT-SUBROUTINES">EXPORT/SUBROUTINES</h1>
+
+<h2 id="theilsen">theilsen</h2>
+
+<p>Accepts two list refs, the lists should be the same length. They represent y and x series which will be the subject of the regression. Returns a list of two</p>
+
+<pre><code><code>    <span class="keyword">use</span> <span class="variable">Statistics::TheilSenEstimator</span> <span class="string">qw/theilsen/</span><span class="operator">;</span>
+    
+    <span class="keyword">my</span> <span class="operator">(</span><span class="variable">$m</span><span class="operator">,</span><span class="variable">$b</span><span class="operator">)</span> <span class="operator">=</span> <span class="variable">theilsen</span><span class="operator">(\</span><span class="variable">$y_values</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">$x_values</span><span class="operator">);</span>
+</code></code></pre>
+
+<h1 id="METHODS">METHODS</h1>
+
+<h2 id="new">new</h2>
+
+<pre><code><code>    <span class="keyword">use</span> <span class="variable">Statistics::TheilSenEstimator</span><span class="operator">;</span>
+    <span class="keyword">my</span> <span class="variable">$tse</span> <span class="operator">=</span> <span class="variable">Statistics::TheilSenEstimator</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">();</span>
+    <span class="comment">#or</span>
+    <span class="keyword">my</span> <span class="variable">$tse</span> <span class="operator">=</span> <span class="variable">Statistics::TheilSenEstimator</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">(\</span><span class="variable">@y_values</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">@x_values</span><span class="operator">);</span>
+</code></code></pre>
+
+<p>returns a new Statistics::TheilSenEstimator estimator object with the optional data added.</p>
+
+<h2 id="addData">addData</h2>
+
+<pre><code><code>    <span class="variable">$tse</span><span class="operator">-&gt;</span><span class="variable">addData</span><span class="operator">(\</span><span class="variable">@y_values</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">@x_values</span><span class="operator">);</span>
+</code></code></pre>
+
+<p>Adds data to the y and x series. Data series should be the same length.</p>
+
+<h2 id="run">run</h2>
+
+<pre><code><code>    <span class="keyword">my</span> <span class="variable">$status_line</span> <span class="operator">=</span> <span class="variable">$tse</span><span class="operator">-&gt;</span><span class="variable">run</span><span class="operator">();</span>
+</code></code></pre>
+
+<p>Runs the estimator on the data currently in the object. Returns any messages about whether errors or weird things were found in the data. Sets m and c in the object</p>
+
+<h2 id="m">m</h2>
+
+<pre><code><code>    <span class="keyword">my</span> <span class="variable">$gradient</span> <span class="operator">=</span> <span class="variable">$tse</span><span class="operator">-&gt;</span>m<span class="operator">();</span>
+</code></code></pre>
+
+<p>Returns &quot;m&quot;, the gradient of the model generated by run(). If run() was not called since addData(), then run() will be called here!</p>
+
+<h2 id="c">c</h2>
+
+<pre><code><code>    <span class="keyword">my</span> <span class="variable">$intersect</span> <span class="operator">=</span> <span class="variable">$tse</span><span class="operator">-&gt;</span>c<span class="operator">();</span>
+</code></code></pre>
+
+<p>Returns &quot;c&quot;, the intersect of the model generated by run(). If run() was not called since addData(), then run() will be called here!</p>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<p>Jimi Wills, <code><code>&lt;jimi at webu.co.uk&gt;</code></code></p>
+
+<h1 id="BUGS">BUGS</h1>
+
+<p>Please report any bugs or feature requests to <code><code>bug-statistics-theilsen at rt.cpan.org</code></code>, or through the web interface at <a href="http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Statistics-TheilSen">http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Statistics-TheilSen</a>. I will be notified, and then you&#39;ll automatically be notified of progress on your bug as I make changes.</p>
+
+<h1 id="SUPPORT">SUPPORT</h1>
+
+<p>You can find documentation for this module with the perldoc command.</p>
+
+<pre><code><code>    perldoc Statistics::TheilSenEstimator</code></code></pre>
+
+<p>You can also look for information at:</p>
+
+<ul>
+
+<li><p>RT: CPAN&#39;s request tracker (report bugs here)</p>
+
+<p><a href="http://rt.cpan.org/NoAuth/Bugs.html?Dist=Statistics-TheilSenEstimator">http://rt.cpan.org/NoAuth/Bugs.html?Dist=Statistics-TheilSenEstimator</a></p>
+
+</li>
+<li><p>AnnoCPAN: Annotated CPAN documentation</p>
+
+<p><a href="http://annocpan.org/dist/Statistics-TheilSenEstimator">http://annocpan.org/dist/Statistics-TheilSenEstimator</a></p>
+
+</li>
+<li><p>CPAN Ratings</p>
+
+<p><a href="http://cpanratings.perl.org/d/Statistics-TheilSenEstimator">http://cpanratings.perl.org/d/Statistics-TheilSenEstimator</a></p>
+
+</li>
+<li><p>Search CPAN</p>
+
+<p><a href="http://search.cpan.org/dist/Statistics-TheilSenEstimator/">http://search.cpan.org/dist/Statistics-TheilSenEstimator/</a></p>
+
+</li>
+</ul>
+
+<h1 id="ACKNOWLEDGEMENTS">ACKNOWLEDGEMENTS</h1>
+
+<p>http://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator</p>
+
+<h1 id="LICENSE-AND-COPYRIGHT">LICENSE AND COPYRIGHT</h1>
+
+<p>Copyright 2013 Jimi Wills.</p>
+
+<p>This program is free software; you can redistribute it and/or modify it under the terms of the the Artistic License (2.0). You may obtain a copy of the full license at:</p>
+
+<p><a href="http://www.perlfoundation.org/artistic_license_2_0">http://www.perlfoundation.org/artistic_license_2_0</a></p>
+
+<p>Any use, modification, and distribution of the Standard or Modified Versions is governed by this Artistic License. By using, modifying or distributing the Package, you accept this license. Do not use, modify, or distribute the Package, if you do not accept this license.</p>
+
+<p>If your Modified Version has been derived from a Modified Version made by someone other than you, you are nevertheless required to ensure that your Modified Version complies with the requirements of this license.</p>
+
+<p>This license does not grant you the right to use any trademark, service mark, tradename, or logo of the Copyright Holder.</p>
+
+<p>This license includes the non-exclusive, worldwide, free-of-charge patent license to make, have made, use, offer to sell, sell, import and otherwise transfer the Package with respect to any patent claims licensable by the Copyright Holder that are necessarily infringed by the Package. If you institute patent litigation (including a cross-claim or counterclaim) against any party alleging that the Package constitutes direct or contributory patent infringement, then this Artistic License to you shall terminate on the date that such litigation is filed.</p>
+
+<p>Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS &quot;AS IS&#39; AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES. THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+
+</body>
+
+</html>
+
+

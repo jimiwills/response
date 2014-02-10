@@ -1,0 +1,167 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../scineplex.css">
+<title></title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#VERSION">VERSION</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#EXPORT">EXPORT</a></li>
+  <li><a href="#SUBROUTINES-METHODS">SUBROUTINES/METHODS</a>
+    <ul>
+      <li><a href="#new">new</a></li>
+      <li><a href="#qmedian-arrayref-">qmedian(arrayref)</a></li>
+      <li><a href="#qsplit">qsplit</a></li>
+    </ul>
+  </li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#SUPPORT">SUPPORT</a></li>
+  <li><a href="#ACKNOWLEDGEMENTS">ACKNOWLEDGEMENTS</a></li>
+  <li><a href="#LICENSE-AND-COPYRIGHT">LICENSE AND COPYRIGHT</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>Statistics::QuickMedian - Parition-based median estimator</p>
+
+<h1 id="VERSION">VERSION</h1>
+
+<p>Version 0.03</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<p>CAR Hoare&#39;s partition-based Quick Median Estimator in perl</p>
+
+<pre><code><code>    <span class="keyword">use</span> <span class="variable">Statistics::QuickMedian</span> <span class="string">qw/qmedian/</span><span class="operator">;</span>
+    <span class="keyword">my</span> <span class="variable">$median</span> <span class="operator">=</span> <span class="variable">qmedian</span><span class="operator">(\</span><span class="variable">$array</span><span class="operator">);</span>
+    
+    <span class="comment">#or</span>
+    <span class="keyword">use</span> <span class="variable">Statistics::QuickMedian</span><span class="operator">;</span>
+    <span class="keyword">my</span> <span class="variable">$qm</span> <span class="operator">=</span> <span class="variable">Statistics::QuickMedian</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">();</span>
+    <span class="keyword">my</span> <span class="variable">$median</span> <span class="operator">=</span> <span class="variable">$qm</span><span class="operator">-&gt;</span><span class="variable">qmedian</span><span class="operator">(\</span><span class="variable">$array</span><span class="operator">);</span>
+    
+       
+</code></code></pre>
+
+<h1 id="EXPORT">EXPORT</h1>
+
+<dl>
+
+<dt id="qmedian">qmedian</dt>
+<dd>
+
+<pre><code><code>    <span class="keyword">use</span> <span class="variable">Statistics::QuickMedian</span> <span class="string">qw/qmedian/</span><span class="operator">;</span>
+</code></code></pre>
+
+</dd>
+</dl>
+
+<h1 id="SUBROUTINES-METHODS">SUBROUTINES/METHODS</h1>
+
+<h2 id="new">new</h2>
+
+<p>Makes a new Statistics::QuickMedian object...</p>
+
+<pre><code><code>    <span class="keyword">use</span> <span class="variable">Statistics::QuickMedian</span><span class="operator">;</span>
+    <span class="keyword">my</span> <span class="variable">$qm</span> <span class="operator">=</span> <span class="variable">Statistics::QuickMedian</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">();</span>
+</code></code></pre>
+
+<h2 id="qmedian-arrayref-">qmedian(arrayref)</h2>
+
+<p>Partitions the data in referenced array and returns the median.</p>
+
+<pre><code><code>    <span class="keyword">my</span> <span class="variable">$median</span> <span class="operator">=</span> <span class="variable">$qm</span><span class="operator">-&gt;</span><span class="variable">qmedian</span><span class="operator">(\</span><span class="variable">$array</span><span class="operator">);</span>
+    <span class="comment"># or</span>
+    <span class="keyword">my</span> <span class="variable">$median</span> <span class="operator">=</span> <span class="variable">qmedian</span><span class="operator">(\</span><span class="variable">$array</span><span class="operator">);</span>
+</code></code></pre>
+
+<h2 id="qsplit">qsplit</h2>
+
+<p>Used by qmedian.</p>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<p>Jimi Wills, <code><code>&lt;jimi at webu.co.uk&gt;</code></code></p>
+
+<h1 id="BUGS">BUGS</h1>
+
+<p>Please report any bugs or feature requests to <code><code>bug-statistics-quickmedian at rt.cpan.org</code></code>, or through the web interface at <a href="http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Statistics-QuickMedian">http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Statistics-QuickMedian</a>. I will be notified, and then you&#39;ll automatically be notified of progress on your bug as I make changes.</p>
+
+<h1 id="SUPPORT">SUPPORT</h1>
+
+<p>You can find documentation for this module with the perldoc command.</p>
+
+<pre><code><code>    perldoc Statistics::QuickMedian</code></code></pre>
+
+<p>You can also look for information at:</p>
+
+<ul>
+
+<li><p>RT: CPAN&#39;s request tracker (report bugs here)</p>
+
+<p><a href="http://rt.cpan.org/NoAuth/Bugs.html?Dist=Statistics-QuickMedian">http://rt.cpan.org/NoAuth/Bugs.html?Dist=Statistics-QuickMedian</a></p>
+
+</li>
+<li><p>AnnoCPAN: Annotated CPAN documentation</p>
+
+<p><a href="http://annocpan.org/dist/Statistics-QuickMedian">http://annocpan.org/dist/Statistics-QuickMedian</a></p>
+
+</li>
+<li><p>CPAN Ratings</p>
+
+<p><a href="http://cpanratings.perl.org/d/Statistics-QuickMedian">http://cpanratings.perl.org/d/Statistics-QuickMedian</a></p>
+
+</li>
+<li><p>Search CPAN</p>
+
+<p><a href="http://search.cpan.org/dist/Statistics-QuickMedian/">http://search.cpan.org/dist/Statistics-QuickMedian/</a></p>
+
+</li>
+</ul>
+
+<h1 id="ACKNOWLEDGEMENTS">ACKNOWLEDGEMENTS</h1>
+
+<p><a href="http://www.i-programmer.info/babbages-bag/505-quick-median.html">http://www.i-programmer.info/babbages-bag/505-quick-median.html</a></p>
+
+<p>C.A.R. Hoare.</p>
+
+<h1 id="LICENSE-AND-COPYRIGHT">LICENSE AND COPYRIGHT</h1>
+
+<p>Copyright 2013 Jimi Wills.</p>
+
+<p>This program is free software; you can redistribute it and/or modify it under the terms of the the Artistic License (2.0). You may obtain a copy of the full license at:</p>
+
+<p><a href="http://www.perlfoundation.org/artistic_license_2_0">http://www.perlfoundation.org/artistic_license_2_0</a></p>
+
+<p>Any use, modification, and distribution of the Standard or Modified Versions is governed by this Artistic License. By using, modifying or distributing the Package, you accept this license. Do not use, modify, or distribute the Package, if you do not accept this license.</p>
+
+<p>If your Modified Version has been derived from a Modified Version made by someone other than you, you are nevertheless required to ensure that your Modified Version complies with the requirements of this license.</p>
+
+<p>This license does not grant you the right to use any trademark, service mark, tradename, or logo of the Copyright Holder.</p>
+
+<p>This license includes the non-exclusive, worldwide, free-of-charge patent license to make, have made, use, offer to sell, sell, import and otherwise transfer the Package with respect to any patent claims licensable by the Copyright Holder that are necessarily infringed by the Package. If you institute patent litigation (including a cross-claim or counterclaim) against any party alleging that the Package constitutes direct or contributory patent infringement, then this Artistic License to you shall terminate on the date that such litigation is filed.</p>
+
+<p>Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS &quot;AS IS&#39; AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES. THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+
+</body>
+
+</html>
+
+

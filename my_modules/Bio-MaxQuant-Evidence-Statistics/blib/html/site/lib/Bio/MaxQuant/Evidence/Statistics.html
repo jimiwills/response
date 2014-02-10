@@ -1,0 +1,454 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../../../scineplex.css">
+<title></title>
+<link rel="stylesheet" href="../../../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#VERSION">VERSION</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#SUBROUTINES-METHODS">SUBROUTINES/METHODS</a>
+    <ul>
+      <li><a href="#new">new</a></li>
+      <li><a href="#parseEssentials-options-">parseEssentials(%options)</a>
+        <ul>
+          <li><a href="#list_column_names">list_column_names</a></li>
+        </ul>
+      </li>
+      <li><a href="#info">info</a></li>
+      <li><a href="#experiments">experiments</a></li>
+      <li><a href="#replicated">replicated</a></li>
+      <li><a href="#orthogonals">orthogonals</a></li>
+      <li><a href="#pairs">pairs</a></li>
+      <li><a href="#ids">ids</a></li>
+      <li><a href="#sharedIds">sharedIds</a></li>
+      <li><a href="#uniqueIds">uniqueIds</a></li>
+      <li><a href="#saveEssentials-options-">saveEssentials(%options)</a></li>
+      <li><a href="#loadEssentials">loadEssentials</a></li>
+      <li><a href="#extractColumnValues">extractColumnValues</a></li>
+      <li><a href="#proteinCount">proteinCount</a></li>
+      <li><a href="#getProteinGroupIds">getProteinGroupIds</a></li>
+      <li><a href="#getLeadingProteins">getLeadingProteins</a></li>
+      <li><a href="#logRatios">logRatios</a></li>
+      <li><a href="#filter">filter</a>
+        <ul>
+          <li><a href="#options">options</a></li>
+        </ul>
+      </li>
+      <li><a href="#replicateMedian">replicateMedian</a></li>
+      <li><a href="#deviations">deviations</a></li>
+      <li><a href="#mean">mean</a></li>
+      <li><a href="#sd-unbiased-standard-deviation-">sd (unbiased standard deviation)</a></li>
+      <li><a href="#sum">sum</a></li>
+      <li><a href="#mad">mad</a></li>
+      <li><a href="#ttest">ttest</a></li>
+      <li><a href="#welchs_ttest">welchs_ttest</a></li>
+      <li><a href="#replicateMedianSubtractions">replicateMedianSubtractions</a></li>
+      <li><a href="#median">median</a></li>
+      <li><a href="#experimentMaximumPvalue">experimentMaximumPvalue</a></li>
+      <li><a href="#fullProteinComparison">fullProteinComparison</a></li>
+      <li><a href="#fullComparison">fullComparison</a></li>
+      <li><a href="#direction">direction</a></li>
+      <li><a href="#directionsDisagree">directionsDisagree</a></li>
+    </ul>
+  </li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#SUPPORT">SUPPORT</a></li>
+  <li><a href="#ACKNOWLEDGEMENTS">ACKNOWLEDGEMENTS</a></li>
+  <li><a href="#LICENSE-AND-COPYRIGHT">LICENSE AND COPYRIGHT</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>Bio::MaxQuant::Evidence::Statistics - Additional statistics on your SILAC evidence</p>
+
+<h1 id="VERSION">VERSION</h1>
+
+<p>Version 0.01</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<p>Read/convert your evidence file to a more rapidly processable format, and perform various operations and statistics across/between multiple experiments. Supports multidimensional experiments with replicate analyses.</p>
+
+<pre><code><code>    <span class="keyword">use</span> <span class="variable">Bio::MaxQuant::Evidence::Statistics</span><span class="operator">;</span>
+    
+    <span class="keyword">my</span> <span class="variable">$foo</span> <span class="operator">=</span> <span class="variable">Bio::MaxQuant::Evidence::Statistics</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">();</span>
+    
+    <span class="comment"># get the essential data from an evidence file</span>
+    <span class="variable">$foo</span><span class="operator">-&gt;</span><span class="variable">parseEssentials</span><span class="operator">(</span><span class="string">filename</span><span class="operator">=&gt;</span><span class="variable">$evidencePath</span><span class="operator">);</span>
+    
+    <span class="comment"># store the essentials for later</span>
+        <span class="variable">$foo</span><span class="operator">-&gt;</span><span class="variable">writeEssentials</span><span class="operator">(</span><span class="string">filename</span><span class="operator">=&gt;</span><span class="variable">$essentialsPath</span><span class="operator">);</span>
+    
+        <span class="comment"># laod previously stored essentials</span>
+        <span class="variable">$foo</span><span class="operator">-&gt;</span><span class="variable">readEssentials</span><span class="operator">(</span><span class="string">filename</span><span class="operator">=&gt;</span><span class="variable">$essentialsPath</span><span class="operator">);</span>
+</code></code></pre>
+
+<h1 id="SUBROUTINES-METHODS">SUBROUTINES/METHODS</h1>
+
+<h2 id="new">new</h2>
+
+<p>Create a new object:</p>
+
+<pre><code><code>    <span class="keyword">my</span> <span class="variable">$foo</span> <span class="operator">=</span> <span class="variable">Bio::MaxQuant::Evidence::Statistics</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">();</span>
+</code></code></pre>
+
+<h2 id="parseEssentials-options-">parseEssentials(%options)</h2>
+
+<p>Reads the essential data from an evidence file. Evidence files for large analyses can be very big and take a long time to process, to we only read what&#39;s necessary, and can save this for convenience and speed too, using writeEssentials().</p>
+
+<p>The data are stored by Protein group IDs, i.e. one entry per protein group. Other data stored here are:</p>
+
+<dl>
+
+<dt id="id">id</dt>
+<dd>
+
+</dd>
+<dt id="Protein-group-IDs">Protein group IDs</dt>
+<dd>
+
+</dd>
+<dt id="Modified----is-this-actually-the-right-name-">Modified -- is this actually the right name??</dt>
+<dd>
+
+</dd>
+<dt id="Leading-Proteins">Leading Proteins</dt>
+<dd>
+
+</dd>
+<dt id="Experiment">Experiment</dt>
+<dd>
+
+</dd>
+<dt id="PEP">PEP</dt>
+<dd>
+
+</dd>
+<dt id="Ratio-H-L">Ratio H/L</dt>
+<dd>
+
+</dd>
+<dt id="Intensity-H">Intensity H</dt>
+<dd>
+
+</dd>
+<dt id="Intensity-L">Intensity L</dt>
+<dd>
+
+</dd>
+<dt id="Contaminant">Contaminant</dt>
+<dd>
+
+</dd>
+<dt id="Reverse">Reverse</dt>
+<dd>
+
+</dd>
+</dl>
+
+<p>The column names used for storage are defined in the default option essential_column_names, and can be changed when you call new, or when you call parseEssentials. The option is a hash of column names whose values detmerine whether the column is kept by their truthness... e.g.</p>
+
+<pre><code><code>    <span class="variable">$o</span><span class="operator">-&gt;</span><span class="variable">parseEssentials</span><span class="operator">(</span><span class="string">essential_column_names</span><span class="operator">=&gt;(</span>
+        <span class="string">'id'</span>  <span class="operator">=&gt;</span> <span class="number">1</span><span class="operator">,</span> <span class="comment"># kept</span>
+        <span class="string">'PEP'</span> <span class="operator">=&gt;</span> <span class="number">0</span><span class="operator">,</span> <span class="comment"># discarded</span>
+        <span class="comment">#foo  =&gt; ?, # discarded</span>
+    <span class="operator">));</span>
+</code></code></pre>
+
+<p>If a column doesn&#39;t exist, it does not complain!</p>
+
+<p>The method takes a hash of options.</p>
+
+<p>options:</p>
+
+<dl>
+
+<dt id="filename---path-of-the-file-to-process">filename - path of the file to process</dt>
+<dd>
+
+</dd>
+<dt id="separator---passed-to-Text::CSV-default-is-tab-">separator - passed to Text::CSV (default is tab)</dt>
+<dd>
+
+</dd>
+<dt id="key_column_name---change-the-column-keyed-on-default-is-id-">key_column_name - change the column keyed on (default is id)</dt>
+<dd>
+
+</dd>
+<dt id="experiment_column_name---change-the-column-the-data-are-split-on">experiment_column_name - change the column the data are split on</dt>
+<dd>
+
+</dd>
+<dt id="list_column_names---change-the-columns-stored-as-lists">list_column_names - change the columns stored as lists</dt>
+<dd>
+
+</dd>
+</dl>
+
+<h3 id="list_column_names">list_column_names</h3>
+
+<p>Some columns are the same across all the evidence in a protein group, eg, the id is obviously the same, Contaminant and Reverse, Protein IDs, and so on. The default, therefore, is to overwrite the column with the value seen in an evidence. BUT, some columns have a different value in each evidence, e.g. Ratio H/L or PEP. Whatever columns are given in list_column_names, which true values, will be appended as lists, so in the final data, there will be one row per protein and any column bearing multiple evidences for that protein will be a list.</p>
+
+<p>If that makes no sense, write to me and I&#39;ll try to change it.</p>
+
+<h2 id="info">info</h2>
+
+<p>used internally, prints to $o-&gt;{ih}, which is initially set to an IO::Handle object writing to STDERR, but you might change that if you wanted. Returns immediately if $o-&gt;{quiet} is true, otherwise prints the remaining contents of @_, comma separated, to the handle, followed by a newline.</p>
+
+<h2 id="experiments">experiments</h2>
+
+<p>Returns a list of the experiments in the data.</p>
+
+<h2 id="replicated">replicated</h2>
+
+<p>Returns a list of the experiment names without the replicate portion.</p>
+
+<p>The names are assumed to be Cell.Condition.Replicate, i.e. full-stop (period) separated.</p>
+
+<h2 id="orthogonals">orthogonals</h2>
+
+<p>Returns a list of sets of orthogonal experiments, that is 3 experiments in which the first has one condition in common with the other two, but they have nothing in common with each other.</p>
+
+<p>e.g. A.X A.Y B.X</p>
+
+<p>The rationale behind this is that quantitative differences across this set indicate mechanistic links between, for example, cell line and drug treatment. If a reponse is seen to a drug, and a different repsonse is seen in a different cell-type, this system will pick that up. The fourth member of the comparison (in the example that would be B.Y) could be anything... and the interpretation would still be that there is a differential response.</p>
+
+<h2 id="pairs">pairs</h2>
+
+<p>Returns a list of pairs of replicated experiments (e.g. A.X A.Y, A.X B.X ...) that represents all possible comparisons.</p>
+
+<h2 id="ids">ids</h2>
+
+<p>Returns a list of evidence ids in the data.</p>
+
+<h2 id="sharedIds">sharedIds</h2>
+
+<p>Returns a list containing the ids of those evidences shared between protein groups.</p>
+
+<h2 id="uniqueIds">uniqueIds</h2>
+
+<p>Returns a list containing the ids of those evidences unique to one protein group.</p>
+
+<h2 id="saveEssentials-options-">saveEssentials(%options)</h2>
+
+<p>Save the essential data (quicker to read again in future)</p>
+
+<h2 id="loadEssentials">loadEssentials</h2>
+
+<p>Load up previously saved essentials</p>
+
+<h2 id="extractColumnValues">extractColumnValues</h2>
+
+<h2 id="proteinCount">proteinCount</h2>
+
+<h2 id="getProteinGroupIds">getProteinGroupIds</h2>
+
+<h2 id="getLeadingProteins">getLeadingProteins</h2>
+
+<h2 id="logRatios">logRatios</h2>
+
+<p>Logs ratios (base 2) throughout the dataset, and sets a flag so it can&#39;t get logged again.</p>
+
+<p>Treatment of &quot;special values&quot;: empty string, &lt;= 0, NaN, and any other non-number are removed from the data!</p>
+
+<h2 id="filter">filter</h2>
+
+<p>returns a set of protein records based on filter parameters...</p>
+
+<h3 id="options">options</h3>
+
+<dl>
+
+<dt id="experiment---regular-expression-to-match-experiment-name">experiment - regular expression to match experiment name</dt>
+<dd>
+
+</dd>
+<dt id="proteinGroupId---regular-expression-to-match-protein-group-id">proteinGroupId - regular expression to match protein group id</dt>
+<dd>
+
+</dd>
+<dt id="leadingProteins---regular-expression-to-match-leading-protein-ids">leadingProteins - regular expression to match leading protein ids</dt>
+<dd>
+
+</dd>
+<dt id="notLeadingProteins---regular-expression-to-not-match-leading-protein-ids">notLeadingProteins - regular expression to not match leading protein ids</dt>
+<dd>
+
+</dd>
+</dl>
+
+<p>Returns a filtered object of the same type, with relevant flags set (e.g. whether data has been logged, etc).</p>
+
+<p>Warning, intentionally does not perform a deep clone!</p>
+
+<h2 id="replicateMedian">replicateMedian</h2>
+
+<p>options are passed to filter.</p>
+
+<h2 id="deviations">deviations</h2>
+
+<p>returns an hashref with the following keys</p>
+
+<dl>
+
+<dt id="n---the-number-of-items">n - the number of items</dt>
+<dd>
+
+</dd>
+<dt id="sd---the-standard-deviation-from-the-mean-">sd - the standard deviation (from the mean)</dt>
+<dd>
+
+</dd>
+<dt id="mad---the-median-absolute-deviation-from-the-median-">mad - the median absolute deviation (from the median)</dt>
+<dd>
+
+</dd>
+<dt id="sd_via_mad---the-standard-deviation-estimated-from-the-median-absolute-deviation">sd_via_mad - the standard deviation estimated from the median absolute deviation</dt>
+<dd>
+
+</dd>
+</dl>
+
+<h2 id="mean">mean</h2>
+
+<p>given a list of values, returns the mean</p>
+
+<h2 id="sd-unbiased-standard-deviation-">sd (unbiased standard deviation)</h2>
+
+<p>given a list of values, returns a hash with keys mean and sd (standard deviation).</p>
+
+<h2 id="sum">sum</h2>
+
+<p>given a list of values, returns the sum</p>
+
+<h2 id="mad">mad</h2>
+
+<p>given a list of values, returns the median absolute deviation</p>
+
+<h2 id="ttest">ttest</h2>
+
+<p>Given options, experiment1, experiment2 and optional filters, returns a hash of statistics...</p>
+
+<p>stats1 and stats2 are hashes of deviations: sd, mad, sd_via_mad, usv, n, values</p>
+
+<p>ttest is hash of Welch&#39;s ttest results: t, df, p</p>
+
+<p>ttest_mad is like ttest but based on median and median absolute deviateions.</p>
+
+<p>The p-values are derived using Welch&#39;s Ttest and the t-distribution function from Statistics::Distributions.</p>
+
+<p>MAD and medians are much more robust to outliers, which are significant in peptide ratios.</p>
+
+<h2 id="welchs_ttest">welchs_ttest</h2>
+
+<p>performs Welch&#39;s ttest, given mean1, mean2, usv1, usv2, n1 and n2 in a hash.</p>
+
+<p>e.g.</p>
+
+<pre><code><code>    $o-&gt;welchs_ttest( mean1 =&gt; 4, mean2 =&gt; 3,  # sample mean
+                      usv1 =&gt; 1,  usv2 =&gt; 1.1, # unbiased sample variance (returned as usv from $o-&gt;sd
+                      n1 =&gt; 4,    n2=&gt; 7       # number of observations
+                      </code></code></pre>
+
+<p>also performs Welch-Satterthwaite to calculate degrees of freedom (to look up in t-statistic table)</p>
+
+<p>Returns hashref containing t and df.</p>
+
+<h2 id="replicateMedianSubtractions">replicateMedianSubtractions</h2>
+
+<p>Logs data, if not already done, calculates median for each replicate, and subtracts median from each evidence in that replicate.</p>
+
+<h2 id="median">median</h2>
+
+<p>given a list of numbers, returns the median... assumes all items are numbers!</p>
+
+<h2 id="experimentMaximumPvalue">experimentMaximumPvalue</h2>
+
+<h2 id="fullProteinComparison">fullProteinComparison</h2>
+
+<p>Does a full comparison on a particular protein, i.e. compares all pairs of conditions, also does differential response analysis. Allows limitation of analysis to proteotypic peptides.</p>
+
+<h2 id="fullComparison">fullComparison</h2>
+
+<p>Does a full comparison for each protein. Returns hash of hashes.</p>
+
+<h2 id="direction">direction</h2>
+
+<p>given two values, returns whether the different between first and second is positive or negative</p>
+
+<p>returns &#39;+&#39; or &#39;-&#39;</p>
+
+<h2 id="directionsDisagree">directionsDisagree</h2>
+
+<p>given two directions, which could be &#39;+&#39;, &#39;-&#39; or &#39;&#39;, returns true if one is &#39;+&#39; and the other is &#39;-&#39;</p>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<p>jimi, <code><code>&lt;j at 0na.me&gt;</code></code></p>
+
+<h1 id="BUGS">BUGS</h1>
+
+<p>Please report any bugs or feature requests to <code><code>bug-bio-maxquant-evidence-statistics at rt.cpan.org</code></code>, or through the web interface at <a href="http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-MaxQuant-Evidence-Statistics">http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-MaxQuant-Evidence-Statistics</a>. I will be notified, and then you&#39;ll automatically be notified of progress on your bug as I make changes.</p>
+
+<h1 id="SUPPORT">SUPPORT</h1>
+
+<p>You can find documentation for this module with the perldoc command.</p>
+
+<pre><code><code>    perldoc Bio::MaxQuant::Evidence::Statistics</code></code></pre>
+
+<p>You can also look for information at:</p>
+
+<ul>
+
+<li><p>RT: CPAN&#39;s request tracker (report bugs here)</p>
+
+<p><a href="http://rt.cpan.org/NoAuth/Bugs.html?Dist=Bio-MaxQuant-Evidence-Statistics">http://rt.cpan.org/NoAuth/Bugs.html?Dist=Bio-MaxQuant-Evidence-Statistics</a></p>
+
+</li>
+<li><p>AnnoCPAN: Annotated CPAN documentation</p>
+
+<p><a href="http://annocpan.org/dist/Bio-MaxQuant-Evidence-Statistics">http://annocpan.org/dist/Bio-MaxQuant-Evidence-Statistics</a></p>
+
+</li>
+<li><p>CPAN Ratings</p>
+
+<p><a href="http://cpanratings.perl.org/d/Bio-MaxQuant-Evidence-Statistics">http://cpanratings.perl.org/d/Bio-MaxQuant-Evidence-Statistics</a></p>
+
+</li>
+<li><p>Search CPAN</p>
+
+<p><a href="http://search.cpan.org/dist/Bio-MaxQuant-Evidence-Statistics/">http://search.cpan.org/dist/Bio-MaxQuant-Evidence-Statistics/</a></p>
+
+</li>
+</ul>
+
+<h1 id="ACKNOWLEDGEMENTS">ACKNOWLEDGEMENTS</h1>
+
+<h1 id="LICENSE-AND-COPYRIGHT">LICENSE AND COPYRIGHT</h1>
+
+<p>Copyright 2014 jimi.</p>
+
+<p>This program is released under the following license: artistic2</p>
+
+
+</body>
+
+</html>
+
+

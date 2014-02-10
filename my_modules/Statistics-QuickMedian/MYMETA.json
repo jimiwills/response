@@ -1,5 +1,5 @@
 {
-   "abstract" : "The great new Statistics::QuickMedian!",
+   "abstract" : "Parition-based median estimator",
    "author" : [
       "Jimi Wills <jimi@webu.co.uk>"
    ],
@@ -37,5 +37,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.01"
+   "version" : "0.03"
 }

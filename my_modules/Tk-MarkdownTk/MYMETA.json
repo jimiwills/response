@@ -4,7 +4,7 @@
       "jimi <jimi@webu.co.uk>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "ExtUtils::MakeMaker version 6.74, CPAN::Meta::Converter version 2.120351",
+   "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "unknown"
    ],
@@ -32,10 +32,12 @@
       },
       "runtime" : {
          "requires" : {
+            "Tk" : "5",
+            "Tk::Markdown" : "0.05",
             "perl" : "5.006"
          }
       }
    },
    "release_status" : "stable",
-   "version" : "0.06"
+   "version" : "0.07"
 }
