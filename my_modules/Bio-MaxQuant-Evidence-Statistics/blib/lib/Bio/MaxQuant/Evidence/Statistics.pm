@@ -1,5 +1,8 @@
 package Bio::MaxQuant::Evidence::Statistics;
 
+use threads;
+use threads::shared;
+
 use 5.006;
 use strict;
 use warnings;
@@ -9,6 +12,7 @@ use Carp;
 use Storable;
 use Statistics::Distributions;
 use IO::Handle;
+
 
 =head1 NAME
 
@@ -94,6 +98,17 @@ sub new {
     };
     bless $o, $c;
     return $o;
+}
+
+=head2 clearCache
+
+Some stuff is cached.  This can lead to massive memory usage.  It's a good idea to 
+clear the cache every now and then. 
+
+=cut
+
+sub clearCache {
+    $_[0]->{cache} = {};
 }
 
 =head2 parseEssentials(%options)
@@ -603,7 +618,6 @@ sub filter {
     my $p = $o->new;
     %$p = %$o;
     $p->{data} = $result;
-    $o->{lastfiltered} = $p;
     return $p;
 }
 
@@ -644,11 +658,11 @@ returns an hashref with the following keys
 
 sub deviations {
     my ($o,%opts) = @_;
-    # cache
-    $o->{cache}->{deviations} = {} unless exists $o->{cache}->{deviations};
-    my $cachekey = join('::', map {"$_=$opts{$_}"} sort keys %opts);
+    # cache 
+    #$o->{cache}->{deviations} = {} unless exists $o->{cache}->{deviations};
+    #my $cachekey = join('::', map {"$_=$opts{$_}"} sort keys %opts);
    # print STDERR "$cachekey\n";
-    return $o->{cache}->{deviations}->{$cachekey} if exists $o->{cache}->{deviations}->{$cachekey};
+    #return $o->{cache}->{deviations}->{$cachekey} if exists $o->{cache}->{deviations}->{$cachekey};
     ##
     my $f = $o->filter(%opts);
     my @values = $f->extractColumnValues(
@@ -664,7 +678,7 @@ sub deviations {
     $d->{usv_mad} = $n ? $d->{sd_from_mad} ** 2 : '';
     $d->{median} = $n ? $o->median(@values) : '';
     # I should think about caching here!!!  DONE!
-    $o->{cache}->{deviations}->{$cachekey} = $d;
+    #$o->{cache}->{deviations}->{$cachekey} = $d;
     return $d;
 }
 
@@ -826,6 +840,7 @@ Logs data, if not already done, calculates median for each replicate, and subtra
 
 sub replicateMedianSubtractions {
     my ($o, %opts) = @_; # can set filter here
+    $o->info("replicateMedianSubtractions: calculating");
     $o->logRatios();
     foreach my $replicate($o->experiments()){
         my $median = $o->replicateMedian(%opts, experiment=>$replicate);
@@ -838,9 +853,11 @@ sub replicateMedianSubtractions {
             }
         }
     }
+    $o->info("replicateMedianSubtractions: done");
     # i guess we should do something better with generating this status:
     return 1;
 }
+
 
 =head2 median 
 
@@ -973,17 +990,70 @@ Does a full comparison for each protein.  Returns hash of hashes.
 =cut
 
 sub fullComparison {
-    my $o = shift;
+    my ($o, %opts) = @_;
+    $opts{threads} = 1 unless $opts{threads};
     $o->info("fullComparison: calculating");
-    my @leadingProteins = $o->getLeadingProteins();
-    my %results = ();
+
+    # threads here requires shared vars to work well...
+    # the list from which to pop jobs (unless we reference by counter)
+    # the counter to increment
+    # the results to key results in
+
+    my @leadingProteins :shared;
+    my %results :shared;
+    my $i :shared;
+
+    @leadingProteins = $o->getLeadingProteins();
+    %results = ();
+    $i = 0;
+    
     my $lpcount = @leadingProteins;
-    my $i = 0;
-    foreach my $lp(@leadingProteins){
-	$i ++;
-	$o->info("fullComparison: leading protein $i/$lpcount");
-        $results{$lp} = $o->fullProteinComparison(filter=>$lp);
+
+    foreach(1..$opts{threads}){
+        async {
+            my $tid = threads->tid;
+            $o->info("THREAD $tid started");
+            while(@leadingProteins){
+                $o->info("THREAD $tid: ".scalar(@leadingProteins)." in queue");
+                my $lp;
+                if(@leadingProteins){
+                    $o->info("THREAD $tid locking leadingProteins");
+                    lock(@leadingProteins);
+                    # check again now it's locked!
+                    if(@leadingProteins){
+                        $o->info("THREAD $tid locking i");
+                        lock($i);
+                        $lp = shift @leadingProteins;
+                        $i++;
+                    } # out of scope now, so should be unlocked.
+                } # out of scope now, so should be unlocked.
+                if($lp){
+                    $o->info("THREAD $tid: fullComparison: leading protein $i/$lpcount");
+                    my $r = $o->fullProteinComparison(filter=>$lp); 
+                    $o->clearCache();
+                    $o->info("THREAD $tid locking results");
+                    lock(%results);
+                    &{$opts{callback}}($lp,$r);
+
+                    #### THIS IS ERRORING! WE MAY NEED TO LOCK A VARIABLE WHILE APPENDING TO A FILE!
+                } # out of scope again to unlock...
+            }
+        };
     }
+
+    # wait for them all to run...
+    while(threads->list(threads::running)){
+        $o->info("threads are running");
+        sleep 1;
+    }
+
+    # once there are no threads running... join them...
+    my @joinable = threads->list(threads::joinable);
+    foreach(@joinable){
+        $o->info("joining thread ".$_->tid);
+        $_->join();
+    }
+
     $o->info("fullComparison: done");
     return \%results;
 }

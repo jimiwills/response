@@ -10,5 +10,6 @@ $o->parseEssentials(filename=>$file);
 $o->saveEssentials(filename=>$file.'.essentials');
 $o->logRatios();
 $o->saveEssentials(filename=>$file.'.essentials.logged');
-
+$o->replicateMedianSubtractions();
+$o->saveEssentials(filename=>$file.'.essentials.logged.medsub');
 
