@@ -1,0 +1,13 @@
+Protein	Comparison	p-value	p-value(mad)
+
+
+
+
+
+
+
+
+
+
+A0MZ66-8	MCF7.ET MCF7.wE	0.0062144	0.50000
+

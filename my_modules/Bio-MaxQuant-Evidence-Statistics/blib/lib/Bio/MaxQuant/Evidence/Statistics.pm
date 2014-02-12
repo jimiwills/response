@@ -1033,6 +1033,8 @@ sub fullComparison {
                     $o->clearCache();
                     $o->info("THREAD $tid locking results");
                     lock(%results);
+                    use Data::Dumper;
+                    print STDERR Dumper $r;
                     &{$opts{callback}}($lp,$r);
 
                     #### THIS IS ERRORING! WE MAY NEED TO LOCK A VARIABLE WHILE APPENDING TO A FILE!
