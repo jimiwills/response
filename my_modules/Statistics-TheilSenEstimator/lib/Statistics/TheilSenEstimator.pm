@@ -102,6 +102,7 @@ sub theilsen {
 	foreach my $i(0 .. $n-1){ 
         $y1 = $y->[$i];
         $x1 = $x->[$i];
+        next unless defined $y1 && $y1 =~ /\d/ && defined $x1 && $x1 =~ /\d/;
         push @C, $y1 - $m * $x1;
 	}
     # now we have @C, so what's the median?

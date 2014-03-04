@@ -1,5 +1,8 @@
 Revision history for Statistics-Reproducibility
 
+0.05    20140221/11:38
+        Removed line that overwrites data in run() !!!
+
 0.04    20140108/07:25
         Updated to reflect change of name of Statistics::TheilSenEstimator
 

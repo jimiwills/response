@@ -155,14 +155,17 @@ sub diagonalDistancesFromOriginN {
 	my $k1 = $k-1;
 	my $sk = sqrt($k);
 	my @D = ();
+	my $count = 0;
 	my $sum;
 	foreach my $i(0..$n-1){
 		$sum = 0;
 		foreach (0..$k1){
-			$sum += $cols[$_]->[$i] 	
-				if defined $cols[$_]->[$i] && $cols[$_]->[$i] ne '';
+			if(defined $cols[$_]->[$i] && $cols[$_]->[$i] ne ''){
+				$sum += $cols[$_]->[$i];
+				$count++;
+			}
 		}
-		push @D, $sum / $sk;
+		push @D, $count ? $sum / $sk : '';
 	}
 	return \@D;
 }
@@ -180,9 +183,14 @@ sub diagonalComponentsN {
 			unless @$Y == @$X;
 		return [map {
 			my ($y,$x) = ($Y->[$_], $X->[$_]);
+			if((! defined $x || $x eq '') && (! defined $y || $y eq '')){
+				$x = 'skip';
+			}
 			$y = 0 unless defined $y && $y ne '';
 			$x = 0 unless defined $x && $x ne '';
-			($y - $x)/sqrt(2)
+			$x eq 'skip' 
+				? '' 
+				: ($y - $x)/sqrt(2)
 		} (0..$#$Y)];
 }
 

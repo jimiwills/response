@@ -3,106 +3,81 @@
 use strict;
 use warnings;
 
-=pod
+use Bio::MaxQuant::ProteinGroups::Response;
 
-Order of business...
 
-Read in the experiment names (Ratio H/L <experimentname>) and 
-delineate cells, conditions and replicates.
+my $resp = Bio::MaxQuant::ProteinGroups::Response->new(
+	filepath=>'../../Dropbox/Work/Projects/repro-evstats/response '
+				. 'testdata rerun/good txt custom/proteinGroups.txt'
+);
 
-Set up the response analyses, i.e. pairwise comparisons between
-all conditions with each cell line.
+mkdir ('./test');
+mkdir ('./test/replicate_comparisons');
+mkdir ('./test/responses');
+mkdir ('./test/differential_responses');
 
-Set up differential response analyses, i.e. pairwise comparisons
-of responses between cell lines.
+$resp->replicate_comparison(output_directory=>'./test/replicate_comparisons');
+$resp->calculate_response_comparisons(output_directory=>'./test/responses');
+$resp->calculate_differential_response_comparisons(output_directory=>'./test/differential_responses');
 
-Assumed separator is "." - but should be configurable.
 
-So, A.x.1 means cell line A in condition x, replicate 1.
 
-So we might set up:
 
-A.x vs A.y for a response analysis, and call this A.x-y 
-(note, the minus sign would become illegal in names)
+__END__
 
-and
+OLD STUFF HERE...
 
-A.x-y vs B.x-y for a differential response analysis, and
-call this A-B.x-y.
-
-=cut
 
 use Data::Dumper;
+$Data::Dumper::Sortkeys = sub{
+	return [sort keys %{$_[0]}];
+};
 
-my $pg = Bio::MaxQuant::ProteinGroups->new(
-	filepath=>'../../Dropbox/Work/Projects/repro-evstats/response '
-				. 'testdata rerun/good txt custom/proteinGroups.txt');
-$pg->experiments;
-print Dumper $pg;
+my $Route = 3;
+my $storefile = 'post-rescomps.stored';
 
-package Bio::MaxQuant::ProteinGroups;
+if($Route == 1){
 
-use strict;
-use warnings;
+	my $pg = Bio::MaxQuant::ProteinGroups::Response->new(
+		filepath=>'../../Dropbox/Work/Projects/repro-evstats/response '
+					. 'testdata rerun/good txt custom/proteinGroups.txt');
+	#my $rc = $pg->replicate_comparison(output_directory=>'rc');
 
-use Carp;
+	my $pts = $pg->calculate_response_comparisons();
 
-use Statistics::Reproducibility;
-use Text::CSV;
-use IO::File;
-
-sub new {
-	my $p = shift;
-	my $c = ref($p) || $p;
-	my %defaults = (
-		filepath => 'proteinGroups.txt',
-		separator => '.',
-	);
-	my %opts = (%defaults, @_);
-
-	my $o = {%opts};
-	bless $o, $c;
-
-	my $io = IO::File->new($opts{filepath}, 'r') 
-		or die "Could not read $opts{filepath}: $!";
-	my $csv = Text::CSV->new({sep_char=>"\t"});
-	my $colref = $csv->getline($io);
-	$csv->column_names (@$colref);
-
-	$o->{csv} = $csv;
-	$o->{io} = $io;
-	$o->{header} = $colref;
-
-	return $o;
+	open(STORE,'>', $storefile) or die "Could not write $storefile: $!"; 
+	print STORE Dumper $pg;
+	close(STORE);
 }
+elsif($Route == 2){
+	print STDERR "Reading storefile: $storefile...\n";
+	open(STORE,'<', $storefile) or die "Could not read $storefile: $!";
+	my $restore = $/; undef $/;
+	my $toeval = <STORE>;
+	$/ = $restore;
+	close(STORE);
+	print STDERR "evaling storefile...\n";
+	my $VAR1;
+	eval($toeval);
+	my $pg = $VAR1;
+	print STDERR "Done.\n";
+	my $pts2 = $pg->calculate_differential_response_comparisons();
 
-sub experiments {
-	my $o = shift;
-	my @header = @{$o->{header}};
-	my %celllines = ();
-	my %conditions = ();
-	my %replicates = ();
-	my @expts = ();
-	foreach (@header){
-		next unless /^Experiment\s(\S+)$/;
-		my $expt = $1;
-		push @expts, $expt;
-		my $dot1 = index($expt, $o->{separator});
-		my $dot2 = index($expt, $o->{separator}, $dot1 + 1);
-		my $cell = substr($expt,0,$dot1);
-		my $cond = substr($expt,$dot1+1, $dot2-$dot1-1);
-		my $repl = substr($expt, $dot2+1);
-		return carp "bad experiment name format $_" unless 
-			(defined $cell && defined $cond && defined $repl);
-		$celllines{$cell} = 1;
-		$conditions{$cond} = 1;
-		$replicates{$repl} = 1;
-	}
-	$o->{expeiments} = \@expts;
-	$o->{celllines} = [keys %celllines];
-	$o->{conditions} = [keys %conditions];
-	$o->{replicates} = [keys %replicates];
 }
+elsif ($Route == 3){
 
+    my $resp = Bio::MaxQuant::ProteinGroups::Response->new(
+		filepath=>'../../Dropbox/Work/Projects/repro-evstats/response '
+					. 'testdata rerun/good txt custom/proteinGroups.txt'
+    );
 
+    mkdir ('./test');
+    mkdir ('./test/replicate_comparisons');
+    mkdir ('./test/responses');
+    mkdir ('./test/differential_responses');
 
+    $resp->replicate_comparison(output_directory=>'./test/replicate_comparisons');
+	$resp->calculate_response_comparisons(output_directory=>'./test/responses');
+	$resp->calculate_differential_response_comparisons(output_directory=>'./test/differential_responses');
+
+}

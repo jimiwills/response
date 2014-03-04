@@ -16,11 +16,11 @@ Statistics::Reproducibility - Reproducibility measurement between multiple repli
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 =head1 SYNOPSIS
@@ -159,11 +159,12 @@ It returns the last object. So you could do:
 
 sub run {
     my $r = shift;
-    $r->data([qw/1 2 3 4 5 6 7 8/],[qw/0 1 2 3 4 5 6 7/],[qw/2.1 3.2 4.3 5.4 6.5 7.6 8.7 9.8/]);
+#    $r->data([qw/1 2 3 4 5 6 7 8/],[qw/0 1 2 3 4 5 6 7/],[qw/2.1 3.2 4.3 5.4 6.5 7.6 8.7 9.8/]);
+    $r->regression();
     my $m = $r->subtractMedian();
     $m->middlemostColumn();
     my $d = $m->deDiagonalize();
-    $d -> regression();
+    $d->regression();
     my $e = $d->rotateToRegressionLine();
     $e->variances();
     return $e;
@@ -363,21 +364,26 @@ sub rotateToRegressionLine {
                 [$o->{m}->[$i], $o->{m}->[$ic]],
                 [$o->{c}->[$i], $o->{c}->[$ic]]
             );
-            if($o->{data}->[$ic]->[$j] < $o->{data}->[$i]->[$j]){
+            my $icv = $o->{data}->[$ic]->[$j] || 0;
+            my $iv = $o->{data}->[$i]->[$j] || 0;
+            if($icv < $iv){
                 $d *= -1;
             }
             $r->{data}->[$i]->[$j] = $d;
         }
         
+        my @coords = map {$o->{data}->[$_]->[$j]} (0..$o->{k}-1);
         my ($d,$x) = distanceToLineN(
-            [map {$o->{data}->[$_]->[$j]} (0..$o->{k}-1)], @MC
+            [@coords], @MC
         );
-        
+
         push @{$r->{d}}, $d; # distance to line
         
         my $ss = 0; # sum of squares
         foreach my $i(0..$o->{k}-1){
-            $ss += ($X->[$i] - $o->{data}->[$i]->[$j])**2
+            my $xi = $X->[$i] || 0;
+            my $di = $o->{data}->[$i]->[$j] || 0;
+            $ss += ($xi - $di)**2
         }
         
         $r->{data}->[$ic]->[$j] = sqrt($ss); # distance to center of line
@@ -421,14 +427,18 @@ sub variances {
     $o->{pes} = [];
     $o->{pse} = [];
     foreach my $j(0..$o->{n}-1){
-        my $Tee = $o->{d}->[$j] / $sdE;
-        my $Tss = $o->{data}->[$ic]->[$j] / $sdS;
-        my $Tes = $o->{d}->[$j] / $sdS;
-        my $Tse = $o->{data}->[$ic]->[$j] / $sdE;
-        push @{$o->{pee}}, Statistics::Distributions::tprob ($df,$Tee);
-        push @{$o->{pss}}, Statistics::Distributions::tprob ($df,$Tss);
-        push @{$o->{pes}}, Statistics::Distributions::tprob ($df,$Tes);
-        push @{$o->{pse}}, Statistics::Distributions::tprob ($df,$Tse);
+        push @{$o->{pee}}, $sdE ?
+            Statistics::Distributions::tprob ($df,$o->{d}->[$j] / $sdE)
+            : 1;
+        push @{$o->{pss}}, $sdS ?
+            Statistics::Distributions::tprob ($df,$o->{data}->[$ic]->[$j] / $sdS)
+            : 1;
+        push @{$o->{pes}}, $sdS ?
+            Statistics::Distributions::tprob ($df,$o->{d}->[$j] / $sdS)
+            : 1;
+        push @{$o->{pse}}, $sdE ?
+            Statistics::Distributions::tprob ($df,$o->{data}->[$ic]->[$j] / $sdE)
+            : 1;
     }
     return ($S,$E);
 }
