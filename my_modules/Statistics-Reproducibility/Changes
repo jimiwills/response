@@ -1,5 +1,8 @@
 Revision history for Statistics-Reproducibility
 
+0.06	20140305/09:35 GMT
+	Minor Fixes
+
 0.05    20140221/11:38
         Removed line that overwrites data in run() !!!
 

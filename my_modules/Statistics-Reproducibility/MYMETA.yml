@@ -23,4 +23,4 @@ requires:
   Statistics::QuickMedian: 0.03
   Statistics::TheilSenEstimator: 0.04
   perl: 5.006
-version: 0.05
+version: 0.06
