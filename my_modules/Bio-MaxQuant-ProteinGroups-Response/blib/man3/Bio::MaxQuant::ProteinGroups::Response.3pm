@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "Bio::MaxQuant::ProteinGroups::Response 3"
-.TH Bio::MaxQuant::ProteinGroups::Response 3 "2014-03-04" "perl v5.16.2" "User Contributed Perl Documentation"
+.TH Bio::MaxQuant::ProteinGroups::Response 3 "2014-03-09" "perl v5.16.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -133,7 +133,7 @@
 Bio::MaxQuant::ProteinGroups::Response \- Analyze MQ proteinGroups for differential responses
 .SH "VERSION"
 .IX Header "VERSION"
-Version 0.01
+Version 0.02
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 This module is tailored for MaxQuant data, but could be applicable elsewhere.
@@ -175,6 +175,12 @@ the default is hyphen (\-)
 replicate_indicator \- used in differential response comparisons
 to indicate which cell the individual replicates were compared
 (with the median of the other cell)
+.SS "resultsfile"
+.IX Subsection "resultsfile"
+returns a handle to the results file, ready for writing.
+.PP
+this is not callde until processing starts, but when it is
+it will clobber the old file.
 .SS "experiments"
 .IX Subsection "experiments"
 Returns the list of experiments in the file as a hash.
@@ -184,6 +190,59 @@ unless/until you delete \f(CW$o\fR\->{experiments}
 .PP
 Also populates cellines, conditions and replicates lists, which are
 accessible by their own accessors.
+.SS "quickNormalize"
+.IX Subsection "quickNormalize"
+\&\s-1TO\s0 \s-1BE\s0 \s-1REMOVED\s0
+.PP
+Does a quick normalization of \s-1ALL\s0 the input columns.  They are each normalized
+by their own median, and not directly to each other.
+.PP
+Two options are available:
+.PP
+.Vb 2
+\&        select => [list of indices]
+\&        exclude => [list of indices]
+.Ve
+.PP
+Select allows to choose a particular subset of rows on which to normalize, e.g. some
+proteins you know don't change.
+Exclude allows to choose a particular subset of rows to exclude from the
+normalization, e.g. contaminants.
+.PP
+sub quickNormalize {
+	my ($o,%opts) = \f(CW@_\fR;
+	my \f(CW$d\fR = \f(CW$o\fR\->data;
+	my \f(CW$n\fR = \f(CW$o\fR\->{n};
+	my \f(CW@I\fR = (0..$n\-1);
+	if($opts{exclude}){
+		my \f(CW%I\fR;
+		\f(CW@I\fR{@I} = \f(CW@I\fR;
+		delete \f(CW$I\fR{$_} foreach @{$opts{exclude}};
+		\f(CW@I\fR = sort {$a <=> \f(CW$b\fR} keys \f(CW%I\fR;
+	}
+	if($opts{select}){
+		\f(CW@I\fR = @{$opts{select}};
+	}
+	\f(CW$o\fR\->{quicknorm} = {
+		map {
+			my \f(CW$med\fR = median ((@{$d\->{$_}})[@I]);
+			($_ => [map {/\ed/ ? \f(CW$_\fR \- med : ''} @{$d\->{$_}}])
+		} 
+		keys %$d;
+	}
+}
+.PP
+\&\s-1TO\s0 \s-1BE\s0 \s-1REMOVED\s0
+.SS "blankRows"
+.IX Subsection "blankRows"
+Option: select (as for quick Normalize)
+.PP
+This allows blanking the data for a subset (e.g. contaminants) so that they do not
+contribute to the statistics.
+.SS "blankItems"
+.IX Subsection "blankItems"
+help function, accepts a listref and a list of indices to blank (set to '')
+returns the listref for your convenience.
 .SS "celllines"
 .IX Subsection "celllines"
 Returns the list of cell lines.  Ensures \fIexperiments()\fR is called.
@@ -242,31 +301,41 @@ Converts one datum into a logged ratio or an empty string, depending.
 calculates the differences between conditions in a cell type.
 outputs a bunch of files.  You can specify the diretory with 
 output_directory option.
+.SS "sigfigs"
+.IX Subsection "sigfigs"
+Helper function
+Tries FormatSigFigs($_[0],$SigFigs), but only if \f(CW$_\fR[0] actually looks like a number!
+\&\f(CW$SigFigs\fR is a global in this module and is set to 3.
 .SS "calculate_differential_response_comparisons"
 .IX Subsection "calculate_differential_response_comparisons"
 .SS "medians"
 .IX Subsection "medians"
 calculates the medians for all replicate sets and stores them in 
-\&\f(CW$0\fR\->{medians}
+\&\f(CW$o\fR\->{medians}
+.SS "put_resultsfile_hashtable"
+.IX Subsection "put_resultsfile_hashtable"
+a method called by \fImedians()\fR if resultsfile was defined.  Calls put_resultsfile with
+some medians and normalized data.
+.SS "dumpHashtable"
+.IX Subsection "dumpHashtable"
+helper function that dumps a HoL as a tab delimited table.
 .SS "median"
 .IX Subsection "median"
 helper function that does a simple median calculation
-.SS "run_reproducibility"
-.IX Subsection "run_reproducibility"
-Calls:
-.PP
-.Vb 5
-\&        my $results = Statistics::Reproducibility
-\&        \->new()
-\&        \->data($data)
-\&        \->run()
-\&        \->printableTable($depth);
-.Ve
-.PP
-for each comparison.
-.PP
-But first I need to calculate the comparisons... i.e.
-take logs and subtract!
+.SS "put_resultsfile"
+.IX Subsection "put_resultsfile"
+take a list of lists (ref) and outputs directly to \f(CW$o\fR\->{resultsfile}.
+This is as an alternative or addition to the output_file options
+avaiable for some methods, and is called by dump_results_table
+and others throughout processing.
+.SS "dump_results_table"
+.IX Subsection "dump_results_table"
+Dumps a results table to a file ($o\->{complete_results_file})
+for laster use.
+.SS "translate_results_table"
+.IX Subsection "translate_results_table"
+helper function that separates out and better labels the different results from 
+Statistics::Reproducbility
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 Jimi, \f(CW\*(C`<j at 0na.me>\*(C'\fR

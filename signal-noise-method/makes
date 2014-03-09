@@ -4,12 +4,13 @@ set -e
 
 cd ~/response/my_modules
 
-for FILE in $(ls)
+for FILE in $(ls -d $*)
 do
 	echo $FILE 
 	cd $FILE
 	perl Makefile.PL
 	make 
+	make test
 	sudo make install
 	cd ..
 done

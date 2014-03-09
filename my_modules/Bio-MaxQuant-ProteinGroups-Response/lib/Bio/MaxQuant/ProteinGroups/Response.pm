@@ -10,7 +10,10 @@ use Carp;
 use Statistics::Reproducibility;
 use Text::CSV;
 use IO::File;
+use File::Path qw(make_path);
+use Math::SigFigs;
 
+our $SigFigs = 3;
 
 =head1 NAME
 
@@ -18,11 +21,11 @@ Bio::MaxQuant::ProteinGroups::Response - Analyze MQ proteinGroups for differenti
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 =head1 SYNOPSIS
@@ -76,6 +79,7 @@ sub new {
 		separator => '.',
 		rseparator => '-',
 		replicate_indicator => '•',
+		resultsfile => '',
 	);
 	my %opts = (%defaults, @_);
 
@@ -92,6 +96,26 @@ sub new {
 	$o->{io} = $io;
 	$o->{header} = $colref;
 	return $o;
+}
+
+=head2 resultsfile
+
+returns a handle to the results file, ready for writing.
+
+this is not callde until processing starts, but when it is
+it will clobber the old file.
+
+=cut
+
+sub resultsfile {
+	my $o = shift;
+	return unless $o->{resultsfile};
+	return $o->{resultsfile_io} if exists $o->{resultsfile_io};
+
+	$o->{resultsfile_io} = IO::File->new($o->{resultsfile},'w')
+		or die "Could not write $o->{resultsfile}: $!";
+
+	return $o->{resultsfile_io};
 }
 
 =head2 experiments
@@ -139,6 +163,91 @@ sub experiments {
 	$o->{replicates} = [keys %replicates];
 	return %expts;
 }
+
+=head2 quickNormalize
+
+TO BE REMOVED
+
+Does a quick normalization of ALL the input columns.  They are each normalized
+by their own median, and not directly to each other.
+
+Two options are available: 
+
+	select => [list of indices]
+	exclude => [list of indices]
+
+Select allows to choose a particular subset of rows on which to normalize, e.g. some
+proteins you know don't change.
+Exclude allows to choose a particular subset of rows to exclude from the
+normalization, e.g. contaminants.
+
+
+sub quickNormalize {
+	my ($o,%opts) = @_;
+	my $d = $o->data;
+	my $n = $o->{n};
+	my @I = (0..$n-1);
+	if($opts{exclude}){
+		my %I;
+		@I{@I} = @I;
+		delete $I{$_} foreach @{$opts{exclude}};
+		@I = sort {$a <=> $b} keys %I;
+	}
+	if($opts{select}){
+		@I = @{$opts{select}};
+	}
+	$o->{quicknorm} = {
+		map {
+			my $med = median ((@{$d->{$_}})[@I]);
+			($_ => [map {/\d/ ? $_ - med : ''} @{$d->{$_}}])
+		} 
+		keys %$d;
+	}
+}
+
+TO BE REMOVED
+
+=cut
+
+
+
+=head2 blankRows
+
+Option: select (as for quick Normalize)
+
+This allows blanking the data for a subset (e.g. contaminants) so that they do not
+contribute to the statistics.
+
+
+
+=cut
+
+sub blankRows {
+	my ($o,%opts) = @_;
+	my $d = $o->data;
+	my $n = $o->{n};
+	my @I = @{$opts{select}};
+	foreach my $k(keys %$d){
+		blankItems($d->{$k}, @I);
+	}
+}
+
+=head2 blankItems
+
+help function, accepts a listref and a list of indices to blank (set to '')
+returns the listref for your convenience.
+
+
+=cut
+
+sub blankItems {
+	my ($listref,@I) = @_;
+	foreach my $i(@I){
+		$listref->[$i] = '';
+	}
+	return $listref;
+}
+
 
 =head2 celllines
 
@@ -241,9 +350,13 @@ Caches!
 sub replicate_comparison {
 	my $o = shift;
 	my %opts = (
-		output_directory => '.',
+		output_directory => '',
 		@_
-	); # output_directory should be defined
+	); 
+	if($opts{output_directory}){
+		make_path($opts{output_directory}) unless -d $opts{output_directory};
+	}
+
 	if(exists $o->{replicate_comparison}){
 		return $o->{replicate_comparison};
 	}
@@ -262,21 +375,25 @@ sub replicate_comparison {
 	        ->printableTable($depth);
 	    $o->{replicate_comparison}->{$cr} = $results;
 
-	    my $fo = new IO::File($opts{output_directory}.'/'.$cr.'.txt', 'w') 
-	    	or die "Could not write $opts{output_directory}/$cr.txt: $!";
-	    print STDERR "Writing $opts{output_directory}/$cr.txt...\n";
-	    print $fo join("\t", @{$results->[0]})."\n";
-	    my $table_length = 0;
-	    foreach (@$results){ $table_length = @$_ if @$_ > $table_length; }
-	    foreach my $i(0..$table_length-1){
-	    	print $fo join("\t", map {
-	    			defined $results->[$_]->[$i]
-	    			? $results->[$_]->[$i]
-	    			: ''
-	    		} (1..$#$results)
-	    	)."\n";
-	    }
-	    close($fo);
+	    $o->dump_results_table('replicates', $cr, $results, \@cols);
+
+	    if($opts{output_directory}){
+		    my $fo = new IO::File($opts{output_directory}.'/'.$cr.'.txt', 'w') 
+		    	or die "Could not write $opts{output_directory}/$cr.txt: $!";
+		    print STDERR "Writing $opts{output_directory}/$cr.txt...\n";
+		    print $fo join("\t", @{$results->[0]})."\n";
+		    my $table_length = 0;
+		    foreach (@$results){ $table_length = @$_ if @$_ > $table_length; }
+		    foreach my $i(0..$table_length-1){
+		    	print $fo join("\t", map {
+		    			defined $results->[$_]->[$i]
+		    			? sigfigs($results->[$_]->[$i])
+		    			: ''
+		    		} (1..$#$results)
+		    	)."\n";
+		    }
+		    close($fo);
+		}
 	}
 	return $o->{replicate_comparison};
 }
@@ -422,8 +539,12 @@ output_directory option.
 sub calculate_response_comparisons {
 	my $o = shift;
 	my %opts = (
-		output_directory => 'rc',
+		output_directory => '',
 		@_);
+
+	if($opts{output_directory}){
+		make_path($opts{output_directory}) unless -d $opts{output_directory};
+	}
 	my %rcs = $o->response_comparisons;
 	my %drcs = $o->differential_response_comparisons;
 	my @rcs = sort keys %rcs;
@@ -511,27 +632,52 @@ sub calculate_response_comparisons {
 	        ->printableTable($depth);
 
 	    #$o->{replicate_comparison}->{$cf} = $results;
+	    $o->dump_results_table('responses', $cf, $results, \@column_names);
 
-		my $fo = IO::File->new("$opts{output_directory}/$cf.txt",'w') 
-			or die "Could not write $opts{output_directory}/$cf.txt: $!";
-		print STDERR "Writing $opts{output_directory}/$cf.txt...\n";
-	    print $fo join("\t", @{$results->[0]})."\n";
-	    my $table_length = 0;
-	    foreach (@$results){ $table_length = @$_ if @$_ > $table_length; }
-	    foreach my $i(0..$table_length-1){
-	    	print $fo join("\t", map {
-	    			defined $results->[$_]->[$i]
-	    			? $results->[$_]->[$i]
-	    			: ''
-	    		} (1..$#$results)
-	    	)."\n";
-	    }
-	    close($fo);
-
+	    if($opts{output_directory}){
+			my $fo = IO::File->new("$opts{output_directory}/$cf.txt",'w') 
+				or die "Could not write $opts{output_directory}/$cf.txt: $!";
+			print STDERR "Writing $opts{output_directory}/$cf.txt...\n";
+		    print $fo join("\t", @{$results->[0]})."\n";
+		    my $table_length = 0;
+		    foreach (@$results){ $table_length = @$_ if @$_ > $table_length; }
+		    foreach my $i(0..$table_length-1){
+		    	print $fo join("\t", map {
+		    			defined $results->[$_]->[$i]
+		    			? sigfigs($results->[$_]->[$i])
+		    			: ''
+		    		} (1..$#$results)
+		    	)."\n";
+		    }
+		    close($fo);
+		}
 	}
 	$o->{response_comparison_results} = \%comparisons;
 
+}
 
+
+=head2 sigfigs
+
+Helper function
+Tries FormatSigFigs($_[0],$SigFigs), but only if $_[0] actually looks like a number!
+$SigFigs is a global in this module and is set to 3.
+
+=cut
+
+sub sigfigs {
+	my $x = shift;
+	if($x =~ /^[-\.\d]+$/){
+		if($x<1000){
+			return FormatSigFigs($x,$SigFigs);
+		}
+		else {
+			return int($x);
+		}
+	}
+	else {
+		return $x;
+	}
 }
 
 =head2 calculate_differential_response_comparisons
@@ -543,9 +689,12 @@ sub calculate_response_comparisons {
 sub calculate_differential_response_comparisons {
 	my $o = shift;
 	my %opts = (
-		output_directory => 'rc',
+		output_directory => '',
 		@_);
 
+	if($opts{output_directory}){
+		make_path($opts{output_directory}) unless -d $opts{output_directory};
+	}
 	my %rcs = $o->response_comparisons;
 	my %drcs = $o->differential_response_comparisons;
 	my %rcms = %{$o->{response_comparison_medians}};
@@ -620,29 +769,32 @@ sub calculate_differential_response_comparisons {
 	        ->printableTable($depth);
 
 	    #$o->{replicate_comparison}->{$cf} = $results;
+	    $o->dump_results_table('differential_responses', $cf, $results, \@keys);
 
-		my $fo = IO::File->new("$opts{output_directory}/$cf.txt",'w') 
-			or die "Could not write $opts{output_directory}/$cf.txt: $!";
-		print STDERR "Writing $opts{output_directory}/$cf.txt...\n";
-	    print $fo join("\t", @{$results->[0]})."\n";
-	    my $table_length = 0;
-	    foreach (@$results){ $table_length = @$_ if @$_ > $table_length; }
-	    foreach my $i(0..$table_length-1){
-	    	print $fo join("\t", map {
-	    			defined $results->[$_]->[$i]
-	    			? $results->[$_]->[$i]
-	    			: ''
-	    		} (1..$#$results)
-	    	)."\n";
-	    }
-	    close($fo);
+	    if($opts{output_directory}){
+			my $fo = IO::File->new("$opts{output_directory}/$cf.txt",'w') 
+				or die "Could not write $opts{output_directory}/$cf.txt: $!";
+			print STDERR "Writing $opts{output_directory}/$cf.txt...\n";
+		    print $fo join("\t", @{$results->[0]})."\n";
+		    my $table_length = 0;
+		    foreach (@$results){ $table_length = @$_ if @$_ > $table_length; }
+		    foreach my $i(0..$table_length-1){
+		    	print $fo join("\t", map {
+		    			defined $results->[$_]->[$i]
+		    			? sigfigs($results->[$_]->[$i])
+		    			: ''
+		    		} (1..$#$results)
+		    	)."\n";
+		    }
+		    close($fo);
+		}
 	}
 }
 
 =head2 medians
 
 calculates the medians for all replicate sets and stores them in 
-$0->{medians}
+$o->{medians}
 
 =cut
 
@@ -650,14 +802,22 @@ sub medians {
 	# this function has been manually verified
 
 	my $o = shift;
+
 	return %{$o->{medians}} if exists $o->{medians};
+	my %opts = (exclude=>[],output_directory=>'',@_);
+	if($opts{output_directory}){
+		make_path($opts{output_directory}) unless -d $opts{output_directory};
+	}
+	# exclude => [indices]
+	my @I = @{$opts{exclude}}; 
+
 	my $data = $o->data;
 	my %cr = $o->condition_replicates;
 	my %medians = ();
 
 	my @keys =  sort keys %$data;
 	my $k = scalar @keys;
-	my @mydata = map {$data->{$_}} @keys;
+	my @mydata = map { blankItems([@{$data->{$_}}],@I)} @keys;
 
 # here we have to do subtract medians...
 
@@ -679,18 +839,75 @@ sub medians {
 	foreach my $i(0..$o->{n}-1){
 		foreach my $cond(keys %cr){
 			my @repkeys = @{$cr{$cond}};
-			$medians{$cond}->[$i] = median ( 
-				map {
-					defined $normalized{$_}->[$i] && $normalized{$_}->[$i] ne '' 
-					? $normalized{$_}->[$i] 
-					: ()
-				} @repkeys 
-			);
+			$medians{$cond}->[$i] = median ( map {$data->{$_}->[$i]} @repkeys );
 		}
 	}
 	$o->{medians} = \%medians;
+
+	if($opts{output_directory}){
+		print "Outputting to $opts{output_directory}...\n";
+		dumpHashtable($opts{output_directory}.'/normalized.txt', $o->{normalized});
+		dumpHashtable($opts{output_directory}.'/medians.txt', $o->{medians});
+		print "Done\n";
+	}
+	if($o->resultsfile){
+		print "Outputting to $o->{resultsfile}...\n";
+		$o->put_resultsfile_hashtable('normalized','normalized',$o->{normalized});
+		$o->put_resultsfile_hashtable('normalized','medians',$o->{medians});
+		print "Done\n";
+	}
+
 	return %medians;
 }
+
+=head2 put_resultsfile_hashtable
+
+a method called by medians() if resultsfile was defined.  Calls put_resultsfile with
+some medians and normalized data.
+
+=cut 
+
+sub put_resultsfile_hashtable {
+	my ($o,$section,$derivation,$ht) = @_;
+	# HoL
+ 	$o->put_resultsfile(
+ 		[
+ 			map {
+ 				my @en = $o->parse_experiment_name($_);
+ 				my $en =  $en[1] 
+ 					? join($o->{separator}, @en[0..1])
+ 					: $_;
+ 				[	
+					"n/s:$section/n:$en/d:$derivation/k:$_/t:$derivation/",	
+					@{$ht->{$_}}	
+				]
+ 			} sort keys %$ht
+ 		]
+ 	);
+}
+
+
+=head2 dumpHashtable
+
+helper function that dumps a HoL as a tab delimited table.
+
+=cut
+
+sub dumpHashtable {
+	my ($fn,$hol) = @_;
+	my $io = IO::File->new($fn, 'w') or die "Could not write $fn: $!";
+	my @h = sort keys %$hol;
+	my $L = 0;
+	foreach (@h){
+		my $l = scalar @{$hol->{$_}};
+		$L = $l if $l > $L;
+	} 
+	print $io join("\t", @h)."\n";
+	foreach my $i (0..$L-1){
+		print $io join("\t", map {sigfigs($hol->{$_}->[$i])} @h)."\n";
+	}
+}
+
 
 =head2 median
 
@@ -699,7 +916,7 @@ helper function that does a simple median calculation
 =cut
 
 sub median {
-	my @x = sort {$a <=> $b} @_;
+	my @x = sort {$a <=> $b} map { /\d/ ? $_ : () } @_; # strips non-numbers (ish)
 	return '' if scalar(@x) < 2; # minumum is 2!
 	if(@x % 2){ #odd
 		return $x[scalar(@x) / 2]; # 0 1 2 3 4   @/2
@@ -710,36 +927,119 @@ sub median {
 	}
 }
 
-=head2 run_reproducibility
 
-Calls:
+=head2 put_resultsfile
 
-	my $results = Statistics::Reproducibility
-        ->new()
-        ->data($data)
-        ->run()
-        ->printableTable($depth);
-
-for each comparison.
-
-But first I need to calculate the comparisons... i.e.
-take logs and subtract!
+take a list of lists (ref) and outputs directly to $o->{resultsfile}.
+This is as an alternative or addition to the output_file options
+avaiable for some methods, and is called by dump_results_table
+and others throughout processing.
 
 =cut
 
-sub run_reproducibility {
-	my $o = shift;
-	my $data = $o->data;
-	my %response_comparisons = $o->response_comparisons;
-	my %differential_response_comparisons = $o->differential_response_comparisons;
-	foreach my $comp(sort keys %response_comparisons){
-		#?????
+sub put_resultsfile {
+	my ($o,$table) = @_;
+	my $io = $o->resultsfile;
+	if($io){
+		print $io map {join("\t", @$_)."\n"} @$table;
 	}
 }
 
+=head2 dump_results_table 
 
+Dumps a results table to a file ($o->{complete_results_file})
+for laster use.
 
+=cut
 
+sub dump_results_table {
+	my ($o,$section,$name,$data,$keys) = @_;
+	my @results = translate_results_table($section,$name,$data,$keys);
+	$o->put_resultsfile(\@results);
+}
+
+=head2 translate_results_table 
+
+helper function that separates out and better labels the different results from 
+Statistics::Reproducbility
+
+=cut
+
+sub translate_results_table {
+	my ($section,$name,$table,$keys) = @_;
+	# headers we get are:
+	# Column x (x is any number)
+	# Regression, M, C (a list for columns)
+	# Statistic, Value (a list for set of columns)
+	# DerivedFrom (how the columns on the left were derived from those on the right)
+	my @header = @{$table->[0]};
+	my $DerivedFrom = 'source';
+	my $compareColumn = 1;
+	my $flag = '';
+	my %compareFinder = ();
+	my $i = @header;
+	my @results = ();
+	while($i>0){
+		my $index = $i;
+		my $row = $table->[$index];
+		$i--;
+		my $h = $header[$i];
+		if($h =~ /^Column\s(\d+)$/){
+			my $c = $1;
+			my $j = $c - 1;
+			my $newname = "n/s:$section/n:$name/d:$DerivedFrom/k:"
+							.$keys->[$j]."/t:data/";
+			$header[$i] = $newname;
+			push @results, [$newname, map {sigfigs($_)} @$row];
+			$compareFinder{$c} = $#results;
+		}
+		elsif($h eq 'DerivedFrom'){
+			$DerivedFrom = $table->[$i+1]->[0];
+			$flag = $DerivedFrom eq 'rotateToRegressionLine'
+				? '*' : '';
+		}
+		elsif($h =~ /Regression/){
+			my $M = $table->[$index+1];
+			my $C = $table->[$index+2];
+			foreach my $k(0..$#$row){
+				my ($h,$m,$c) = map {$_->[$k]} ($row,$M,$C);
+				if($h =~ /^Column\s(\d+)$/){
+					my $j = $1 - 1;
+					my $newname = "1/s:$section/n:$name/d:$DerivedFrom/k:".$keys->[$j];
+
+					push @results, ["$newname/t:M/", sigfigs($m)];
+					push @results, ["$newname/t:C/", sigfigs($c)];
+				}
+			}
+		}
+		elsif($h =~ /Statistic/){
+			my $V = $table->[$index+1];
+			foreach my $k(0..$#$row){
+				my ($h,$v) = map {$_->[$k]} ($row,$V);
+				my $newname = "1/s:$section/n:$name/d:$DerivedFrom/k:$name/t:$h/";
+				if($h eq 'CompareColumn'){
+					my @cc = @{$results[$compareFinder{$v}]};
+					$v = shift @cc;
+					push @results, [
+						"n/s:$section/n:$name/d:$DerivedFrom/k:$name/t:spread/$flag",
+						@cc
+					];
+				}
+				push @results, [$newname, sigfigs($v)];
+			}
+		}
+		elsif($h =~ /^M$|^C$|^Value$/){
+			# ignore, because we've already collected it in Statistic or Regression.
+		}
+		else {
+			my $thisflag = $h eq 'SpreadOverErrorPvalue' ? $flag : '';
+			my $newname = "n/s:$section/n:$name/d:$DerivedFrom/k:"
+							."$name/t:$h/$thisflag";
+			push @results, [$newname, map {sigfigs($_)} @$row];
+		}
+	}
+	return @results;
+}
 
 
 

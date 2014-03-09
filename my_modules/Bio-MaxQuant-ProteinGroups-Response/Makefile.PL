@@ -20,6 +20,7 @@ WriteMakefile(
     PREREQ_PM => {
         #'ABC'              => 1.6,
         #'Foo::Bar::Module' => 5.0401,
+        'Statistics::Reproducibility' => 0.06,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Bio-MaxQuant-ProteinGroups-Response-*' },
