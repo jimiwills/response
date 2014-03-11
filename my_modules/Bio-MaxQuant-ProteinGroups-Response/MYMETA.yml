@@ -20,4 +20,4 @@ no_index:
 requires:
   Statistics::Reproducibility: 0.06
   perl: 5.006
-version: 0.02
+version: 0.03
