@@ -95,6 +95,7 @@ sub new {
 	$o->{csv} = $csv;
 	$o->{io} = $io;
 	$o->{header} = $colref;
+	$o->{median_exclude} = [];
 	return $o;
 }
 
@@ -804,7 +805,7 @@ sub medians {
 	my $o = shift;
 
 	return %{$o->{medians}} if exists $o->{medians};
-	my %opts = (exclude=>[],output_directory=>'',@_);
+	my %opts = (exclude=>$o->{median_exclude},output_directory=>'',@_);
 	if($opts{output_directory}){
 		make_path($opts{output_directory}) unless -d $opts{output_directory};
 	}
@@ -839,7 +840,7 @@ sub medians {
 	foreach my $i(0..$o->{n}-1){
 		foreach my $cond(keys %cr){
 			my @repkeys = @{$cr{$cond}};
-			$medians{$cond}->[$i] = median ( map {$data->{$_}->[$i]} @repkeys );
+			$medians{$cond}->[$i] = median ( map {$normalized{$_}->[$i]} @repkeys );
 		}
 	}
 	$o->{medians} = \%medians;
@@ -879,7 +880,7 @@ sub put_resultsfile_hashtable {
  					: $_;
  				[	
 					"n/s:$section/n:$en/d:$derivation/k:$_/t:$derivation/",	
-					@{$ht->{$_}}	
+					map {sigfigs($_)} @{$ht->{$_}}	
 				]
  			} sort keys %$ht
  		]
