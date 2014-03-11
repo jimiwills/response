@@ -35,6 +35,35 @@ $app::filebuttons_row = 0;
 
 $app::H = $app::W = 0;
 
+%app::sortables = (
+	'Filter' => 0,
+	'Cells' => 1,
+	'Conditions' => 2,
+	'Condition Responses' => 3,
+	'Differential Responses' => 4,
+	'Data Type' => 10,
+	'Processing Stage' => 11,
+	'Annotations' => 20,
+
+	'normalized' => 31,
+	'medians' => 32,
+	'spread' => 33,
+	'ErrorPvalue' => 34,
+	'SpreadPvalue' => 35,
+	'SpreadOverErrorPvalue' => 36,
+	'ErrorOverSpreadPvalue' => 37,
+
+	'source' => 41,
+	'subtractMedian' => 42,
+	'deDiagonalize' => 43,
+	'rotateToRegressionLine' => 44,
+);
+
+sub App::Sortable {
+	return $app::sortables{$_[0]} if exists $app::sortables{$_[0]};
+	return 100;
+}
+
 $app::tixgrid_format = {
 	x_margin => ['formatGrid'],
 	y_margin => ['formatGrid'],
@@ -74,6 +103,12 @@ sub App::BrowseCmd {
 	($app::x,$app::y) = @_;
 	return unless $app::x < $app::W && $app::y < $app::H;
 	$app::gridmenu->post($app::tixgrid->pointerx,$app::tixgrid->pointery);
+}
+
+sub App::FixPanel {
+	my $p = shift;
+	my $c = $p->{check};
+	$c->configure(-indicatoron=>0, -selectcolor=>$c->cget('-background'));
 }
 
 sub Tk::GridMenu {
@@ -169,17 +204,23 @@ sub Tk::RefreshColumnFilters {
 #	}
 	App::CollectSelectionOptions();
 
-	my $ff = $f->Panel(-text=>'Filter')->grid(-stick=>'we');
+	my $sff = $f->Panel(-text=>'Statistics')->grid(-sticky=>'we');
+	App::FixPanel($sff);
+	$sff->Button(-text=>'Show Statistics',-command=>\&App::Stats)->pack;
+
+	$app::selection_controls{sffpanel} = $sff;
+
+	my $ff = $f->Panel(-text=>'Filter')->grid(-sticky=>'we');
+	App::FixPanel($ff);
 	$ff->Label(-text=>"Use the checkboxes below to modify\nthe filter, or do it manually:")->pack;
 	$ff->Entry(-textvariable=>\$app::filter)->pack(-expand=>1,-fill=>'x');
 	my $fff = $ff->Frame()->pack(-expand=>1,-fill=>'x');
 	$fff->Checkbutton(-text=>'show replicates',-variable=>\$app::show_replicates,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
-	$fff->Checkbutton(-text=>'show stats',-variable=>\$app::show_stats,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
 	$ff->Button(-text=>'Apply Filter',-command=>\&App::ApplyFilter)->pack(-expand=>1,-fill=>'x');
 
 	$app::selection_controls{ffpanel} = $ff;
 
-	foreach my $title( sort keys %app::selectionFlags){
+	foreach my $title( sort {App::Sortable($a) <=> App::Sortable($b)} keys %app::selectionFlags){
 
 		$app::selection_controls{$title} = $f->SelectColumns($title);
 		$app::selection_controls{$title}->grid(-sticky=>'we');
@@ -193,9 +234,64 @@ sub Tk::RefreshColumnFilters {
 
 }
 
+sub App::Stats {
+	App::EmptyGrid();
+
+	my $nextrow = 3;
+	my $nextcol = 1;
+	my %indices = ();
+	my %cw = ();
+
+	foreach my $key(sort keys %app::columnIndex){
+		next unless $key =~ /^1/;
+		$key =~ m!/s\:([^/]+)/!; my $s = $1;
+		$key =~ m!/d\:([^/]+)/!; my $d = $1;
+		$key =~ m!/k\:([^/]+)/!; my $k = $1;
+		$key =~ m!/t\:([^/]+)/!; my $t = $1;
+
+		my $colname = "/$s/$d/$k/";
+		my $rowname = "/$t/";
+
+		if(! exists $indices{$colname}){
+			$indices{$colname} = $nextcol++ ;
+			my @cn = ($s,$d,$k);
+			$cw{$colname} = 0;
+			foreach my $y(0..2){
+				$app::tixgrid->set($indices{$colname},$y,-text=>$cn[$y],
+					-style=>$app::topmarginstyle);
+				my $l = length $cn[$y];
+				$cw{$colname} = $l if $l > $cw{$colname};
+			}
+		}
+ 
+		if(! exists $indices{$rowname}){
+			$indices{$rowname} = $nextrow++ ;
+			$app::tixgrid->set(0,$indices{$rowname},-text=>$t,
+					-style=>$app::leftmarginstyle);
+			my $l = length $t;
+			$cw{$colname} = $l if $l > $cw{$colname};
+		}
+
+		my $value = $app::columnIndex{$key}->[0];
+
+		$app::tixgrid->set($indices{$colname},$indices{$rowname},-text=>$value,
+				-style=>$app::mainstyle);
+		my $l = length $value;
+		$cw{$colname} = $l if $l > $cw{$colname};
+	}
+	$app::W = $nextcol;
+	$app::H = $nextrow;
+
+	foreach my $colname(keys %indices){
+		$app::tixgrid->sizeColumn($indices{$colname},-size=> $cw{$colname} > 20 ? 100 : 'auto');
+	}
+
+}
+
 sub Tk::PGSelect {
 	my $f = shift;
-	my $mw = $f->Panel(-text=>'Protein Groups');
+	my $mw = $f->Panel(-text=>'Annotations');
+	App::FixPanel($mw);
 	foreach(@app::proteinGroupsHead){
 		$mw->Checkbutton(-text=>$_,-variable=>\$app::selectionFlags{PG}->{$_},
 			-command=>\&App::GenerateColumnFilter)->grid(-sticky=>'w')
@@ -206,31 +302,26 @@ sub Tk::PGSelect {
 sub App::ParseFilter {
 	my @parts = split /\s/, $app::filter;
 	my $reps = 0;
-	my $stats = 0;
 	my %pattern = ();
 	foreach my $part(@parts){
 		if($part eq 'replicates' || $part eq 'reps'){
 			$reps = 1;
 		}
-		if($part eq 'stats'){
-			$stats = 1;
-		}
 		my ($key,$values) = split /\:/, $part;
 		$pattern{$key} = $values;
 	}
-	my $n1 = $stats ? '1' : 'n';
 	my $nk = $reps ? 'n' : 'k';
 	
 	my ($cells,$conds,$procs,$data,$pg) = map {$pattern{$_}} qw/cells conds procs data pg/;
 
-	$data .= '|data|normalized|medians';
-	$data = '.*' if $n1 eq '1';
+	$procs .= '|normalized|medians';
+	$data .= '|data';
 
 	my $qr = $nk eq 'n'
-		? qr!$n1/s\:[^/]+/n\:(?:$cells)\.(?:$conds)/d\:(?:$procs)/k\:[^/]+/t\:(?:$data)/!
-		: qr!$n1/s\:[^/]+/n\:[^/]+/d\:(?:$procs)/k\:(?:$cells)\.(?:$conds)/t\:(?:$data)/!;
+		? qr!n/s\:[^/]+/n\:(?:$cells)\.(?:$conds)/d\:(?:$procs)/k\:[^/]+/t\:(?:$data)/!
+		: qr!n/s\:[^/]+/n\:[^/]+/d\:(?:$procs)/k\:(?:$cells)\.(?:$conds)/t\:(?:$data)/!;
 
-	my $qr2 = $n1 eq '1' ? qr!-----! : qr!$pg!;
+	my $qr2 = qr!$pg!;
 
 	return ($qr,$qr2);
 }
@@ -249,6 +340,7 @@ sub App::ApplyFilter {
 	App::EmptyGrid();
 	my $x = 0;
 	$app::leftMargin = 0;
+	my $ymax = 0;
 
 	foreach my $key(@app::proteinGroupsHead){
 		next unless $key =~ /$P/;
@@ -262,6 +354,7 @@ sub App::ApplyFilter {
 			$maxw = $l if $l > $maxw;
 			$y ++;
 		}
+		$ymax = $y if $y > $ymax;
 		$app::leftMargin ++;
 
 		$app::tixgrid->sizeColumn($x,-size=> $maxw > 20 ? 100 : 'auto');
@@ -269,7 +362,6 @@ sub App::ApplyFilter {
 		$x++;
 	}
 	$app::tixgrid->configure(-leftmargin=>$app::leftMargin);
-	my $ymax = 0;
 	foreach my $key(sort keys %app::columnIndex){
 		next unless $key =~ /$F/;
 		$key =~ m!/s\:([^/]+)/!; my $s = $1;
@@ -326,7 +418,7 @@ sub App::ReadPGFile {
 		foreach (keys %$hr){
 			push @{$app::proteinGroups{$_}}, $hr->{$_};
 		}
-		if($hr->{Contaminant}){
+		if($hr->{Contaminant} || $hr->{Reverse}){
 			push @{$app::resp->{median_exclude}}, $i;
 		}
 		$app::progress = int (100*tell($io)/$size);
@@ -391,15 +483,15 @@ sub App::CollectSelectionOptions {
 		Conditions => \%conds,
 		'Differential Responses' => \%cellcomps,
 		'Condition Responses' => \%condcomps,
-		data => \%types,
-		processing => \%derivations, 
+		'Data Type' => \%types,
+		'Processing Stage' => \%derivations, 
 	);
 }
 
 sub App::GenerateColumnFilter {
 	my (@cells,@conds,@resps,@diffs,@types,@procs,@pg);
 	my %map = ('Cells'=>\@cells, 'Conditions'=>\@conds, 'Differential Responses'=>\@diffs, 
-				'Condition Responses'=>\@resps,data=>\@types,processing=>\@procs,
+				'Condition Responses'=>\@resps,'Data Type'=>\@types, 'Processing Stage'=>\@procs,
 				PG=>\@pg);
 	foreach my $k(keys %map){
 		@{$map{$k}} = map {$app::selectionFlags{$k}->{$_} ? $_ : ()}
@@ -414,10 +506,9 @@ sub App::GenerateColumnFilter {
 	my $procs = scalar(@procs) ? join('|', @procs) : '---';
 	my $pg = scalar(@pg) ? join('|', @pg) : '---';
 
-	my $showstats = $app::show_stats ? 'stats ' : '';
 	my $showreps = $app::show_replicates ? 'reps ' : '';
 
-	$app::filter = $showstats . $showreps
+	$app::filter = $showreps
 		. "cells:$cells conds:$conds data:$types procs:$procs pg:$pg";
 
 }
@@ -428,8 +519,10 @@ sub Tk::SelectColumns {
 	my $f = shift;
 	my $title = shift;
 	my $mw = $f->Panel(-text=>$title);
-	foreach (sort keys %{$app::selectionFlags{$title}}){
-		next if $title eq 'data' && /^data$|^medians$|^normalized$/;
+	App::FixPanel($mw);
+	foreach (sort {App::Sortable($a) <=> App::Sortable($b)} keys %{$app::selectionFlags{$title}}){
+		next if $title eq 'Data Type' && /^data$/;
+		next if $title eq 'Processing Stage' && /^medians$|^normalized$/;
 		$mw->Checkbutton(-text=>$_,
 			-variable=>\$app::selectionFlags{$title}->{$_},
 			-command=>\&App::GenerateColumnFilter)
@@ -487,19 +580,23 @@ sub Tk::FileControls {
 	my $mw;
 	if($set == 1){
 		$mw = $f->Panel(-text=>'Files for Processing');
+		App::FixPanel($mw);
 		$mw->FileButton(-label=>'ProteinGroups',-textvariable=>\$app::proteinGroupsPath,-type=>'getOpenFile',-callback=>'')->pack(-expand=>1,-fill=>'x');
 		$mw->FileButton(-label=>'Output Results',-textvariable=>\$app::outputPath,-type=>'getSaveFile',-callback=>\&app::resp)->pack(-expand=>1,-fill=>'x');
 	}
 	elsif($set == 2){
 		$mw = $f->Panel(-text=>'Input Files for Analysis');
-		$mw->FileButton(-label=>'Output Results',-textvariable=>\$app::outputPath,-type=>'getSaveFile',-callback=>\&App::ReadResultsFile)->pack(-expand=>1,-fill=>'x');
-		$mw->FileButton(-label=>'Annotations',-textvariable=>\$app::annotationsPath,-type=>'getOpenFile',-callback=>\&App::ReadPGFile)->pack(-expand=>1,-fill=>'x');
+		App::FixPanel($mw);
+		$mw->FileButton(-label=>'ProteinGroups',-textvariable=>\$app::proteinGroupsPath,-type=>'getOpenFile',-callback=>'')->pack(-expand=>1,-fill=>'x');
+		$mw->FileButton(-label=>'Output Results',-textvariable=>\$app::outputPath,-reloadbutton=>1,-type=>'getOpenFile',-callback=>\&App::ReadResultsFile)->pack(-expand=>1,-fill=>'x');
+		$mw->FileButton(-label=>'Annotations',-textvariable=>\$app::annotationsPath,-reloadbutton=>1,-type=>'getOpenFile',-callback=>\&App::ReadPGFile)->pack(-expand=>1,-fill=>'x');
 	}
 	return $mw;
 }
 sub Tk::ProcessControls {
 	my $f = shift;
 	my $mw = $f->Panel(-text=>'Processing');
+	App::FixPanel($mw);
 
 	@app::procbuts = ();
 	$app::noforce = 1;
@@ -515,18 +612,30 @@ sub Tk::ProcessControls {
 		-text 	=>	'Responses', 
 		-method	=>	'calculate_response_comparisons')->pack(-expand=>1,-fill=>'x');
 	push @app::procbuts, $mw->Tk::ProcessButton(
+		-text 	=>	'Cell Differences', 
+		-method	=>	'calculate_cell_comparisons')->pack(-expand=>1,-fill=>'x');
+	push @app::procbuts, $mw->Tk::ProcessButton(
 		-text 	=>	'Differential Responses', 
 		-method	=>	'calculate_differential_response_comparisons')->pack(-expand=>1,-fill=>'x');
 
-	$mw->Button(-text=>'Run all (force)',-command=>sub{
-			$app::noforce = 0;
-			foreach my $but(@app::procbuts){
-				my $subarr = $but->cget('-command');
-				my $sub = $subarr->[0];
-				&$sub();
-			}
-			$app::noforce = 1;
-		})->pack(-expand=>1,-fill=>'x');
+	$mw->Button(-text=>'Run all',-command=>sub{
+		if($app::noforce  &&  -e $app::outputPath &&
+			'Ok' ne $mw->messageBox(
+				-title =>'File Exists',
+				-message => "$app::outputPath already exists!  Overwrite?",
+				-type => 'OkCancel',
+				-icon => 'warning')){
+			return;
+		}
+
+		$app::noforce = 0;
+		foreach my $but(@app::procbuts){
+			my $subarr = $but->cget('-command');
+			my $sub = $subarr->[0];
+			&$sub();
+		}
+		$app::noforce = 1;
+	})->pack(-expand=>1,-fill=>'x');
 	return $mw;
 }
 
@@ -567,6 +676,8 @@ sub Tk::FileButton {
 	delete $opts{'-type'};
 	my $cb = $opts{'-callback'};
 	delete $opts{'-callback'};
+	my $rb = $opts{'-reloadbutton'};
+	delete $opts{'-reloadbutton'};
 	croak "-type must be one of getOpenFile, getSaveFile or chooseDirectory"
 		unless $type =~ /^(?:getOpenFile|getSaveFile|chooseDirectory)$/;
 	my $fr = $w;
@@ -595,6 +706,6 @@ sub Tk::FileButton {
 	)->grid(-column=>$c++, -row=>$r, -sticky=>'ew');
 	$fr->Button(-text=>"reread", -command=>$cb
 		)->grid(-column=>$c++, -row=>$r, -sticky=>'ew')
-		 if $cb;
+		 if $rb;
 	return $fr;
 }

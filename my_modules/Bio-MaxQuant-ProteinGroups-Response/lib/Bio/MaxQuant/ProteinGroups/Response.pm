@@ -443,6 +443,50 @@ sub response_comparisons {
 	return %comparisons;
 }
 
+
+=head2 cell_comparisons
+
+Returns the list of comparisons that can be made between cells
+within each condition, given the replicates available.
+
+At least 2 replicates must be available for a comparison to be made.
+
+Caches.
+
+=cut 
+
+sub cell_comparisons {
+	my $o = shift;
+	if(exists $o->{cell_comparisons}){
+		return %{$o->{cell_comparisons}};
+	}
+	my %expts = $o->experiments;
+	my @expts = sort keys %expts;
+	my $sep = $o->{separator};
+	my $rsep = $o->{rseparator};
+	my %comparisons = ();
+	foreach my $i(0..$#expts-1){
+		my $e1 = $expts[$i];
+		my ($cell1,$cond1,$repl1) = @{$expts{$e1}};
+		foreach my $j($i+1..$#expts){
+			my $e2 = $expts[$j];
+			my ($cell2,$cond2,$repl2) = @{$expts{$e2}};
+			# we want same condition
+			next unless $cond1 eq $cond1;
+			# and different cell line
+			next if $cell1 eq $cell2;
+			my $comp_key = "$cell1$rsep$cell2$sep$cond2";
+			# store them in a useful way...
+			$comparisons{$comp_key} = {$cell1=>{},$cell2=>{}} 
+				unless defined $comparisons{$comp_key};
+			$comparisons{$comp_key}->{$cell2}->{$e2} = "$cell1$rsep$cell2$repl2$sep$cond1";
+			$comparisons{$comp_key}->{$cell1}->{$e1} = "$cell1$repl1$rsep$cell2$sep$cond1";
+		}
+	}
+	$o->{cell_comparisons} = \%comparisons;
+	return %comparisons;
+}
+
 =head2 differential_response_comparisons 
 
 Returns the list of comparisons that can be made between cell line
@@ -547,9 +591,7 @@ sub calculate_response_comparisons {
 		make_path($opts{output_directory}) unless -d $opts{output_directory};
 	}
 	my %rcs = $o->response_comparisons;
-	my %drcs = $o->differential_response_comparisons;
 	my @rcs = sort keys %rcs;
-	my @drcs = sort keys %drcs;
 	# so, here for this protein, we calculate the comparisons
 	# for everything... first we need to log, and then subtract...
 	# this does mean that we need to normalize here independent
@@ -654,6 +696,136 @@ sub calculate_response_comparisons {
 		}
 	}
 	$o->{response_comparison_results} = \%comparisons;
+
+}
+
+=head2 calculate_cell_comparisons 
+
+calculates the differences between cell types in a condition.
+outputs a bunch of files.  You can specify the diretory with 
+output_directory option.
+
+=cut
+
+sub calculate_cell_comparisons {
+	my $o = shift;
+	my %opts = (
+		output_directory => '',
+		@_);
+
+	if($opts{output_directory}){
+		make_path($opts{output_directory}) unless -d $opts{output_directory};
+	}
+	my %rcs = $o->cell_comparisons;
+	my @rcs = sort keys %rcs;
+
+
+	# so, here for this protein, we calculate the comparisons
+	# for everything... first we need to log, and then subtract...
+	# this does mean that we need to normalize here independent
+	# of the Statistics::Reproducibility thing (or hijack it)
+
+	my %cfmedians = ();
+	my %comparisons = ();
+
+	foreach my $cf(@rcs){ # each comparison
+		my ($cell,$cond,$rep) = $o->parse_experiment_name($cf.'.');
+
+		my @cells = sort keys %{$rcs{$cf}};
+
+		die "not two cells!" unless @cells == 2;
+		my ($cell1,$cell2) = @cells;
+		my %counterpart = ($cell1=>$cell2, $cell2=>$cell1);
+		# we will calculate cell replicate minus counterpart median
+		my %sign = ($cell1=>1, $cell2=>-1);
+		
+		my %medians = $o->medians;
+		my %reps1 = %{$rcs{$cf}->{$cell1}};
+		my %reps2 = %{$rcs{$cf}->{$cell2}};
+		my @column_names = sort((values %reps1),(values %reps2));
+		my %columns = map {($_=>[])} (@column_names);
+
+		$cfmedians{$cf} = [map {[]} 1..$o->{n}];
+
+		my $data = $o->{normalized};
+		# we'll take the median of each protein here
+
+		my $sign = 0;
+		foreach my $cell(sort keys %{$rcs{$cf}}){ # each of the two cells... sorted by name
+			my $sign = $sign{$cell};
+			my $counterpart = $counterpart{$cell}; 
+			my $sep = $o->{separator};
+			#my $cc = "$cell$sep$cond";
+			my $ccc = "$counterpart$sep$cond";
+			#print STDERR "$cc : $ccc : \n";
+			my %reps = %{$rcs{$cf}->{$cell}};  # these are the replicates in this cell
+			foreach my $r(sort keys %reps){ # replicates
+				my $key = $reps{$r};
+				#print STDERR "   : $r : $key \n";
+				foreach my $i(0..$o->{n}-1){ # each protein... check enough data
+					if(
+						defined $data->{$r}->[$i] && 
+						$data->{$r}->[$i] ne '' 
+						&& defined $medians{$ccc}->[$i] 
+						&& $medians{$ccc}->[$i] ne ''){
+						# now these are sorted, so we do $cond-$replicate for 
+						my $value = 
+							$sign * ($data->{$r}->[$i] - $medians{$ccc}->[$i]);
+						push @{$columns{$key}}, $value;
+						# collect the values to make medians later...
+						push @{$cfmedians{$cf}->[$i]}, $value;
+					}
+					else {
+						push @{$columns{$key}}, '';
+					}
+				}
+			}
+		}
+		# 
+		foreach my $i(0..$o->{n}-1){ # each protein... check enough data
+			if(@{$cfmedians{$cf}->[$i]} < 2){
+				$cfmedians{$cf}->[$i] = '';
+			}
+			else {
+				$cfmedians{$cf}->[$i] = median(@{$cfmedians{$cf}->[$i]});
+			}
+		}
+		$o->{cell_comparison_medians} = \%cfmedians;
+		#
+		%comparisons = (%comparisons, %columns);
+
+		print STDERR "Processing $cf...\n";
+		my @mydata = map {$columns{$_}} @column_names;
+		#print Dumper @mydata;
+		my $depth = -1;
+		my $results = Statistics::Reproducibility
+	        ->new()
+	        ->data(@mydata)
+	        ->run()
+	        ->printableTable($depth);
+
+	    #$o->{replicate_comparison}->{$cf} = $results;
+	    $o->dump_results_table('celldiffs', $cf, $results, \@column_names);
+
+	    if($opts{output_directory}){
+			my $fo = IO::File->new("$opts{output_directory}/$cf.txt",'w') 
+				or die "Could not write $opts{output_directory}/$cf.txt: $!";
+			print STDERR "Writing $opts{output_directory}/$cf.txt...\n";
+		    print $fo join("\t", @{$results->[0]})."\n";
+		    my $table_length = 0;
+		    foreach (@$results){ $table_length = @$_ if @$_ > $table_length; }
+		    foreach my $i(0..$table_length-1){
+		    	print $fo join("\t", map {
+		    			defined $results->[$_]->[$i]
+		    			? sigfigs($results->[$_]->[$i])
+		    			: ''
+		    		} (1..$#$results)
+		    	)."\n";
+		    }
+		    close($fo);
+		}
+	}
+	$o->{cell_comparison_results} = \%comparisons;
 
 }
 
