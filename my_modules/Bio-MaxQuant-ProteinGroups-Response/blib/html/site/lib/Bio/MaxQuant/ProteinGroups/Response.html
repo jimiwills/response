@@ -1,0 +1,380 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../../../scineplex.css">
+<title>Bio::MaxQuant::ProteinGroups::Response - Analyze MQ proteinGroups for differential responses</title>
+<link rel="stylesheet" href="../../../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<script>writelinks('__top__',5);</script>
+<h1><a>Bio::MaxQuant::ProteinGroups::Response - Analyze MQ proteinGroups for differential responses</a></h1>
+<p><a name="__index__"></a></p>
+
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#version">VERSION</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#subroutines_methods">SUBROUTINES/METHODS</a></li>
+	<ul>
+
+		<li><a href="#new">new</a></li>
+		<li><a href="#resultsfile">resultsfile</a></li>
+		<li><a href="#experiments">experiments</a></li>
+		<li><a href="#quicknormalize">quickNormalize</a></li>
+		<li><a href="#blankrows">blankRows</a></li>
+		<li><a href="#blankitems">blankItems</a></li>
+		<li><a href="#celllines">celllines</a></li>
+		<li><a href="#conditions">conditions</a></li>
+		<li><a href="#condition_replicates">condition_replicates</a></li>
+		<li><a href="#replicates">replicates</a></li>
+		<li><a href="#parse_experiment_name">parse_experiment_name</a></li>
+		<li><a href="#parse_response_name">parse_response_name</a></li>
+		<li><a href="#replicate_comparison">replicate_comparison</a></li>
+		<li><a href="#response_comparisons">response_comparisons</a></li>
+		<li><a href="#differential_response_comparisons">differential_response_comparisons</a></li>
+		<li><a href="#data">data</a></li>
+		<li><a href="#datum">datum</a></li>
+		<li><a href="#calculate_response_comparisons">calculate_response_comparisons</a></li>
+		<li><a href="#sigfigs">sigfigs</a></li>
+		<li><a href="#calculate_differential_response_comparisons">calculate_differential_response_comparisons</a></li>
+		<li><a href="#medians">medians</a></li>
+		<li><a href="#put_resultsfile_hashtable">put_resultsfile_hashtable</a></li>
+		<li><a href="#dumphashtable">dumpHashtable</a></li>
+		<li><a href="#median">median</a></li>
+		<li><a href="#put_resultsfile">put_resultsfile</a></li>
+		<li><a href="#dump_results_table">dump_results_table</a></li>
+		<li><a href="#translate_results_table">translate_results_table</a></li>
+	</ul>
+
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#bugs">BUGS</a></li>
+	<li><a href="#support">SUPPORT</a></li>
+	<li><a href="#acknowledgements">ACKNOWLEDGEMENTS</a></li>
+	<li><a href="#license_and_copyright">LICENSE AND COPYRIGHT</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>Bio::MaxQuant::ProteinGroups::Response - Analyze MQ proteinGroups for differential responses</p>
+<p>
+</p>
+<hr />
+<h1><a name="version">VERSION</a></h1>
+<p>Version 0.03</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p>This module is tailored for MaxQuant data, but could be applicable elsewhere.
+The target experiment is one where several celltypes have been assayed for 
+responses to different conditions, e.g. cancer cell lines responding to 
+hormones and drugs.  The module help to analyse responses to the conditions
+within each cell line and differences in those responses between cell lines.
+Those differences in responses indicate that the proteins involved are markers
+of the mechanism by which the cells differ in their response, and are therefore
+not only good targets to exploit for biomarkers, but also for biological follow up.</p>
+<pre>
+    <span class="keyword">use</span> <span class="variable">Bio::MaxQuant::ProteinGroups::Response</span><span class="operator">;</span>
+</pre>
+<pre>
+    <span class="keyword">my</span> <span class="variable">$resp</span> <span class="operator">=</span> <span class="variable">Bio::MaxQuant::ProteinGroups::Response</span><span class="operator">-&gt;</span><span class="variable">new</span><span class="operator">(</span>
+        <span class="string">filepath</span><span class="operator">=&gt;</span><span class="string">'proteinGroups.txt'</span>
+    <span class="operator">);</span>
+</pre>
+<pre>
+    <span class="variable">$resp</span><span class="operator">-&gt;</span><span class="variable">replicate_comparison</span><span class="operator">(</span><span class="string">output_directory</span><span class="operator">=&gt;</span><span class="string">'./replicate_comparisons'</span><span class="operator">);</span>
+        <span class="variable">$resp</span><span class="operator">-&gt;</span><span class="variable">calculate_response_comparisons</span><span class="operator">(</span><span class="string">output_directory</span><span class="operator">=&gt;</span><span class="string">'./responses'</span><span class="operator">);</span>
+        <span class="variable">$resp</span><span class="operator">-&gt;</span><span class="variable">calculate_differential_response_comparisons</span><span class="operator">(</span><span class="string">output_directory</span><span class="operator">=&gt;</span><span class="string">'./differential_responses'</span><span class="operator">);</span>
+</pre>
+<p>The data are output as tables in the directories.  They are the printable tables
+returned from Statistics::Reproducibility.</p>
+<p>
+</p>
+<hr />
+<h1><a name="subroutines_methods">SUBROUTINES/METHODS</a></h1>
+<p>
+</p>
+<h2><a name="new">new</a></h2>
+<p>creates a new ProteinGroups object.</p>
+<p>Options: 
+filepath - path to the file!  default is proteinGroups.txt
+separator - NOT table separator! This is the separator 
+used in the experiment name to separate cellline from 
+condition from replicate.  Default is full stop (period)
+rseparator - used for separating the compared cells/conditions.
+the default is hyphen (-)
+replicate_indicator - used in differential response comparisons
+to indicate which cell the individual replicates were compared
+(with the median of the other cell)</p>
+<p>
+</p>
+<h2><a name="resultsfile">resultsfile</a></h2>
+<p>returns a handle to the results file, ready for writing.</p>
+<p>this is not callde until processing starts, but when it is
+it will clobber the old file.</p>
+<p>
+</p>
+<h2><a name="experiments">experiments</a></h2>
+<p>Returns the list of experiments in the file as a hash.
+Keys are names, values are listrefs of cellline,condition,replicate.
+Caches! So once called, it will not re-read the file
+unless/until you delete $o-&gt;{experiments}</p>
+<p>Also populates cellines, conditions and replicates lists, which are
+accessible by their own accessors.</p>
+<p>
+</p>
+<h2><a name="quicknormalize">quickNormalize</a></h2>
+<p>TO BE REMOVED</p>
+<p>Does a quick normalization of ALL the input columns.  They are each normalized
+by their own median, and not directly to each other.</p>
+<p>Two options are available:</p>
+<pre>
+        select =&gt; [list of indices]
+        exclude =&gt; [list of indices]</pre>
+<p>Select allows to choose a particular subset of rows on which to normalize, e.g. some
+proteins you know don't change.
+Exclude allows to choose a particular subset of rows to exclude from the
+normalization, e.g. contaminants.</p>
+<p>sub quickNormalize {
+	my ($o,%opts) = @_;
+	my $d = $o-&gt;data;
+	my $n = $o-&gt;{n};
+	my @I = (0..$n-1);
+	if($opts{exclude}){
+		my %I;
+		@I{@I} = @I;
+		delete $I{$_} foreach @{$opts{exclude}};
+		@I = sort {$a &lt;=&gt; $b} keys %I;
+	}
+	if($opts{select}){
+		@I = @{$opts{select}};
+	}
+	$o-&gt;{quicknorm} = {
+		map {
+			my $med = median ((@{$d-&gt;{$_}})[@I]);
+			($_ =&gt; [map {/\d/ ? $_ - med : ''} @{$d-&gt;{$_}}])
+		} 
+		keys %$d;
+	}
+}</p>
+<p>TO BE REMOVED</p>
+<p>
+</p>
+<h2><a name="blankrows">blankRows</a></h2>
+<p>Option: select (as for quick Normalize)</p>
+<p>This allows blanking the data for a subset (e.g. contaminants) so that they do not
+contribute to the statistics.</p>
+<p>
+</p>
+<h2><a name="blankitems">blankItems</a></h2>
+<p>help function, accepts a listref and a list of indices to blank (set to '')
+returns the listref for your convenience.</p>
+<p>
+</p>
+<h2><a name="celllines">celllines</a></h2>
+<p>Returns the list of cell lines.  Ensures <code>experiments()</code> is called.</p>
+<p>
+</p>
+<h2><a name="conditions">conditions</a></h2>
+<p>Returns the list of conditions.  Ensures <code>experiments()</code> is called.</p>
+<p>
+</p>
+<h2><a name="condition_replicates">condition_replicates</a></h2>
+<p>Returns a hash of key=conditions, value=list of replicates.
+Ensures <code>experiments()</code> is called.</p>
+<p>
+</p>
+<h2><a name="replicates">replicates</a></h2>
+<p>Returns the list of replicates.  Ensures <code>experiments()</code> is called.</p>
+<p>
+</p>
+<h2><a name="parse_experiment_name">parse_experiment_name</a></h2>
+<p>Method  to parse the experiment name.
+Uses $o-&gt;{separator} to separate into 3 parts.  Uses index and
+substr, not regexes.  Default separator is dot/fullstop/period &quot;.&quot; .</p>
+<p>
+</p>
+<h2><a name="parse_response_name">parse_response_name</a></h2>
+<p>Method  to parse the response name.
+Uses $o-&gt;{rseparator} to separate into 3 parts.  Uses index and
+substr, not regexes.  Default separator is hyphen &quot;-&quot;, which
+should not be used in experiment name!</p>
+<p>
+</p>
+<h2><a name="replicate_comparison">replicate_comparison</a></h2>
+<p>Uses Statistics::Reproducibility to get normalized values and
+metrics on each condition.</p>
+<p>Caches!</p>
+<p>
+</p>
+<h2><a name="response_comparisons">response_comparisons</a></h2>
+<p>Returns the list of comparisons that can be made between conditions
+within each cell line, given the replicates available.</p>
+<p>At least 2 replicates must be available for a comparison to be made.</p>
+<p>Caches.</p>
+<p>
+</p>
+<h2><a name="differential_response_comparisons">differential_response_comparisons</a></h2>
+<p>Returns the list of comparisons that can be made between cell line
+responses to a each condition.</p>
+<p>Caches.</p>
+<p>
+</p>
+<h2><a name="data">data</a></h2>
+<p>Reads in all the protein ratios from the proteinGroups file.
+Also reads other identifying information, such as id and Leading 
+Proteins.  Reads each non-normalized ratio column into a list and
+stores them in a hash by experiment name.</p>
+<p>
+</p>
+<h2><a name="datum">datum</a></h2>
+<p>Converts one datum into a logged ratio or an empty string, depending.</p>
+<p>
+</p>
+<h2><a name="calculate_response_comparisons">calculate_response_comparisons</a></h2>
+<p>calculates the differences between conditions in a cell type.
+outputs a bunch of files.  You can specify the diretory with 
+output_directory option.</p>
+<p>
+</p>
+<h2><a name="sigfigs">sigfigs</a></h2>
+<p>Helper function
+Tries <code>FormatSigFigs($_[0],$SigFigs)</code>, but only if $_[0] actually looks like a number!
+$SigFigs is a global in this module and is set to 3.</p>
+<p>
+</p>
+<h2><a name="calculate_differential_response_comparisons">calculate_differential_response_comparisons</a></h2>
+<p>
+</p>
+<h2><a name="medians">medians</a></h2>
+<p>calculates the medians for all replicate sets and stores them in 
+$o-&gt;{medians}</p>
+<p>
+</p>
+<h2><a name="put_resultsfile_hashtable">put_resultsfile_hashtable</a></h2>
+<p>a method called by <code>medians()</code> if resultsfile was defined.  Calls put_resultsfile with
+some medians and normalized data.</p>
+<p>
+</p>
+<h2><a name="dumphashtable">dumpHashtable</a></h2>
+<p>helper function that dumps a HoL as a tab delimited table.</p>
+<p>
+</p>
+<h2><a name="median">median</a></h2>
+<p>helper function that does a simple median calculation</p>
+<p>
+</p>
+<h2><a name="put_resultsfile">put_resultsfile</a></h2>
+<p>take a list of lists (ref) and outputs directly to $o-&gt;{resultsfile}.
+This is as an alternative or addition to the output_file options
+avaiable for some methods, and is called by dump_results_table
+and others throughout processing.</p>
+<p>
+</p>
+<h2><a name="dump_results_table">dump_results_table</a></h2>
+<p>Dumps a results table to a file ($o-&gt;{complete_results_file})
+for laster use.</p>
+<p>
+</p>
+<h2><a name="translate_results_table">translate_results_table</a></h2>
+<p>helper function that separates out and better labels the different results from 
+Statistics::Reproducbility</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Jimi, <code>&lt;j at 0na.me&gt;</code></p>
+<p>
+</p>
+<hr />
+<h1><a name="bugs">BUGS</a></h1>
+<p>Please report any bugs or feature requests to <code>bug-bio-maxquant-proteingroups-response at rt.cpan.org</code>, or through
+the web interface at <a href="http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bio-MaxQuant-ProteinGroups-Response">http://rt.cpan.org/NoAuth/ReportBug.html</a>.  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.</p>
+<p>
+</p>
+<hr />
+<h1><a name="support">SUPPORT</a></h1>
+<p>You can find documentation for this module with the perldoc command.</p>
+<pre>
+    <a href="../../../../../lib/pods/perldoc.html">perldoc</a> Bio::MaxQuant::ProteinGroups::Response</pre>
+<p>You can also look for information at:</p>
+<ul>
+<li><strong><a name="tracker" class="item">RT: CPAN's request tracker (report bugs here)</a></strong>
+
+<p><a href="http://rt.cpan.org/NoAuth/Bugs.html?Dist=Bio-MaxQuant-ProteinGroups-Response">http://rt.cpan.org/NoAuth/Bugs.html</a></p>
+</li>
+<li><strong><a name="annocpan_annotated_cpan_documentation" class="item">AnnoCPAN: Annotated CPAN documentation</a></strong>
+
+<p><a href="http://annocpan.org/dist/Bio-MaxQuant-ProteinGroups-Response">http://annocpan.org/dist/Bio-MaxQuant-ProteinGroups-Response</a></p>
+</li>
+<li><strong><a name="cpan_ratings" class="item">CPAN Ratings</a></strong>
+
+<p><a href="http://cpanratings.perl.org/d/Bio-MaxQuant-ProteinGroups-Response">http://cpanratings.perl.org/d/Bio-MaxQuant-ProteinGroups-Response</a></p>
+</li>
+<li><strong><a name="search_cpan" class="item">Search CPAN</a></strong>
+
+<p><a href="http://search.cpan.org/dist/Bio-MaxQuant-ProteinGroups-Response/">http://search.cpan.org/dist/Bio-MaxQuant-ProteinGroups-Response/</a></p>
+</li>
+</ul>
+<p>
+</p>
+<hr />
+<h1><a name="acknowledgements">ACKNOWLEDGEMENTS</a></h1>
+<p>
+</p>
+<hr />
+<h1><a name="license_and_copyright">LICENSE AND COPYRIGHT</a></h1>
+<p>Copyright 2014 Jimi.</p>
+<p>This program is free software; you can redistribute it and/or modify it
+under the terms of the the Artistic License (2.0). You may obtain a
+copy of the full license at:</p>
+<p><a href="http://www.perlfoundation.org/artistic_license_2_0">http://www.perlfoundation.org/artistic_license_2_0</a></p>
+<p>Any use, modification, and distribution of the Standard or Modified
+Versions is governed by this Artistic License. By using, modifying or
+distributing the Package, you accept this license. Do not use, modify,
+or distribute the Package, if you do not accept this license.</p>
+<p>If your Modified Version has been derived from a Modified Version made
+by someone other than you, you are nevertheless required to ensure that
+your Modified Version complies with the requirements of this license.</p>
+<p>This license does not grant you the right to use any trademark, service
+mark, tradename, or logo of the Copyright Holder.</p>
+<p>This license includes the non-exclusive, worldwide, free-of-charge
+patent license to make, have made, use, offer to sell, sell, import and
+otherwise transfer the Package with respect to any patent claims
+licensable by the Copyright Holder that are necessarily infringed by the
+Package. If you institute patent litigation (including a cross-claim or
+counterclaim) against any party alleging that the Package constitutes
+direct or contributory patent infringement, then this Artistic License
+to you shall terminate on the date that such litigation is filed.</p>
+<p>Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
+AND CONTRIBUTORS &quot;AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
+THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
+YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
+CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+</body>
+
+</html>

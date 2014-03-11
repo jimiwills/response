@@ -1,0 +1,200 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../scineplex.css">
+<title>Tk::TiedListbox - gang together Listboxes</title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<script>writelinks('__top__',3);</script>
+<h1><a>Tk::TiedListbox - gang together Listboxes</a></h1>
+<p><a name="__index__"></a></p>
+
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#methods">METHODS</a></li>
+	<li><a href="#overridden_methods">OVERRIDDEN METHODS</a></li>
+	<li><a href="#bugs">BUGS</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>Tk::TiedListbox - gang together Listboxes</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+    use Tk::TiedListbox</pre>
+<pre>
+    <span class="variable">$l1</span> <span class="operator">=</span> <span class="variable">$widget</span><span class="operator">-&gt;</span><span class="variable">Listbox</span><span class="operator">(</span><span class="string">-exportselection</span> <span class="operator">=&gt;</span> <span class="number">0</span><span class="operator">,...);</span>
+    <span class="variable">$l2</span> <span class="operator">=</span> <span class="variable">$widget</span><span class="operator">-&gt;</span><span class="variable">Listbox</span><span class="operator">(</span><span class="string">-exportselection</span> <span class="operator">=&gt;</span> <span class="number">0</span><span class="operator">,...);</span>
+    <span class="variable">$l3</span> <span class="operator">=</span> <span class="variable">$widget</span><span class="operator">-&gt;</span><span class="variable">Listbox</span><span class="operator">(</span><span class="string">-exportselection</span> <span class="operator">=&gt;</span> <span class="number">0</span><span class="operator">,...);</span>
+    <span class="variable">$l1</span><span class="operator">-&gt;</span><span class="variable">tie</span><span class="operator">(</span><span class="operator">[</span><span class="variable">$l2</span><span class="operator">,</span><span class="variable">$l3</span><span class="operator">]</span><span class="operator">);</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>TiedListbox causes two or more Listboxes to be operated in tandem.
+One application is emulating multi-column listboxes. The scrolling,
+selection, or both mechanisms may be tied together. The methods <strong>tie</strong>
+and <strong>untie</strong> are provided, along with overridden versions of some of
+the Listbox methods to provide tandem operation.</p>
+<p>Scrollbars are fully supported. You can use either explicitly created
+<a href="../../../site/lib/Tk/Scrollbar.html">Scrollbar</a>s, the <strong>ScrlListbox</strong> widget, or the
+<a href="../../../site/lib/Tk/Scrolled.html">Scrolled</a>
+super-widget. Tricks to &quot;attach&quot; multiple tied listboxes to a single
+scrollbar are unnecessary and will lead to multiple calls of the
+listbox methods (a bad thing).</p>
+<p>The configuration options, geometry, and items of the Listboxes are
+not altered by tying them. The programmer will have to make sure that
+the setup of the Listboxes make sense together. Here are some
+(unenforced) guidelines:</p>
+<p>For listboxes with tied selection:</p>
+<ul>
+<li>
+<p>set <strong>-exportselection</strong> to 0 for all but possibly one Listbox</p>
+</li>
+<li>
+<p>use identical <strong>-selectmode</strong> for all Listboxes</p>
+</li>
+<li>
+<p>if items are added/deleted, they should be done all at once and 
+at the same index, or the selection should be cleared</p>
+</li>
+<li>
+<p>Listboxes should have the same number of items</p>
+</li>
+</ul>
+<p>For listboxes with tied scrolling:</p>
+<ul>
+<li>
+<p>use the same window height and font for all Listboxes</p>
+</li>
+<li>
+<p>Listboxes should have the same number of items</p>
+</li>
+</ul>
+<p>
+</p>
+<hr />
+<h1><a name="methods">METHODS</a></h1>
+<dl>
+<dt><strong><a name="tie" class="item"><em>$listbox</em>-&gt;<strong>tie</strong>?(?<em>option</em>?, [<em>listbox</em>,...])?</a></strong></dt>
+
+<dd>
+<p>Ties together <em>$listbox</em> and the list of Listboxes with the given
+<em>option</em>. Returns <em>$listbox</em>.</p>
+<p>If no arguments are given, returns a list containing two items: the
+tie option (&quot;scroll&quot;, &quot;selection&quot;, or &quot;all&quot;) and the list of Listboxes
+to which <em>$listbox</em> is tied.</p>
+<p><em>option</em> can be one of &quot;scroll&quot;, &quot;selection&quot;, or &quot;all&quot;.  If omitted,
+&quot;all&quot; is assumed. &quot;scroll&quot; makes the tied Listboxes scroll
+together, &quot;selection&quot; makes selections occur simultaneously in all
+tied Listboxes, and &quot;all&quot; effects both actions.</p>
+<p>All the Listboxes are <strong>untie</strong>d (if previously tied) before being tied
+to each other; hence a Listbox can only be in one &quot;tie group&quot; at a
+time. &quot;Tiedness&quot; is commutative.</p>
+<p>The tie method can be called with either Listbox or TiedListbox
+objects. All Listbox objects specified are reblessed to TiedListbox
+objects.</p>
+<p>Code such as below can be used to tie ScrlListboxes:</p>
+<pre>
+    <span class="variable">$slb1</span><span class="operator">=</span><span class="variable">ScrlListbox</span><span class="operator">(...);</span> <span class="comment"># or Scrolled('Listbox',...</span>
+    <span class="variable">$slb2</span><span class="operator">=</span><span class="variable">ScrlListbox</span><span class="operator">(...);</span> <span class="comment"># or Scrolled('Listbox',...</span>
+    <span class="variable">$slb1</span><span class="operator">-&gt;</span><span class="variable">tie</span><span class="operator">(</span><span class="operator">[</span><span class="variable">$slb2</span><span class="operator">-&gt;</span><span class="variable">Subwidget</span><span class="operator">(</span><span class="string">'scrolled'</span><span class="operator">)</span><span class="operator">]</span><span class="operator">);</span>
+</pre>
+</dd>
+<dt><strong><a name="untie" class="item"><em>$listbox</em>-&gt;<strong>untie()</strong></a></strong></dt>
+
+<dd>
+<p>This function unties the Listbox from its &quot;tie group&quot;. The other items
+in the &quot;tie group&quot; (if more than one) remain tied to each other.</p>
+<p>Returns a list containing two items: the old tie option (&quot;scroll&quot;,
+&quot;selection&quot;, or &quot;all&quot;) and the list of Listboxes to which <em>$listbox</em> was
+tied.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="overridden_methods">OVERRIDDEN METHODS</a></h1>
+<p>You probably don't care about these. They are just details to tie
+together the behaviors of the listboxes.</p>
+<p>All overriden methods take identical arguments as the corresponding
+<strong>Listbox</strong> methods (see <a href="../../../site/lib/Tk/Listbox.html">the Tk::Listbox manpage</a> for a full
+description). All overridden methods that take an index interpret that
+index in the context of the listbox object provided.</p>
+<dl>
+<dt><strong><a name="activate" class="item"><em>$listbox</em>-&gt;<strong>activate</strong>(...)</a></strong></dt>
+
+<dt><strong><a name="selection" class="item"><em>$listbox</em>-&gt;<strong>selection</strong>(...)</a></strong></dt>
+
+<dd>
+<p>To allow tied selection, these functions are overridden for listboxes
+tied together with the &quot;selection&quot; or &quot;all&quot; option. When an item is
+selected or activated in one listbox, the items with the same index
+(if present) are selected or activated in all tied listboxes.</p>
+<p>The <strong>selection</strong>('includes',...) submethod returns only information
+about the given <em>$listbox</em>.</p>
+</dd>
+<dt><strong><a name="scan" class="item"><em>$listbox</em>-&gt;<strong>scan</strong>(...)</a></strong></dt>
+
+<dt><strong><a name="see" class="item"><em>$listbox</em>-&gt;<strong>see</strong>(...)</a></strong></dt>
+
+<dt><strong><a name="yview" class="item"><em>$listbox</em>-&gt;<strong>yview</strong>(...)</a></strong></dt>
+
+<dd>
+<p>To allow tied scrolling, these functions are overridden for listboxes
+tied together with the &quot;scroll&quot; or &quot;all&quot; option. When one listbox is
+scrolled, all the other tied listboxes are scrolled by the same number
+of items (if possible). An attempt is made to keep items of the same
+index at the top of each tied listbox, while not interfering with the
+normal scrolling operations.</p>
+<p>The <strong>yview</strong> method with no arguments returns only information about
+the given <em>$listbox</em>.</p>
+<p>Horizontal scrolling (via <strong>xview</strong>) is not tied.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="bugs">BUGS</a></h1>
+<p>Reblessing the widgets to TiedListbox might be too weird. It will
+disable any additional features for widgets in a class derived from
+Listbox (none yet that I know of).</p>
+<p>The bindtags for reblessed widgets aren't updated. This is probably
+wouldn't be a good thing to do automatically anyway.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Andrew Allen &lt;<a href="mailto:ada@fc.hp.com">ada@fc.hp.com</a>&gt;</p>
+<p>This code may be distributed under the same conditions as Perl.</p>
+
+</body>
+
+</html>

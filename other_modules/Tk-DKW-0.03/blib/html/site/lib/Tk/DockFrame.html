@@ -1,0 +1,241 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../scineplex.css">
+<title>Tk::DockFrame - A multicolumn list widget with sortable &amp; sizeable columns</title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<script>writelinks('__top__',3);</script>
+<h1><a>Tk::DockFrame - A multicolumn list widget with sortable &amp; sizeable columns</a></h1>
+<p><a name="__index__"></a></p>
+
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#standard_options">STANDARD OPTIONS</a></li>
+	<li><a href="#widget_specific_options">WIDGET-SPECIFIC OPTIONS</a></li>
+	<li><a href="#widget_methods">WIDGET METHODS</a></li>
+	<li><a href="#bindings">BINDINGS</a></li>
+	<li><a href="#authors">AUTHORS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#history">HISTORY</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<hr />
+<h1><a name="name">NAME</a></h1>
+<p>Tk::DockFrame - A multicolumn list widget with sortable &amp; sizeable columns</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+    <span class="keyword">use</span> <span class="variable">Tk::DockFrame</span><span class="operator">;</span>
+</pre>
+<pre>
+    <span class="variable">$DockPort</span> <span class="operator">=</span> <span class="variable">$parent</span><span class="operator">-&gt;</span><span class="variable">DockPort</span><span class="operator">();</span>
+</pre>
+<pre>
+    <span class="variable">$DockPort</span><span class="operator">-&gt;</span><span class="variable">pack</span><span class="operator">();</span>
+</pre>
+<pre>
+    <span class="variable">$DockFrame</span> <span class="operator">=</span> <span class="variable">$parent</span><span class="operator">-&gt;</span><span class="variable">DockFrame</span>
+       <span class="operator">(</span>
+        <span class="string">'-dock'</span> <span class="operator">=&gt;</span> <span class="variable">$DockPort</span><span class="operator">,</span>
+        <span class="string">'-trimcount'</span> <span class="operator">=&gt;</span> <span class="number">1</span><span class="operator">,</span>
+        <span class="string">'-sensitivity'</span> <span class="operator">=&gt;</span> <span class="number">10</span><span class="operator">,</span>
+        <span class="string">'-decorate'</span> <span class="operator">=&gt;</span> <span class="number">0</span><span class="operator">,</span>
+        <span class="string">'-trimgap'</span> <span class="operator">=&gt;</span> <span class="number">2</span>
+       <span class="operator">);</span>
+</pre>
+<pre>
+    <span class="variable">$DockFrame</span><span class="operator">-&gt;</span><span class="variable">Widget</span> <span class="operator">(...)-&gt;</span><span class="variable">pack</span><span class="operator">();</span>
+</pre>
+<pre>
+    ...</pre>
+<pre>
+    <span class="variable">Tk::MainLoop</span><span class="operator">;</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>The two public classes in this module combine to implement a dockable widget subsystem.</p>
+<p>Objects of class DockFrame are simple frames which can be made to &quot;float&quot; free as Toplevel
+widgets or packed as Frames. Dockframes can have any number of direct children but the
+favored use is to pack a single Frame based child widget and add widgets to that
+using any geometry manager.</p>
+<p>DockPorts are simple frame widgets which must be managed by the packer. They normally
+have no width or height and are thus rendered invisible. DockFrame children of the same
+parentage, when dragged over them, will be converted from &quot;floating&quot; Toplevels into Frame
+widgets rendered within the DockPort, resizing it accordingly.</p>
+<dl>
+<dt><strong><a name="important_update" class="item">IMPORTANT UPDATE</a></strong></dt>
+
+<dd>
+<p>The DockFrames are now managed WITHIN the DockPorts, therefore any geometry manager
+can be used with all the widgets described here</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="standard_options">STANDARD OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="dockframe" class="item">DockFrame</a></strong></dt>
+
+<dd>
+<p><em>-background -borderwidth -relief -bg -width -height</em></p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="dockport" class="item">DockPort</a></strong></dt>
+
+<dd>
+<p><em>none</em></p>
+</dd>
+</dl>
+<p>See <em>Tk</em> for details of the standard options.</p>
+<p>
+</p>
+<hr />
+<h1><a name="widget_specific_options">WIDGET-SPECIFIC OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="name_dock" class="item">Name:	<strong>dock</strong></a></strong></dt>
+
+<dt><strong><a name="class_dock" class="item">Class:	<strong>Dock</strong></a></strong></dt>
+
+<dt><strong><a name="switch_dock" class="item">Switch:	<strong>-dock</strong></a></strong></dt>
+
+<dd>
+<p>Used to &quot;dock&quot; a DockFrame to a DockPort. The parameter passed must be
+a reference to a DockPort and nothing else. If a DockPort is not specified
+in this manner on creation, then the DockFrame will initially &quot;float&quot; free.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_trimcount2" class="item">Name:	<strong>trimcount</strong></a></strong></dt>
+
+<dt><strong><a name="class_trimcount2" class="item">Class:	<strong>TrimCount</strong></a></strong></dt>
+
+<dt><strong><a name="switch_trimcount2" class="item">Switch:	<strong>-trimcount</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the number of button trim drag 'handles'. Specifying 0 will prevent
+attachment/detachment of the DockFrame.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_sensitivity" class="item">Name:	<strong>sensitivity</strong></a></strong></dt>
+
+<dt><strong><a name="class_sensitivity" class="item">Class:	<strong>Sensitivity</strong></a></strong></dt>
+
+<dt><strong><a name="switch_sensitivity" class="item">Switch:	<strong>-sensitivity</strong></a></strong></dt>
+
+<dd>
+<p>The DockFrame will &quot;dock&quot; when it gets within the specified number of pixels of the DockPort.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_decorate" class="item">Name:	<strong>decorate</strong></a></strong></dt>
+
+<dt><strong><a name="class_decorate" class="item">Class:	<strong>Decorate</strong></a></strong></dt>
+
+<dt><strong><a name="switch_decorate" class="item">Switch:	<strong>-decorate</strong></a></strong></dt>
+
+<dd>
+<p>Boolean value indicating whether or not to instruct the window manager to add decoration
+(titlebar, etc) to the undocked DockFrame. It is important to note here that, due to the
+nature of the event handling, dragging the DockFrame by the titlebar will not cause it to
+dock.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_trimgap" class="item">Name:	<strong>trimgap</strong></a></strong></dt>
+
+<dt><strong><a name="class_trimgap" class="item">Class:	<strong>Trimgap</strong></a></strong></dt>
+
+<dt><strong><a name="switch_trimgap" class="item">Switch:	<strong>-trimgap</strong></a></strong></dt>
+
+<dd>
+<p>This option specifies the number of pixels to leave between the &quot;handles&quot; and the first
+child widget</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="widget_methods">WIDGET METHODS</a></h1>
+<dl>
+<dt><strong><a name="dock" class="item"><em>$DockFrame</em>-&gt;<strong>dock</strong> (<strong>$DockPort</strong>)</a></strong></dt>
+
+<dd>
+<p>Immediately docks the DockFrame to the specified DockPort</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="undock" class="item"><em>$DockFrame</em>-&gt;<strong>undock</strong>()</a></strong></dt>
+
+<dd>
+<p>Immediately undocks the DockFrame</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="bindings">BINDINGS</a></h1>
+<dl>
+<dt><strong><a name="12" class="item"><strong>[1]</strong></a></strong></dt>
+
+<dd>
+<p>Pressing and holding the left mouse button on a DockFrame trim element allows movement
+of that DockFrame. If the DockFrame is &quot;dragged&quot; over a DockPort, it will &quot;dock&quot; and
+dragging will cease until the &quot;handle&quot; is released and then selected again.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="authors">AUTHORS</a></h1>
+<p>Damion K. Wilson, <a href="mailto:dwilson@ibl.bm,">dwilson@ibl.bm,</a> <a href="http://pwp.ibl.bm/~dkw">http://pwp.ibl.bm/~dkw</a></p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 1999 Damion K. Wilson.</p>
+<p>All rights reserved.</p>
+<p>This program is free software, you may redistribute it and/or modify it
+under the same terms as Perl itself.</p>
+<p>
+</p>
+<hr />
+<h1><a name="history">HISTORY</a></h1>
+<dl>
+<dt><strong><a name="october_1_1999_written_to_replace_experimental_tk_dockinggroup_with_no_legacy_support" class="item"><strong>October 1, 1999</strong>: Written to replace experimental Tk::DockingGroup with no legacy support</a></strong></dt>
+
+</dl>
+
+</body>
+
+</html>

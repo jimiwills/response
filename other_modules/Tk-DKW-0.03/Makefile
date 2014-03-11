@@ -1,4 +1,4 @@
-# This Makefile is for the Bio::MaxQuant::ProteinGroups::Response extension to perl.
+# This Makefile is for the Tk extension to perl.
 #
 # It was generated automatically by MakeMaker version
 # 6.57_05 (Revision: 65705) from the contents of
@@ -11,18 +11,13 @@
 
 #   MakeMaker Parameters:
 
-#     ABSTRACT_FROM => q[lib/Bio/MaxQuant/ProteinGroups/Response.pm]
-#     AUTHOR => [q[Jimi <j@0na.me>]]
-#     BUILD_REQUIRES => { Test::More=>q[0] }
-#     CONFIGURE_REQUIRES => { ExtUtils::MakeMaker=>q[0] }
-#     LICENSE => q[Artistic_2_0]
-#     MIN_PERL_VERSION => q[5.006]
-#     NAME => q[Bio::MaxQuant::ProteinGroups::Response]
-#     PL_FILES => {  }
-#     PREREQ_PM => { Test::More=>q[0], Statistics::Reproducibility=>q[0.06] }
-#     VERSION_FROM => q[lib/Bio/MaxQuant/ProteinGroups/Response.pm]
-#     clean => { FILES=>q[Bio-MaxQuant-ProteinGroups-Response-*] }
-#     dist => { COMPRESS=>q[gzip -9f], SUFFIX=>q[gz] }
+#     BUILD_REQUIRES => {  }
+#     DISTNAME => q[Tk-DKW]
+#     NAME => q[Tk]
+#     PMLIBDIRS => [q[Tk]]
+#     PREREQ_PM => { Tk::TiedListbox=>q[0], Tk::Pane=>q[0], Tk=>q[800.005] }
+#     VERSION => q[0.02]
+#     dist => { COMPRESS=>q[gzip -9f], SUFFIX=>q[.gz] }
 
 # --- MakeMaker post_initialize section:
 
@@ -59,13 +54,13 @@ VENDORLIBEXP =
 AR_STATIC_ARGS = cr
 DIRFILESEP = \\
 DFSEP = $(DIRFILESEP)
-NAME = Bio::MaxQuant::ProteinGroups::Response
-NAME_SYM = Bio_MaxQuant_ProteinGroups_Response
-VERSION = 0.03
+NAME = Tk
+NAME_SYM = Tk
+VERSION = 0.02
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_03
+VERSION_SYM = 0_02
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.03
+XS_VERSION = 0.02
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib\arch
@@ -156,11 +151,11 @@ MM_REVISION = 65705
 # PARENT_NAME = NAME without BASEEXT and no trailing :: (eg Foo::Bar)
 # DLBASE  = Basename part of dynamic library. May be just equal BASEEXT.
 MAKE = C:\Perl64\site\bin\dmake.exe
-FULLEXT = Bio\MaxQuant\ProteinGroups\Response
-BASEEXT = Response
-PARENT_NAME = Bio::MaxQuant::ProteinGroups
+FULLEXT = Tk
+BASEEXT = Tk
+PARENT_NAME = 
 DLBASE = $(BASEEXT)
-VERSION_FROM = lib/Bio/MaxQuant/ProteinGroups/Response.pm
+VERSION_FROM = 
 OBJECT = 
 LDFROM = $(OBJECT)
 LINKTYPE = dynamic
@@ -172,14 +167,25 @@ C_FILES  =
 O_FILES  = 
 H_FILES  = 
 MAN1PODS = 
-MAN3PODS = lib/Bio/MaxQuant/ProteinGroups/Response.pm
+MAN3PODS = Tk/CheckBox.pm \
+	Tk/Columns.pm \
+	Tk/ComboEntry.pm \
+	Tk/CornerBox.pm \
+	Tk/DockFrame.pm \
+	Tk/IconCanvas.pm \
+	Tk/Menustrip.pm \
+	Tk/ProgressIndicator.pm \
+	Tk/SplitFrame.pm \
+	Tk/TabFrame.pm \
+	Tk/TabbedForm.pm \
+	Tk/TableEdit.pm
 
 # Where is the Config information that we are using/depend on
 CONFIGDEP = $(PERL_ARCHLIB)$(DFSEP)Config.pm $(PERL_INC)$(DFSEP)config.h
 
 # Where to build things
-INST_LIBDIR      = $(INST_LIB)\Bio\MaxQuant\ProteinGroups
-INST_ARCHLIBDIR  = $(INST_ARCHLIB)\Bio\MaxQuant\ProteinGroups
+INST_LIBDIR      = $(INST_LIB)
+INST_ARCHLIBDIR  = $(INST_ARCHLIB)
 
 INST_AUTODIR     = $(INST_LIB)\auto\$(FULLEXT)
 INST_ARCHAUTODIR = $(INST_ARCHLIB)\auto\$(FULLEXT)
@@ -194,10 +200,49 @@ PERL_ARCHIVE       = $(PERL_INC)\perl514.lib
 PERL_ARCHIVE_AFTER = 
 
 
-TO_INST_PM = lib/Bio/MaxQuant/ProteinGroups/Response.pm
+TO_INST_PM = Tk/CheckBox.pm \
+	Tk/ChildNotification.pm \
+	Tk/Columns.pm \
+	Tk/ComboEntry.pm \
+	Tk/CornerBox.pm \
+	Tk/DockFrame.pm \
+	Tk/IconCanvas.pm \
+	Tk/Menustrip.pm \
+	Tk/ProgressIndicator.pm \
+	Tk/Signals.pm \
+	Tk/SplitFrame.pm \
+	Tk/TabFrame.pm \
+	Tk/TabbedForm.pm \
+	Tk/TableEdit.pm
 
-PM_TO_BLIB = lib/Bio/MaxQuant/ProteinGroups/Response.pm \
-	blib\lib\Bio\MaxQuant\ProteinGroups\Response.pm
+PM_TO_BLIB = Tk/TabbedForm.pm \
+	$(INST_LIB)\Tk\TabbedForm.pm \
+	Tk/Columns.pm \
+	$(INST_LIB)\Tk\Columns.pm \
+	Tk/Signals.pm \
+	$(INST_LIB)\Tk\Signals.pm \
+	Tk/TabFrame.pm \
+	$(INST_LIB)\Tk\TabFrame.pm \
+	Tk/ProgressIndicator.pm \
+	$(INST_LIB)\Tk\ProgressIndicator.pm \
+	Tk/ChildNotification.pm \
+	$(INST_LIB)\Tk\ChildNotification.pm \
+	Tk/IconCanvas.pm \
+	$(INST_LIB)\Tk\IconCanvas.pm \
+	Tk/TableEdit.pm \
+	$(INST_LIB)\Tk\TableEdit.pm \
+	Tk/ComboEntry.pm \
+	$(INST_LIB)\Tk\ComboEntry.pm \
+	Tk/CornerBox.pm \
+	$(INST_LIB)\Tk\CornerBox.pm \
+	Tk/DockFrame.pm \
+	$(INST_LIB)\Tk\DockFrame.pm \
+	Tk/CheckBox.pm \
+	$(INST_LIB)\Tk\CheckBox.pm \
+	Tk/SplitFrame.pm \
+	$(INST_LIB)\Tk\SplitFrame.pm \
+	Tk/Menustrip.pm \
+	$(INST_LIB)\Tk\Menustrip.pm
 
 
 # --- MakeMaker platform_constants section:
@@ -254,7 +299,7 @@ TARFLAGS = cvf
 ZIP = zip
 ZIPFLAGS = -r
 COMPRESS = gzip -9f
-SUFFIX = gz
+SUFFIX = .gz
 SHAR = shar
 PREOP = $(NOECHO) $(NOOP)
 POSTOP = $(NOECHO) $(NOOP)
@@ -263,8 +308,8 @@ CI = ci -u
 RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
-DISTNAME = Bio-MaxQuant-ProteinGroups-Response
-DISTVNAME = Bio-MaxQuant-ProteinGroups-Response-0.03
+DISTNAME = Tk-DKW
+DISTVNAME = Tk-DKW-0.02
 
 
 # --- MakeMaker macro section:
@@ -381,9 +426,9 @@ linkext :: $(LINKTYPE)
 
 # --- MakeMaker dlsyms section:
 
-Response.def: Makefile.PL
+Tk.def: Makefile.PL
 	$(PERLRUN) -MExtUtils::Mksymlists \
-     -e "Mksymlists('NAME'=>\"Bio::MaxQuant::ProteinGroups::Response\", 'DLBASE' => '$(BASEEXT)', 'DL_FUNCS' => {  }, 'FUNCLIST' => [], 'IMPORTS' => {  }, 'DL_VARS' => []);"
+     -e "Mksymlists('NAME'=>\"Tk\", 'DLBASE' => '$(BASEEXT)', 'DL_FUNCS' => {  }, 'FUNCLIST' => [], 'IMPORTS' => {  }, 'DL_VARS' => []);"
 
 
 # --- MakeMaker dynamic section:
@@ -418,9 +463,31 @@ POD2MAN = $(POD2MAN_EXE)
 
 
 manifypods : pure_all  \
-	lib/Bio/MaxQuant/ProteinGroups/Response.pm
+	Tk/TabbedForm.pm \
+	Tk/Columns.pm \
+	Tk/TabFrame.pm \
+	Tk/ProgressIndicator.pm \
+	Tk/IconCanvas.pm \
+	Tk/TableEdit.pm \
+	Tk/ComboEntry.pm \
+	Tk/CornerBox.pm \
+	Tk/DockFrame.pm \
+	Tk/CheckBox.pm \
+	Tk/SplitFrame.pm \
+	Tk/Menustrip.pm
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
-	  lib/Bio/MaxQuant/ProteinGroups/Response.pm $(INST_MAN3DIR)\Bio.MaxQuant.ProteinGroups.Response.$(MAN3EXT) 
+	  Tk/TabbedForm.pm $(INST_MAN3DIR)\Tk\TabbedForm.$(MAN3EXT) \
+	  Tk/Columns.pm $(INST_MAN3DIR)\Tk\Columns.$(MAN3EXT) \
+	  Tk/TabFrame.pm $(INST_MAN3DIR)\Tk\TabFrame.$(MAN3EXT) \
+	  Tk/ProgressIndicator.pm $(INST_MAN3DIR)\Tk\ProgressIndicator.$(MAN3EXT) \
+	  Tk/IconCanvas.pm $(INST_MAN3DIR)\Tk\IconCanvas.$(MAN3EXT) \
+	  Tk/TableEdit.pm $(INST_MAN3DIR)\Tk\TableEdit.$(MAN3EXT) \
+	  Tk/ComboEntry.pm $(INST_MAN3DIR)\Tk\ComboEntry.$(MAN3EXT) \
+	  Tk/CornerBox.pm $(INST_MAN3DIR)\Tk\CornerBox.$(MAN3EXT) \
+	  Tk/DockFrame.pm $(INST_MAN3DIR)\Tk\DockFrame.$(MAN3EXT) \
+	  Tk/CheckBox.pm $(INST_MAN3DIR)\Tk\CheckBox.$(MAN3EXT) \
+	  Tk/SplitFrame.pm $(INST_MAN3DIR)\Tk\SplitFrame.$(MAN3EXT) \
+	  Tk/Menustrip.pm $(INST_MAN3DIR)\Tk\Menustrip.$(MAN3EXT) 
 
 
 
@@ -432,7 +499,18 @@ POD2HTML = $(POD2HTML_EXE)
 
 
 htmlifypods :  \
-	lib/Bio/MaxQuant/ProteinGroups/Response.pm
+	Tk/TabbedForm.pm \
+	Tk/Columns.pm \
+	Tk/TabFrame.pm \
+	Tk/ProgressIndicator.pm \
+	Tk/IconCanvas.pm \
+	Tk/TableEdit.pm \
+	Tk/ComboEntry.pm \
+	Tk/CornerBox.pm \
+	Tk/DockFrame.pm \
+	Tk/CheckBox.pm \
+	Tk/SplitFrame.pm \
+	Tk/Menustrip.pm
 	$(NOECHO) $(POD2HTML)
 
 
@@ -475,8 +553,8 @@ clean :: clean_subdirs
 	  perlmain.c perl.exe \
 	  so_locations $(BASEEXT).exp 
 	- $(RM_RF) \
-	  dll.exp Bio-MaxQuant-ProteinGroups-Response-* \
-	  dll.base blib 
+	  dll.exp dll.base \
+	  blib 
 	- $(MV) $(FIRST_MAKEFILE) $(MAKEFILE_OLD) $(DEV_NULL)
 
 
@@ -498,20 +576,20 @@ realclean purge ::  clean realclean_subdirs
 metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	$(NOECHO) $(ECHO) "--- #YAML:1.0" > META_new.yml
-	$(NOECHO) $(ECHO) "name:               Bio-MaxQuant-ProteinGroups-Response" >> META_new.yml
-	$(NOECHO) $(ECHO) "version:            0.03" >> META_new.yml
-	$(NOECHO) $(ECHO) "abstract:           Analyze MQ proteinGroups for differential responses" >> META_new.yml
-	$(NOECHO) $(ECHO) "author:" >> META_new.yml
-	$(NOECHO) $(ECHO) "    - Jimi <j@0na.me>" >> META_new.yml
-	$(NOECHO) $(ECHO) "license:            Artistic_2_0" >> META_new.yml
+	$(NOECHO) $(ECHO) "name:               Tk-DKW" >> META_new.yml
+	$(NOECHO) $(ECHO) "version:            0.02" >> META_new.yml
+	$(NOECHO) $(ECHO) "abstract:           ~" >> META_new.yml
+	$(NOECHO) $(ECHO) "author:  []" >> META_new.yml
+	$(NOECHO) $(ECHO) "license:            unknown" >> META_new.yml
 	$(NOECHO) $(ECHO) "distribution_type:  module" >> META_new.yml
 	$(NOECHO) $(ECHO) "configure_requires:" >> META_new.yml
 	$(NOECHO) $(ECHO) "    ExtUtils::MakeMaker:  0" >> META_new.yml
 	$(NOECHO) $(ECHO) "build_requires:" >> META_new.yml
-	$(NOECHO) $(ECHO) "    Test::More:  0" >> META_new.yml
+	$(NOECHO) $(ECHO) "    ExtUtils::MakeMaker:  0" >> META_new.yml
 	$(NOECHO) $(ECHO) "requires:" >> META_new.yml
-	$(NOECHO) $(ECHO) "    perl:                 5.006" >> META_new.yml
-	$(NOECHO) $(ECHO) "    Statistics::Reproducibility:  0.06" >> META_new.yml
+	$(NOECHO) $(ECHO) "    Tk:               800.005" >> META_new.yml
+	$(NOECHO) $(ECHO) "    Tk::Pane:         0" >> META_new.yml
+	$(NOECHO) $(ECHO) "    Tk::TiedListbox:  0" >> META_new.yml
 	$(NOECHO) $(ECHO) "no_index:" >> META_new.yml
 	$(NOECHO) $(ECHO) "    directory:" >> META_new.yml
 	$(NOECHO) $(ECHO) "        - t" >> META_new.yml
@@ -816,12 +894,13 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) "<SOFTPKG NAME=\"$(DISTNAME)\" VERSION=\"0.03\">" > $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) "    <ABSTRACT>Analyze MQ proteinGroups for differential responses</ABSTRACT>" >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) "    <AUTHOR>Jimi &lt;j@0na.me&gt;</AUTHOR>" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "<SOFTPKG NAME=\"$(DISTNAME)\" VERSION=\"0.02\">" > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "    <ABSTRACT></ABSTRACT>" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "    <AUTHOR></AUTHOR>" >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "    <IMPLEMENTATION>" >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) "        <PERLCORE VERSION=\"5,006,0,0\" />" >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Statistics::Reproducibility\" VERSION=\"0.06\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Tk::\" VERSION=\"800.005\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Tk::Pane\" />" >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) "        <REQUIRE NAME=\"Tk::TiedListbox\" />" >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "        <ARCHITECTURE NAME=\"MSWin32-x64-multi-thread-5.14\" />" >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "        <CODEBASE HREF=\"\" />" >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) "    </IMPLEMENTATION>" >> $(DISTNAME).ppd
@@ -832,7 +911,20 @@ ppd :
 
 pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e "pm_to_blib({{@ARGV}, '$(INST_LIB)\auto', q[$(PM_FILTER)], '$(PERM_DIR)')" -- \
-	  lib/Bio/MaxQuant/ProteinGroups/Response.pm blib\lib\Bio\MaxQuant\ProteinGroups\Response.pm 
+	  Tk/TabbedForm.pm $(INST_LIB)\Tk\TabbedForm.pm \
+	  Tk/Columns.pm $(INST_LIB)\Tk\Columns.pm \
+	  Tk/Signals.pm $(INST_LIB)\Tk\Signals.pm \
+	  Tk/TabFrame.pm $(INST_LIB)\Tk\TabFrame.pm \
+	  Tk/ProgressIndicator.pm $(INST_LIB)\Tk\ProgressIndicator.pm \
+	  Tk/ChildNotification.pm $(INST_LIB)\Tk\ChildNotification.pm \
+	  Tk/IconCanvas.pm $(INST_LIB)\Tk\IconCanvas.pm \
+	  Tk/TableEdit.pm $(INST_LIB)\Tk\TableEdit.pm \
+	  Tk/ComboEntry.pm $(INST_LIB)\Tk\ComboEntry.pm \
+	  Tk/CornerBox.pm $(INST_LIB)\Tk\CornerBox.pm \
+	  Tk/DockFrame.pm $(INST_LIB)\Tk\DockFrame.pm \
+	  Tk/CheckBox.pm $(INST_LIB)\Tk\CheckBox.pm \
+	  Tk/SplitFrame.pm $(INST_LIB)\Tk\SplitFrame.pm \
+	  Tk/Menustrip.pm $(INST_LIB)\Tk\Menustrip.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
 

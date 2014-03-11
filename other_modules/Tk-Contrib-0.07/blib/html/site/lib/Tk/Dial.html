@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../scineplex.css">
+<title>Tk::Dial - An alternative to the Scale widget</title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<script>writelinks('__top__',3);</script>
+<h1><a>Tk::Dial - An alternative to the Scale widget</a></h1>
+<p><a name="__index__"></a></p>
+
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#to_do">TO DO</a></li>
+	<li><a href="#authors">AUTHORS</a></li>
+	<li><a href="#history">HISTORY</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>Tk::Dial - An alternative to the Scale widget</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+    <span class="keyword">use</span> <span class="variable">Tk::Dial</span><span class="operator">;</span>
+</pre>
+<pre>
+    <span class="variable">$dial</span> <span class="operator">=</span> <span class="variable">$widget</span><span class="operator">-&gt;</span><span class="variable">Dial</span><span class="operator">(</span><span class="string">-margin</span> <span class="operator">=&gt;</span>  <span class="number">20</span><span class="operator">,</span>
+                          <span class="string">-radius</span> <span class="operator">=&gt;</span>  <span class="number">48</span><span class="operator">,</span>
+                          <span class="string">-min</span>    <span class="operator">=&gt;</span>   <span class="number">0</span><span class="operator">,</span>
+                          <span class="string">-max</span>    <span class="operator">=&gt;</span> <span class="number">100</span><span class="operator">,</span>
+                          <span class="string">-value</span>  <span class="operator">=&gt;</span>   <span class="number">0</span><span class="operator">,</span>
+                          <span class="string">-format</span> <span class="operator">=&gt;</span> <span class="string">'%d'</span><span class="operator">);</span>
+</pre>
+<pre>
+    margin - blank space to leave around dial
+    radius - radius of dial
+    min, max - range of possible values
+    value  - current value
+    format - printf-style format for displaying format</pre>
+<p>Values shown above are defaults.</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>A dial looks like a speedometer: a 3/4 circle with a needle indicating
+the current value.  Below the graphical dial is an entry that displays
+the current value, and which can be used to enter a value by hand.</p>
+<p>The needle is moved by pressing button 1 in the canvas and dragging. The
+needle will follow the mouse, even if the mouse leaves the canvas, which
+allows for high precision. Alternatively, the user can enter a value in
+the entry space and press Return to set the value; the needle will be
+set accordingly.</p>
+<p>
+</p>
+<hr />
+<h1><a name="to_do">TO DO</a></h1>
+<pre>
+ Configure
+ Tick marks
+ Step size</pre>
+<p>
+</p>
+<hr />
+<h1><a name="authors">AUTHORS</a></h1>
+<p>Roy Johnson &lt;<a href="mailto:rjohnson@shell.com">rjohnson@shell.com</a>&gt;</p>
+<p>Based on a similar widget in XV, a program by
+John Bradley &lt;<a href="mailto:bradley@cis.upenn.edu">bradley@cis.upenn.edu</a>&gt;</p>
+<p>
+</p>
+<hr />
+<h1><a name="history">HISTORY</a></h1>
+<pre>
+
+August 1995: Released for critique by pTk mailing list</pre>
+
+</body>
+
+</html>

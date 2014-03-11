@@ -1,0 +1,106 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../scineplex.css">
+<title>Tk::Axis - Canvas with Axes</title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<script>writelinks('__top__',3);</script>
+<h1><a>Tk::Axis - Canvas with Axes</a></h1>
+<p><a name="__index__"></a></p>
+
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>Tk::Axis - Canvas with Axes</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+    <span class="keyword">use</span> <span class="variable">Tk::Axis</span><span class="operator">;</span>
+</pre>
+<pre>
+    <span class="variable">$widget</span> <span class="operator">=</span> <span class="variable">$parent</span><span class="operator">-&gt;</span><span class="variable">Axis</span><span class="operator">(</span>
+                       <span class="string">-height</span>   <span class="operator">=&gt;</span> <span class="variable">$height</span><span class="operator">,</span>
+                       <span class="string">-margin</span>   <span class="operator">=&gt;</span> <span class="variable">$margin</span><span class="operator">,</span>
+                       <span class="string">-tick</span>     <span class="operator">=&gt;</span> <span class="variable">$tick</span><span class="operator">,</span>
+                       <span class="string">-tickfont</span> <span class="operator">=&gt;</span> <span class="variable">$tickfont</span><span class="operator">,</span>
+                       <span class="string">-tst</span>      <span class="operator">=&gt;</span> <span class="variable">$tst</span><span class="operator">,</span>
+                       <span class="string">-width</span>    <span class="operator">=&gt;</span> <span class="variable">$width</span><span class="operator">,</span>
+                       <span class="string">-xmin</span>     <span class="operator">=&gt;</span> <span class="variable">$xmin</span><span class="operator">,</span>
+                       <span class="string">-xmax</span>     <span class="operator">=&gt;</span> <span class="variable">$xmax</span><span class="operator">,</span>
+                       <span class="string">-ymin</span>     <span class="operator">=&gt;</span> <span class="variable">$ymin</span><span class="operator">,</span>
+                       <span class="string">-ymax</span>     <span class="operator">=&gt;</span> <span class="variable">$ymax</span><span class="operator">,</span>
+                      <span class="operator">);</span>
+</pre>
+<pre>
+    <span class="comment">#    $height  - height of the window</span>
+    <span class="comment">#    $width   - width  ......</span>
+    <span class="comment">#    $xmin    - lowest x value we will display</span>
+    <span class="comment">#    $xmax    - highest .....</span>
+    <span class="comment">#    $ymin    - lowest y value .....</span>
+    <span class="comment">#    $ymax    - highest .....</span>
+    <span class="comment">#    $margin  - the number of pixels used as a margin around the plot</span>
+    <span class="comment">#    $tick    - the length (in pixels) of the tickmarks</span>
+    <span class="comment">#    $tst     - the step size for the tick marks</span>
+    <span class="comment">#    $tst[x|y]- step size for tick marks on the x (or y) axis</span>
+    <span class="comment">#                (if not specified tst is used)</span>
+    <span class="comment">#    $tickfont    - for for the lables</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>This is an improved version of the axis widget. Changes with respect to the
+previous version are :</p>
+<ul>
+<li>
+<p>the 'pack' has been moved out the widget. One has to do his own packing</p>
+</li>
+<li>
+<p>it is now possible to work in the coordinates of the axis. The following
+piece of code draws a line between the points (2 , 3.1)  (4 , 4).</p>
+<pre>
+    <span class="variable">$t</span><span class="operator">-&gt;</span><span class="variable">create</span><span class="operator">(</span><span class="string">'line'</span><span class="operator">,</span><span class="variable">$t</span><span class="operator">-&gt;</span><span class="variable">plx</span><span class="operator">(</span><span class="number">2</span><span class="operator">),</span><span class="variable">$t</span><span class="operator">-&gt;</span><span class="variable">ply</span><span class="operator">(</span><span class="number">3.1</span><span class="operator">),</span><span class="variable">$t</span><span class="operator">-&gt;</span><span class="variable">plx</span><span class="operator">(</span><span class="number">4</span><span class="operator">),</span><span class="variable">$t</span><span class="operator">-&gt;</span><span class="variable">ply</span><span class="operator">(</span><span class="number">4</span><span class="operator">));</span>
+</pre>
+</li>
+</ul>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<pre>
+ Kris Boulez            (Kris.Boulez@rug.ac.be)
+ Biomolecular NMR unit  &lt;<a href="http://bionmr1.rug.ac.be/~kris&gt">http://bionmr1.rug.ac.be/~kris&gt</a>;
+ University of Ghent, Belgium</pre>
+
+</body>
+
+</html>

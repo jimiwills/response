@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../scineplex.css">
+<title>Tk::OlWm - Interface to OpenLook properties of toplevel windows.</title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<script>writelinks('__top__',3);</script>
+<h1><a>Tk::OlWm - Interface to OpenLook properties of toplevel windows.</a></h1>
+<p><a name="__index__"></a></p>
+
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#status">STATUS</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>Tk::OlWm - Interface to OpenLook properties of toplevel windows.</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+   <span class="keyword">use</span> <span class="variable">Tk::OlWm</span><span class="operator">;</span>
+</pre>
+<pre>
+   <span class="variable">$toplevel</span><span class="operator">-&gt;</span><span class="variable">OL_DECOR</span><span class="operator">(</span> 
+                        <span class="string">CLOSE</span>  <span class="operator">=&gt;</span> <span class="variable">flag</span><span class="operator">,</span>
+                        <span class="string">FOOTER</span> <span class="operator">=&gt;</span> <span class="variable">flag</span><span class="operator">,</span>
+                        <span class="string">HEADER</span> <span class="operator">=&gt;</span> <span class="variable">flag</span><span class="operator">,</span> 
+                        <span class="string">RESIZE</span> <span class="operator">=&gt;</span> <span class="variable">flag</span><span class="operator">,</span> 
+                        <span class="string">PIN</span> <span class="operator">=&gt;</span> <span class="variable">flag</span><span class="operator">,</span> 
+                        <span class="string">ICON_NAME</span> <span class="operator">=&gt;</span> <span class="variable">flag</span><span class="operator">,</span> 
+                      <span class="operator">);</span>
+</pre>
+<pre>
+   <span class="variable">$toplevel</span><span class="operator">-&gt;</span><span class="variable">OL_WIN_BUSY</span><span class="operator">(</span> <span class="variable">flag</span> <span class="operator">);</span>
+</pre>
+<pre>
+   <span class="variable">$toplevel</span><span class="operator">-&gt;</span><span class="variable">OL_PIN_STATE</span><span class="operator">(</span> <span class="variable">flag</span> <span class="operator">);</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>A simple perl-only module that adds a few methods to <a href="../../../site/lib/Tk/Wm.html">Tk::Wm</a> class.
+These methods manipulate properties of the <a href="../../../site/lib/Tk/Toplevel.html">$toplevel</a> to
+communicate 
+with an OpenLook window manager, e.g. Sun's <code>olwm</code> or <code>olvwm</code>.</p>
+<p>In the synopsis above <code>flag</code> is a &quot;boolean&quot; value - i.e. an integer 
+with 0 meaning false and other values meaning true.</p>
+<p>All the <em>name =&gt; flag</em> pairs are optional.</p>
+<p>
+</p>
+<hr />
+<h1><a name="status">STATUS</a></h1>
+<p>Works for me, it is in 'Contrib' because I cannot support something
+which has been developed just by dumping properties of Sun applications
+and guessing.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Nick Ing-Simmons &lt;<a href="mailto:nik@tiuk.ti.com">nik@tiuk.ti.com</a>&gt;</p>
+
+</body>
+
+</html>

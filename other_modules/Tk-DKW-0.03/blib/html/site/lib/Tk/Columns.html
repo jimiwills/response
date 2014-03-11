@@ -1,0 +1,756 @@
+<?xml version="1.0" ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<!-- saved from url=(0017)http://localhost/ -->
+<script language="JavaScript" src="../../../displayToc.js"></script>
+<script language="JavaScript" src="../../../tocParas.js"></script>
+<script language="JavaScript" src="../../../tocTab.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../scineplex.css">
+<title>Tk::Columns - A multicolumn list widget with sortable &amp; sizeable columns</title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<script>writelinks('__top__',3);</script>
+<h1><a>Tk::Columns - A multicolumn list widget with sortable &amp; sizeable columns</a></h1>
+<p><a name="__index__"></a></p>
+
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#standard_options">STANDARD OPTIONS</a></li>
+	<li><a href="#widget_specific_options">WIDGET-SPECIFIC OPTIONS</a></li>
+	<li><a href="#widget_methods">WIDGET METHODS</a></li>
+	<li><a href="#bindings">BINDINGS</a></li>
+	<li><a href="#requirements">REQUIREMENTS</a></li>
+	<li><a href="#caveats">CAVEATS</a></li>
+	<li><a href="#authors">AUTHORS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#history">HISTORY</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<hr />
+<h1><a name="name">NAME</a></h1>
+<p>Tk::Columns - A multicolumn list widget with sortable &amp; sizeable columns</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+    <span class="keyword">use</span> <span class="variable">Tk::Columns</span><span class="operator">;</span>
+</pre>
+<pre>
+    <span class="variable">$Columns</span> <span class="operator">=</span> <span class="variable">$parent</span><span class="operator">-&gt;</span>B<span class="operator">&lt;</span><span class="variable">Columns</span><span class="operator">&gt;</span>
+       <span class="operator">(</span>
+        <span class="string">'-columnlabels'</span> <span class="operator">=&gt;</span> <span class="operator">[</span><span class="string">qw (column1 column2)</span><span class="operator">]</span>
+        <span class="string">'-listbackground'</span> <span class="operator">=&gt;</span> <span class="string">'white'</span><span class="operator">,</span>
+        <span class="string">'-listforeground'</span> <span class="operator">=&gt;</span> <span class="string">'black'</span><span class="operator">,</span>
+        <span class="string">'-buttonforeground'</span> <span class="operator">=&gt;</span> <span class="string">'black'</span><span class="operator">,</span>
+        <span class="string">'-buttonbackground'</span> <span class="operator">=&gt;</span> <span class="string">'blue'</span><span class="operator">,</span>
+       <span class="operator">);</span>
+</pre>
+<pre>
+    <span class="variable">$ColumnHeader</span> <span class="operator">=</span> <span class="variable">$Columns</span><span class="operator">-&gt;</span>B<span class="operator">&lt;</span><span class="variable">ColumnButton</span><span class="operator">&gt;</span>
+       <span class="operator">(</span>
+        <span class="string">'-listfont'</span> <span class="operator">=&gt;</span> <span class="string">'-adobe-new century schoolbook-medium-r-normal--14-*-*-*-*-*-*-*'</span><span class="operator">,</span>
+        <span class="string">'-buttoncolor'</span> <span class="operator">=&gt;</span> <span class="string">'beige'</span><span class="operator">,</span>
+        <span class="string">'-text'</span> <span class="operator">=&gt;</span> <span class="string">'column3'</span><span class="operator">,</span>
+        <span class="string">'-width'</span> <span class="operator">=&gt;</span> <span class="number">15</span><span class="operator">,</span>
+        <span class="string">'-trimcount'</span> <span class="operator">=&gt;</span> <span class="number">2</span><span class="operator">,</span>
+        <span class="string">'-listbackground'</span> <span class="operator">=&gt;</span> <span class="string">'white'</span><span class="operator">,</span>
+        <span class="string">'-listforeground'</span> <span class="operator">=&gt;</span> <span class="string">'black'</span><span class="operator">,</span>
+        <span class="string">'-buttonforeground'</span> <span class="operator">=&gt;</span> <span class="string">'black'</span><span class="operator">,</span>
+        <span class="string">'-buttonbackground'</span> <span class="operator">=&gt;</span> <span class="string">'blue'</span><span class="operator">,</span>
+        <span class="string">'-sort'</span> <span class="operator">=&gt;</span> <span class="string">'true'</span><span class="operator">,</span>
+        <span class="string">'-sortcommand'</span> <span class="operator">=&gt;</span> <span class="string">'$a cmp $b'</span><span class="operator">,</span>
+        <span class="string">'-image'</span> <span class="operator">=&gt;</span> <span class="variable">$icon_image</span><span class="operator">,</span>
+        <span class="string">'-buttoncommand'</span> <span class="operator">=&gt;</span> <span class="keyword">sub</span><span class="variable"> </span><span class="operator">{...},</span>
+        <span class="string">'-selectcommand'</span> <span class="operator">=&gt;</span> <span class="keyword">sub</span><span class="variable"> </span><span class="operator">{...}</span>
+       <span class="operator">);</span>
+</pre>
+<pre>
+   <span class="variable">$Columns</span><span class="operator">-&gt;</span><span class="variable">insert</span> <span class="operator">(</span><span class="string">'end'</span><span class="operator">,</span> <span class="operator">[</span><span class="string">'List'</span><span class="operator">,</span> <span class="string">'Row'</span><span class="operator">,</span> <span class="string">'Contents'</span><span class="operator">]</span><span class="operator">);</span>
+   <span class="variable">$Columns</span><span class="operator">-&gt;</span><span class="variable">insert</span> <span class="operator">(</span><span class="string">'end'</span><span class="operator">,</span> <span class="operator">{</span><span class="string">'column1'</span> <span class="operator">=&gt;</span> <span class="string">'List'</span><span class="operator">,</span> <span class="string">'column2'</span> <span class="operator">=&gt;</span> <span class="string">'Row'</span><span class="operator">,</span> <span class="string">'column3'</span> <span class="operator">=&gt;</span> <span class="string">'Contents'</span><span class="operator">}</span><span class="operator">);</span>
+   <span class="variable">$Columns</span><span class="operator">-&gt;</span><span class="variable">insert</span> <span class="operator">(</span><span class="string">'end'</span><span class="operator">,</span> <span class="string">'List'</span><span class="operator">,</span> <span class="string">'Row'</span><span class="operator">,</span> <span class="string">'Contents'</span><span class="operator">);</span>
+   <span class="variable">$Columns</span><span class="operator">-&gt;</span><span class="variable">delete</span> <span class="operator">(</span><span class="number">0</span><span class="operator">,</span> <span class="string">'end'</span><span class="operator">);</span>
+</pre>
+<pre>
+   ...</pre>
+<pre>
+   <span class="variable">Tk::MainLoop</span><span class="operator">;</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>Implements a multicolumn list with resizeable, scrollable columns and configurable
+sorting by column. Other features include column selection callbacks and row selection
+callbacks, global and per-column color and font selection, and column insertion
+data specified by column label (hash) or by index (list).</p>
+<p>
+</p>
+<hr />
+<h1><a name="standard_options">STANDARD OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="columns" class="item">Columns</a></strong></dt>
+
+<dd>
+<p><em>-background -foreground -font -bg</em></p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="columnbutton" class="item">ColumnButton</a></strong></dt>
+
+<dd>
+<p><em>-font -image -foreground -background -borderwidth -relief -text -width -bg</em></p>
+</dd>
+</dl>
+<p>See <em>Tk</em> for details of the standard options.</p>
+<p>
+</p>
+<hr />
+<h1><a name="widget_specific_options">WIDGET-SPECIFIC OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="name_buttonbackground" class="item">Name:	<strong>buttonbackground</strong></a></strong></dt>
+
+<dt><strong><a name="class_buttonbackground" class="item">Class:	<strong>ButtonBackground</strong></a></strong></dt>
+
+<dt><strong><a name="switch_buttonbackground" class="item">Switch:	<strong>-buttonbackground</strong></a></strong></dt>
+
+<dt><strong><a name="aliases_buttoncolor_color" class="item">Aliases:	<strong>-buttoncolor</strong> <strong>-color</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the background (surface) color for all existing buttons</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_buttoncommand" class="item">Name:	<strong>buttoncommand</strong></a></strong></dt>
+
+<dt><strong><a name="class_buttoncommand" class="item">Class:	<strong>ButtonCommand</strong></a></strong></dt>
+
+<dt><strong><a name="switch_buttoncommand" class="item">Switch:	<strong>-buttoncommand</strong></a></strong></dt>
+
+<dd>
+<p>Specifies a callback to be executed when a column header is clicked. The
+callback is passed the list index. When specified, this callback is
+registered for every existing listbox and sets the default for new ones.
+If the <strong>-sort</strong> option is turned on, it overrides this option but does
+not negate it, allowing it to return when the <strong>-sort</strong> option is turned off.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_buttonfont" class="item">Name:	<strong>buttonfont</strong></a></strong></dt>
+
+<dt><strong><a name="class_buttonfont" class="item">Class:	<strong>ButtonFont</strong></a></strong></dt>
+
+<dt><strong><a name="switch_buttonfont" class="item">Switch:	<strong>-buttonfont</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the font to use for all the existing column header labels</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_columns" class="item">Name:	<strong>columns</strong></a></strong></dt>
+
+<dt><strong><a name="class_columns" class="item">Class:	<strong>Columns</strong></a></strong></dt>
+
+<dt><strong><a name="switch_columns" class="item">Switch:	<strong>-columns</strong></a></strong></dt>
+
+<dt><strong><a name="aliases_columnlabels" class="item">Aliases:	<strong>-columnlabels</strong></a></strong></dt>
+
+<dd>
+<p>This option takes a reference to a list of options. If the list consists of
+scalar values, these are assumed to be the labels for column headers. These
+elements are created with default options which should normally be alright.
+If the list consists of references to arrays, then these are assumed to be
+key =&gt; value pairs specifying the options to pass to $Columns-&gt;<strong>addcolumn</strong>.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_image" class="item">Name:	<strong>image</strong></a></strong></dt>
+
+<dt><strong><a name="class_image" class="item">Class:	<strong>Image</strong></a></strong></dt>
+
+<dt><strong><a name="switch_image" class="item">Switch:	<strong>-image</strong></a></strong></dt>
+
+<dd>
+<p>Setting this to a reference to a Tk::Image causes that image to be set for all
+of the column labels and sets the default for all future columns. By default
+column headers are displayed without icons.</p>
+<p>See <a href="../../../site/lib/Tk/Label.html">the Tk::Label manpage</a></p>
+<dl>
+<dt><strong><a name="name_listbackground" class="item">Name:	<strong>listbackground</strong></a></strong></dt>
+
+<dt><strong><a name="class_listbackground" class="item">Class:	<strong>ListBackground</strong></a></strong></dt>
+
+<dt><strong><a name="switch_listbackground" class="item">Switch:	<strong>-listbackground</strong></a></strong></dt>
+
+<dt><strong><a name="aliases_listcolor_background_bg" class="item">Aliases:	<strong>-listcolor</strong> <strong>-background</strong> <strong>-bg</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the background (surface) color for all existing listboxes and sets the default for all new ones. Default is 'white'</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_listfont" class="item">Name:	<strong>listfont</strong></a></strong></dt>
+
+<dt><strong><a name="class_listfont" class="item">Class:	<strong>ListFont</strong></a></strong></dt>
+
+<dt><strong><a name="switch_listfont" class="item">Switch:	<strong>-listfont</strong></a></strong></dt>
+
+<dt><strong><a name="alias_font" class="item">Alias:	<strong>-font</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the font for all existing listboxes and sets the default for all
+new ones. The default is to use the system default font.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_listforeground" class="item">Name:	<strong>listforeground</strong></a></strong></dt>
+
+<dt><strong><a name="class_listforeground" class="item">Class:	<strong>ListForeground</strong></a></strong></dt>
+
+<dt><strong><a name="switch_listforeground" class="item">Switch:	<strong>-listforeground</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the foreground (writing) color for all existing listboxes and sets the default for all new ones. Default is 'black'</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_selectcommand" class="item">Name:	<strong>selectcommand</strong></a></strong></dt>
+
+<dt><strong><a name="class_selectcommand" class="item">Class:	<strong>SelectCommand</strong></a></strong></dt>
+
+<dt><strong><a name="switch_selectcommand" class="item">Switch:	<strong>-selectcommand</strong></a></strong></dt>
+
+<dt><strong><a name="aliases_command" class="item">Aliases:	<strong>-command</strong></a></strong></dt>
+
+<dd>
+<p>Specifies a callback to be executed when a list entry is double-clicked.
+The callback is passed the list index. When specified, this callback is
+registered for every existing listbox and sets the default for new ones.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_selectmode" class="item">Name:	<strong>selectmode</strong></a></strong></dt>
+
+<dt><strong><a name="class_selectmode" class="item">Class:	<strong>SelectMode</strong></a></strong></dt>
+
+<dt><strong><a name="switch_selectmode" class="item">Switch:	<strong>-selectmode</strong></a></strong></dt>
+
+<dd>
+<p>Sets the selection mode for all existing listboxes and sets the default to
+use for new ones. The default is 'browse'.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_trimcount" class="item">Name:	<strong>trimcount</strong></a></strong></dt>
+
+<dt><strong><a name="class_trimcount" class="item">Class:	<strong>TrimCount</strong></a></strong></dt>
+
+<dt><strong><a name="switch_trimcount" class="item">Switch:	<strong>-trimcount</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the number of button trim 'handles' for all existing buttons.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="name_zoom" class="item">Name:	<strong>zoom</strong></a></strong></dt>
+
+<dt><strong><a name="class_zoom" class="item">Class:	<strong>Zoom</strong></a></strong></dt>
+
+<dt><strong><a name="switch_zoom" class="item">Switch:	<strong>-zoom</strong></a></strong></dt>
+
+<dd>
+<p>This option takes a boolean argument. When set to 1, all the existing columns
+are 'zoomed', that is, reduced to their smallest width. When set to 0, all the
+columns are returned to the original widths</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="widget_methods">WIDGET METHODS</a></h1>
+<dl>
+<dt><strong><em>$Button</em> = <em>$Columns</em>-&gt;<strong>ColumnButton</strong> (<em>option</em> =&gt; <strong>value</strong>, ...)</strong></dt>
+
+<dt><strong><a name="addcolumn" class="item"><em>$Button</em> = <em>$Columns</em>-&gt;<strong>addcolumn</strong> (<em>option</em> =&gt; <strong>value</strong>, ...)</a></strong></dt>
+
+<dt><strong><a name="column" class="item"><em>$Button</em> = <em>$Columns</em>-&gt;<strong>Column</strong> (<em>option</em> =&gt; <strong>value</strong>, ...)</a></strong></dt>
+
+<dt><strong><a name="button" class="item"><em>$Button</em> = <em>$Columns</em>-&gt;<strong>Button</strong> (<em>option</em> =&gt; <strong>value</strong>, ...)</a></strong></dt>
+
+<dt><strong><a name="column" class="item"><em>$Button</em> = <em>$Columns</em>-&gt;<strong>column</strong> (<em>option</em> =&gt; <strong>value</strong>, ...)</a></strong></dt>
+
+<dd>
+<p>Creates a column header and an attached listbox. The listbox is 'tied' to any preexisting
+ones. The new listbox is padded with empty rows to match its siblings. This method really
+invokes an instantiation of the ColumnButton class. All the options given apply to the
+ColumnButton. The widget reference returned can be used to alter the column's behaviour
+later. The following options are available :-</p>
+<p></p>
+<dl>
+<dt><strong><a name="background_color" class="item"><strong>-background</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dt><strong><a name="buttonbackground_color" class="item"><strong>-buttonbackground</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dt><strong><a name="bg_color" class="item"><strong>-bg</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dt><strong><a name="buttoncolor_color" class="item"><strong>-buttoncolor</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dt><strong><a name="color_color" class="item"><strong>-color</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the button's background (surface) color.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="buttoncommand_callback" class="item"><strong>-buttoncommand</strong> =&gt; <strong>callback</strong></a></strong></dt>
+
+<dd>
+<p>Specifies a callback to be executed when a column header is clicked. The
+callback is passed the list index. If the <strong>-sort</strong> option is turned on,
+it overrides this option but does not negate it, allowing it to return
+when the <strong>-sort</strong> option is turned off.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="font_fontspec" class="item"><strong>-font</strong> =&gt; <strong>fontspec</strong></a></strong></dt>
+
+<dt><strong><a name="buttonfont_fontspec" class="item"><strong>-buttonfont</strong> =&gt; <strong>fontspec</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the font for the text in the button label.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="foreground_color" class="item"><strong>-foreground</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dt><strong><a name="buttonforeground_color" class="item"><strong>-buttonforeground</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dt><strong><a name="fg_color" class="item"><strong>-fg</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the button's foreground (text) color. Defaults to black.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="image_image" class="item"><strong>-image</strong> =&gt; <strong>image</strong></a></strong></dt>
+
+<dd>
+<p>Setting this to a reference to a Tk::Image causes that image to be displayed in the
+column label.</p>
+<p>See <a href="../../../site/lib/Tk/Label.html">the Tk::Label manpage</a></p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="listbackground_color" class="item"><strong>-listbackground</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dt><strong><a name="slavecolor_color" class="item"><strong>-slavecolor</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dd>
+<p>Sets the background color for the attached listbox</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="listfont_fontspec" class="item"><strong>-listfont</strong> =&gt; <strong>fontspec</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the font for the text in the attached listbox.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="listforeground_color" class="item"><strong>-listforeground</strong> =&gt; <strong>color</strong></a></strong></dt>
+
+<dd>
+<p>Sets the foreground (text) color for the attached listbox.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="listselectmode_mode" class="item"><strong>-listselectmode</strong> =&gt; <strong>mode</strong></a></strong></dt>
+
+<dd>
+<p>Sets the selection mode for the attached listbox.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="selectcommand_callback" class="item"><strong>-selectcommand</strong> =&gt; <strong>callback</strong></a></strong></dt>
+
+<dt><strong><a name="command_callback" class="item"><strong>-command</strong> =&gt; <strong>callback</strong></a></strong></dt>
+
+<dd>
+<p>Specifies a callback to be executed when a list entry is double-clicked.
+The callback is passed the list index.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="slave_widget" class="item"><strong>-slave</strong> =&gt; <strong>widget</strong></a></strong></dt>
+
+<dd>
+<p>DO NOT USE ! This option is use to inform the button which widget it must
+manage. It is provided here only for completeness.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="sort_boolean" class="item"><strong>-sort</strong> =&gt; <strong>boolean</strong></a></strong></dt>
+
+<dd>
+<p>Setting this to boolean 'true' allows all columns to be sorted by this column
+when the button is pressed. Each invocation reverses the sort order. The sort
+method can be specified with <strong>-sortcommand</strong>. Setting this to boolean false (0)
+disables the sorting. When active, this option overrides any existing
+<strong>-buttoncommand</strong>. When inactive, any preexisting <strong>-buttoncommand</strong> is re-enabled.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="sortcommand_string" class="item"><strong>-sortcommand</strong> =&gt; <strong>string</strong></a></strong></dt>
+
+<dt><strong><a name="sortfunction_string" class="item"><strong>-sortfunction</strong> =&gt; <strong>string</strong></a></strong></dt>
+
+<dt><strong><a name="sortmethod_string" class="item"><strong>-sortmethod</strong> =&gt; <strong>string</strong></a></strong></dt>
+
+<dd>
+<p>This specifies the sort function to pass to the <strong>sort</strong> Perl function for sorting
+of this column. The default is '{lc ($a) cmp lc ($b)}' for (caseless) alphanumeric
+comparison.</p>
+<p>Read the <strong>perlfunc</strong> documentation for more details on <strong>sort</strong>.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="trimcount_integer" class="item"><strong>-trimcount</strong> =&gt; <strong>integer</strong></a></strong></dt>
+
+<dd>
+<p>Specifies the number of trim 'handles' for the button. It defaults to 2.
+Setting it to 0 makes the column unresizeable.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="width_integer" class="item"><strong>-width</strong> =&gt; <strong>integer</strong></a></strong></dt>
+
+<dd>
+<p>Set this to the desired width of the column, in characters. The default is the natural
+width of the text and image parts combined.</p>
+</dd>
+</dl>
+<p></p>
+<dl>
+<dt><strong><a name="zoom_boolean" class="item"><strong>-zoom</strong> =&gt; <strong>boolean</strong></a></strong></dt>
+
+<dd>
+<p>This option takes a boolean argument. When set to 1, the column is 'zoomed',
+that is, its width is reduced to the smallest possible setting. When set to 0,
+the column is returned to its original width.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="activate" class="item"><em>$Columns</em>-&gt;<strong>activate</strong>(<em>index</em>)</a></strong></dt>
+
+<dd>
+<p>Sets the row element to the one indicated by index. If index is outside the
+range of elements in the listbox then the closest element is activated. The
+active element is drawn with an underline when the widget has the input focus,
+and its index may be retrieved with the index active.</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="bbox" class="item"><em>$Columns</em>-&gt;<strong>bbox</strong>(<em>index</em>, <em>[columnspec]</em>)</a></strong></dt>
+
+<dd>
+<p>Returns a list of four numbers describing the bounding box of the text in the
+element given by index in the listbox specified by <strong>column</strong> or the first listbox
+in the composite. The first two elements of the list give the x and y coordinates
+of the upper-left corner of the screen area covered by the text (specified in pixels
+relative to the widget) and the last two elements give the width and height of the
+area, in pixels. If no part of the element given by index is visible on the screen,
+or if index refers to a non-existent element, then the result is an empty string;
+if the element is partially visible, the result gives the full area of the element,
+including any parts that are not visible.</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="buttonhash" class="item"><em>$Columns</em>-&gt;<strong>buttonhash</strong>()</a></strong></dt>
+
+<dd>
+<p>Returns a hash of column buttons keyed by column label</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="buttons" class="item"><em>$Columns</em>-&gt;<strong>buttons</strong>()</a></strong></dt>
+
+<dd>
+<p>Returns an ordered list of the column buttons</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="buttonwidth" class="item"><em>$Columns</em>-&gt;<strong>buttonwidth</strong>(<em>columnspec</em>, <em>?newwidth?</em>)</a></strong></dt>
+
+<dt><strong><a name="columnwidth" class="item"><em>$Columns</em>-&gt;<strong>columnwidth</strong>(<em>columnspec</em>, <em>?newwidth?</em>)</a></strong></dt>
+
+<dt><strong><a name="width" class="item"><em>$Columns</em>-&gt;<strong>width</strong>(<em>columnspec</em>, <em>?newwidth?</em>)</a></strong></dt>
+
+<dd>
+<p>This uses the numeric or textual <strong>columnspec</strong> to locate a column header and sets the
+width to <strong>newwidth</strong> if present, or returns the current width of that column. It the
+column doesn't exist then the return value 0 is quietly returned.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="columnlabels" class="item"><em>$Columns</em>-&gt;<strong>columnlabels</strong>(<em>array reference</em>)</a></strong></dt>
+
+<dt><strong><a name="columns" class="item"><em>$Columns</em>-&gt;<strong>columns</strong>(<em>array reference</em>)</a></strong></dt>
+
+<dd>
+<p>This invokes <em>$Columns</em>-&gt;configure (<em>-columnlabels</em> =&gt; <strong>array reference</strong>). See <strong>-columnlabels</strong>
+for details as this is a convenience method.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="curselection" class="item"><em>$Columns</em>-&gt;<strong>curselection</strong>()</a></strong></dt>
+
+<dd>
+<p>Returns a list containing the numerical indices of all of the elements in the
+listbox that are currently selected. If there are no elements selected in the
+listbox then an empty string is returned.</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="delete" class="item"><em>$Columns</em>-&gt;<strong>delete</strong>(<em>where</em>, <em>where</em>)</a></strong></dt>
+
+<dd>
+<p>This has identical behaviour to listbox-&gt;<strong>delete</strong>.</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="get" class="item"><em>$Columns</em>-&gt;<strong>get</strong>(<em>from</em>, <em>to</em>)</a></strong></dt>
+
+<dd>
+<p>Retrieves the rows in the range <em>from</em> .. <em>to</em>. This method is an
+analog of the <em>listbox</em>-&gt;<strong>get</strong> method. The data returned is
+an array of references to the row lists specified.</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="index" class="item"><em>$Columns</em>-&gt;<strong>index</strong>(<em>index</em>)</a></strong></dt>
+
+<dd>
+<p>Returns the integer index value that corresponds to index. If index is end the
+return value is a count of the number of elements in the listbox (not the index
+of the last element).</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="indexedbutton" class="item"><em>$Columns</em>-&gt;<strong>indexedbutton</strong>(<em>columnspec</em>)</a></strong></dt>
+
+<dd>
+<p>Returns the column button associated with the numeric column index or the textual column
+name.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="indexedlist" class="item"><em>$Columns</em>-&gt;<strong>indexedlist</strong>(<em>columnspec</em>)</a></strong></dt>
+
+<dd>
+<p>Returns the listbox associated with the numeric column index or the textual column
+name.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="insert" class="item"><em>$Columns</em>-&gt;<strong>insert</strong>(<em>where</em>, ?&lt;option&gt;?, ...)</a></strong></dt>
+
+<dd>
+<p>This method inserts rows across all listboxes. <strong>where</strong> is the same as documented in the
+<strong>listbox</strong> pod. The following options can be a list of scalars, a list of references to
+hashes, or a list of references to arrays. These can appear in any order. A list of scalars
+will be interpreted up to an array reference or the end of the parameter list, whichever comes
+first. The list is padded out so it can be applied to all listboxes. It is then inserted using
+<strong>where</strong>.</p>
+<p>An array reference is dereferenced and applied just as the inline list. A hash is assumed to
+be keyed by the column header labels. It is converted into a list using the column header order
+and applied normally after 'padding'.</p>
+<p>NOTE: The insertions are 'cached' and then applied to each listbox at once, avoiding flicker and
+slow updates.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="labels" class="item"><em>$Columns</em>-&gt;<strong>labels</strong>()</a></strong></dt>
+
+<dd>
+<p>Returns an ordered list of the column names</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="listhash" class="item"><em>$Columns</em>-&gt;<strong>listhash</strong>()</a></strong></dt>
+
+<dt><strong><a name="hash" class="item"><em>$Columns</em>-&gt;<strong>hash</strong>()</a></strong></dt>
+
+<dd>
+<p>Returns a hash of listboxes keyed by column label</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="lists" class="item"><em>$Columns</em>-&gt;<strong>lists</strong>()</a></strong></dt>
+
+<dd>
+<p>Returns an ordered list of the column listboxes</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="nearest" class="item"><em>$Columns</em>-&gt;<strong>nearest</strong>(<em>y</em>)</a></strong></dt>
+
+<dd>
+<p>Given a y-coordinate within the listbox window, this command returns the index of the
+(visible) listbox element nearest to that y-coordinate.</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="selection" class="item"><em>$Columns</em>-&gt;<strong>selection</strong> (<em>option</em>, <em>argument</em>)</a></strong></dt>
+
+<dd>
+<p>Adjusts the selection. It has several forms, depending on <strong>option</strong>.</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="see" class="item"><em>$Columns</em>-&gt;<strong>see</strong>(<em>index</em>)</a></strong></dt>
+
+<dd>
+<p>Makes row <em>index</em> visible.</p>
+<p>See <em>listbox</em> for more details.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="size" class="item"><em>$Columns</em>-&gt;<strong>size</strong>()</a></strong></dt>
+
+<dt><strong><a name="rows" class="item"><em>$Columns</em>-&gt;<strong>rows</strong>()</a></strong></dt>
+
+<dd>
+<p>Returns the number of rows.</p>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="update" class="item"><em>$Columns</em>-&gt;<strong>update</strong>(<em>where</em>, ...)</a></strong></dt>
+
+<dt><strong><a name="replace" class="item"><em>$Columns</em>-&gt;<strong>replace</strong>(<em>where</em>, ...)</a></strong></dt>
+
+<dd>
+<p>This takes the same options as &lt;$Columns&gt;-&gt;<strong>insert</strong> but deletes the row found there first.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="bindings">BINDINGS</a></h1>
+<dl>
+<dt><strong><a name="1" class="item"><strong>[1]</strong></a></strong></dt>
+
+<dd>
+<p>Pressing and releasing the left mouse button on a columns label will cause the <strong>-sortcommand</strong> or the default
+sort method to be invoked if the <strong>-sort</strong> option has been enabled. Otherwise, the callback
+specified in <strong>-buttoncommand</strong> is invoked if it is defined.</p>
+</dd>
+<dt><strong><a name="2" class="item"><strong>[2]</strong></a></strong></dt>
+
+<dd>
+<p>Double-clicking the left mouse button on any listbox will cause the callback specified by
+<strong>-selectcommand</strong> to be invoked with the row index of the selected listbox item.</p>
+</dd>
+<dt><strong><a name="3" class="item"><strong>[3]</strong></a></strong></dt>
+
+<dd>
+<p>Pressing and releasing the right mouse button on the column label trim elements will cause that column to 'zoom'.
+That is, it will collapse the column to its smallest size without the need to drag it. When pressed
+again, the column will return to its original size. The mouse pointer will change to a 'resize' form
+when this action is possible.</p>
+</dd>
+<dt><strong><a name="4" class="item"><strong>[4]</strong></a></strong></dt>
+
+<dd>
+<p>Pressing the left mouse button on the column label trim elements will initiate resizing of that column. The edge of
+the column will follow the mouse horizontally until the button is released whereupon the column will remain
+at the selected size. The mouse pointer will change to a 'resize' form when this action is possible.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="requirements">REQUIREMENTS</a></h1>
+<dl>
+<dt><strong><a name="tk_tiedlistbox_from_tk_contrib_0_06" class="item"><strong>Tk::TiedListbox</strong> from <strong>Tk-Contrib-0.06</strong></a></strong></dt>
+
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="caveats">CAVEATS</a></h1>
+<p>I regret that there appears to be no way to justify the listboxes. If anyone knows, please
+tell me how.</p>
+<p>
+</p>
+<hr />
+<h1><a name="authors">AUTHORS</a></h1>
+<p>Damion K. Wilson, <a href="mailto:dwilson@ibl.bm,">dwilson@ibl.bm,</a> <a href="http://pwp.ibl.bm/~dkw">http://pwp.ibl.bm/~dkw</a></p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 1999 Damion K. Wilson.</p>
+<p>All rights reserved.</p>
+<p>This program is free software, you may redistribute it and/or modify it
+under the same terms as Perl itself.</p>
+<p>
+</p>
+<hr />
+<h1><a name="history">HISTORY</a></h1>
+<dl>
+<dt><strong><a name="july_4_1999_fixed_scrollbar_redisplay_failure_after_insertion_bug" class="item"><strong>July 4, 1999</strong>: fixed scrollbar redisplay failure after insertion bug</a></strong></dt>
+
+<dt><strong><a name="september_1_1999_rewrite_with_legacy_support" class="item"><strong>September 1, 1999</strong>: Rewrite with legacy support</a></strong></dt>
+
+<dt><strong><a name="november_25_1999_fixed_index_and_delete_methods" class="item"><strong>November 25, 1999</strong>: Fixed index and delete methods</a></strong></dt>
+
+</dl>
+
+</body>
+
+</html>

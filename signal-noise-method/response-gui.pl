@@ -48,8 +48,9 @@ $app::filetypes = [
 ];
 
 $app::side = $app::top->MyApp();
-$app::side->FileControls()->grid(-sticky=>'we');
+$app::side->FileControls(1)->grid(-sticky=>'we');
 $app::side->ProcessControls()->grid(-sticky=>'we');
+$app::side->FileControls(2)->grid(-sticky=>'we');
 
 $app::directory = File::HomeDir->my_home;
 
@@ -482,10 +483,18 @@ sub Tk::MyApp {
 
 sub Tk::FileControls {
 	my $f = shift;
-	my $mw = $f->Panel(-text=>'Files');
-	$mw->FileButton(-label=>'ProteinGroups',-textvariable=>\$app::proteinGroupsPath,-type=>'getOpenFile',-callback=>'')->pack(-expand=>1,-fill=>'x');
-	$mw->FileButton(-label=>'Output Results',-textvariable=>\$app::outputPath,-type=>'getSaveFile',-callback=>\&App::ReadResultsFile)->pack(-expand=>1,-fill=>'x');
-	$mw->FileButton(-label=>'Annotations',-textvariable=>\$app::annotationsPath,-type=>'getOpenFile',-callback=>\&App::ReadPGFile)->pack(-expand=>1,-fill=>'x');
+	my $set = shift;
+	my $mw;
+	if($set == 1){
+		$mw = $f->Panel(-text=>'Files for Processing');
+		$mw->FileButton(-label=>'ProteinGroups',-textvariable=>\$app::proteinGroupsPath,-type=>'getOpenFile',-callback=>'')->pack(-expand=>1,-fill=>'x');
+		$mw->FileButton(-label=>'Output Results',-textvariable=>\$app::outputPath,-type=>'getSaveFile',-callback=>\&app::resp)->pack(-expand=>1,-fill=>'x');
+	}
+	elsif($set == 2){
+		$mw = $f->Panel(-text=>'Input Files for Analysis');
+		$mw->FileButton(-label=>'Output Results',-textvariable=>\$app::outputPath,-type=>'getSaveFile',-callback=>\&App::ReadResultsFile)->pack(-expand=>1,-fill=>'x');
+		$mw->FileButton(-label=>'Annotations',-textvariable=>\$app::annotationsPath,-type=>'getOpenFile',-callback=>\&App::ReadPGFile)->pack(-expand=>1,-fill=>'x');
+	}
 	return $mw;
 }
 sub Tk::ProcessControls {
@@ -555,7 +564,7 @@ sub Tk::FileButton {
 	my $textvariable = $opts{'-textvariable'};
 	delete $opts{'-textvariable'};
 	my $type = $opts{'-type'};
-	delete $opts{'-textvariable'};
+	delete $opts{'-type'};
 	my $cb = $opts{'-callback'};
 	delete $opts{'-callback'};
 	croak "-type must be one of getOpenFile, getSaveFile or chooseDirectory"
