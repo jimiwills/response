@@ -21,11 +21,11 @@ Bio::MaxQuant::ProteinGroups::Response - Analyze MQ proteinGroups for differenti
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 =head1 SYNOPSIS
@@ -1171,7 +1171,7 @@ sub translate_results_table {
 			$flag = $DerivedFrom eq 'rotateToRegressionLine'
 				? '*' : '';
 		}
-		elsif($h =~ /Regression/){
+		elsif($h eq 'Regression'){
 			my $M = $table->[$index+1];
 			my $C = $table->[$index+2];
 			foreach my $k(0..$#$row){
@@ -1185,7 +1185,7 @@ sub translate_results_table {
 				}
 			}
 		}
-		elsif($h =~ /Statistic/){
+		elsif($h eq 'Statistic'){
 			my $V = $table->[$index+1];
 			foreach my $k(0..$#$row){
 				my ($h,$v) = map {$_->[$k]} ($row,$V);
@@ -1197,6 +1197,7 @@ sub translate_results_table {
 						"n/s:$section/n:$name/d:$DerivedFrom/k:$name/t:spread/$flag",
 						@cc
 					];
+					$v = $1 if $v =~ m!/k\:([^/]+)!;
 				}
 				push @results, [$newname, sigfigs($v)];
 			}

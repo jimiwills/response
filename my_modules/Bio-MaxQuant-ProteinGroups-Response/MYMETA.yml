@@ -24,4 +24,4 @@ requires:
   Statistics::Reproducibility: 0.06
   Text::CSV: 1.32
   perl: 5.006
-version: 0.04
+version: 0.05

@@ -16,11 +16,11 @@ Statistics::Reproducibility - Reproducibility measurement between multiple repli
 
 =head1 VERSION
 
-Version 0.06
+Version 0.08
 
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.08';
 
 
 =head1 SYNOPSIS
@@ -85,7 +85,7 @@ sub new {
         data => [],
         
         #meta info
-        copyOnDerive => [qw/comparatorIndex k n vE vS sdE sdS m c pee pss pes pse copyOnDerive/]
+        copyOnDerive => [qw/comparatorIndex k n vE vS sdE sdS m c pee pss pes pse copyOnDerive obs/]
     };
     bless $o, $c;
     return $o;    
@@ -160,12 +160,15 @@ It returns the last object. So you could do:
 sub run {
     my $r = shift;
 #    $r->data([qw/1 2 3 4 5 6 7 8/],[qw/0 1 2 3 4 5 6 7/],[qw/2.1 3.2 4.3 5.4 6.5 7.6 8.7 9.8/]);
+        $r->countObservations();
     $r->regression();
     my $m = $r->subtractMedian();
     $m->middlemostColumn();
     my $d = $m->deDiagonalize();
+        $d->applyMinimumObservations(2);
     $d->regression();
     my $e = $d->rotateToRegressionLine();
+        $e->applyMinimumObservations(2);
     $e->variances();
     return $e;
 }
@@ -306,6 +309,46 @@ sub deDiagonalize {
     return $r;
 }
 
+=head2 countObservations
+
+Counts the number of observations present in each point and stores in obs.
+The result is used by applyMinimumObservations to check for unwanted data
+before a processing event which turns empties into zeros (like deDiagonalize).
+
+=cut
+
+sub countObservations {
+    my ($o) = @_;
+    my @obs = ();
+    foreach my $j(0..$o->{n}-1){
+        my $c = 0;
+        foreach my $i(0..$o->{k}-1){
+            $c++ if defined $o->{data}->[$i]->[$j] && $o->{data}->[$i]->[$j] ne '';
+        }
+        push @obs, $c;
+    }
+    $o->{obs} = \@obs;
+}
+
+=head2 applyMinimumObservations
+
+A method that blanks any data that does not have a minimum number of
+values, e.g. if the minimum were 2, the point [2,3,undef] would be fine
+but [2,undef,undef] would become [undef,undef,undef]
+
+=cut
+
+sub applyMinimumObservations {
+    my ($o,$min) = @_;
+    foreach my $j(0..$o->{n}-1){
+        if($o->{obs}->[$j] < $min){
+            foreach my $i(0..$o->{k}-1){
+                $o->{data}->[$i]->[$j] = '';
+            }
+        }
+    }
+}
+
 =head2 regression
 
 Perform Theil Sen Estimator regression on the data.  The regression is
@@ -406,12 +449,15 @@ sub variances {
     my $o = shift;
     my $S; # experimental spread
     my $E; # imprecision
-    my $df = $o->{n}-1;
+    my $df = 0;
     my $ic = $o->{comparatorIndex};
     # we can give a value for how likely a point is to be there by imprecision alone
     foreach my $j(0..$o->{n}-1){
-        $E += $o->{d}->[$j] ** 2;
-        $S += $o->{data}->[$ic]->[$j] ** 2;
+        if($o->{d}->[$j] ne '' && $o->{data}->[$ic]->[$j] ne ''){
+            $E += $o->{d}->[$j] ** 2;
+            $S += $o->{data}->[$ic]->[$j] ** 2;
+            $df ++;
+        }
     }
     $E /= $df;
     $S /= $df;
@@ -427,18 +473,25 @@ sub variances {
     $o->{pes} = [];
     $o->{pse} = [];
     foreach my $j(0..$o->{n}-1){
-        push @{$o->{pee}}, $sdE ?
-            Statistics::Distributions::tprob ($df,$o->{d}->[$j] / $sdE)
-            : 1;
-        push @{$o->{pss}}, $sdS ?
-            Statistics::Distributions::tprob ($df,$o->{data}->[$ic]->[$j] / $sdS)
-            : 1;
-        push @{$o->{pes}}, $sdS ?
-            Statistics::Distributions::tprob ($df,$o->{d}->[$j] / $sdS)
-            : 1;
-        push @{$o->{pse}}, $sdE ?
-            Statistics::Distributions::tprob ($df,$o->{data}->[$ic]->[$j] / $sdE)
-            : 1;
+        my ($pee,$pes,$pss,$pse) = ('','','','');
+        if($o->{d}->[$j] ne '' && $o->{data}->[$ic]->[$j] ne ''){
+            $pee = $sdE ?
+                Statistics::Distributions::tprob ($df,$o->{d}->[$j] / $sdE)
+                : 1;
+            $pes = $sdS ?
+                Statistics::Distributions::tprob ($df,$o->{d}->[$j] / $sdS)
+                : 1;
+            $pss = $sdS ?
+                Statistics::Distributions::tprob ($df,$o->{data}->[$ic]->[$j] / $sdS)
+                : 1;
+            $pse = $sdE ?
+                Statistics::Distributions::tprob ($df,$o->{data}->[$ic]->[$j] / $sdE)
+                : 1;
+        }
+        push @{$o->{pee}}, $pee;
+        push @{$o->{pes}}, $pes;
+        push @{$o->{pss}}, $pss;
+        push @{$o->{pse}}, $pse;
     }
     return ($S,$E);
 }

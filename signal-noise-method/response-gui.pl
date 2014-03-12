@@ -48,6 +48,7 @@ $app::H = $app::W = 0;
 	'normalized' => 31,
 	'medians' => 32,
 	'spread' => 33,
+	'DistanceToRegressionLine' => 33.5,
 	'ErrorPvalue' => 34,
 	'SpreadPvalue' => 35,
 	'SpreadOverErrorPvalue' => 36,
@@ -204,18 +205,14 @@ sub Tk::RefreshColumnFilters {
 #	}
 	App::CollectSelectionOptions();
 
-	my $sff = $f->Panel(-text=>'Statistics')->grid(-sticky=>'we');
-	App::FixPanel($sff);
-	$sff->Button(-text=>'Show Statistics',-command=>\&App::Stats)->pack;
-
-	$app::selection_controls{sffpanel} = $sff;
-
 	my $ff = $f->Panel(-text=>'Filter')->grid(-sticky=>'we');
 	App::FixPanel($ff);
 	$ff->Label(-text=>"Use the checkboxes below to modify\nthe filter, or do it manually:")->pack;
 	$ff->Entry(-textvariable=>\$app::filter)->pack(-expand=>1,-fill=>'x');
 	my $fff = $ff->Frame()->pack(-expand=>1,-fill=>'x');
 	$fff->Checkbutton(-text=>'show replicates',-variable=>\$app::show_replicates,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
+	$fff->Checkbutton(-text=>'show statistics',-variable=>\$app::show_stats,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
+
 	$ff->Button(-text=>'Apply Filter',-command=>\&App::ApplyFilter)->pack(-expand=>1,-fill=>'x');
 
 	$app::selection_controls{ffpanel} = $ff;
@@ -235,6 +232,7 @@ sub Tk::RefreshColumnFilters {
 }
 
 sub App::Stats {
+	my ($F,$P) = App::ParseFilter ();
 	App::EmptyGrid();
 
 	my $nextrow = 3;
@@ -243,7 +241,7 @@ sub App::Stats {
 	my %cw = ();
 
 	foreach my $key(sort keys %app::columnIndex){
-		next unless $key =~ /^1/;
+		next unless $key =~ /$F/;
 		$key =~ m!/s\:([^/]+)/!; my $s = $1;
 		$key =~ m!/d\:([^/]+)/!; my $d = $1;
 		$key =~ m!/k\:([^/]+)/!; my $k = $1;
@@ -282,7 +280,7 @@ sub App::Stats {
 	$app::W = $nextcol;
 	$app::H = $nextrow;
 
-	foreach my $colname(keys %indices){
+	foreach my $colname(keys %cw){
 		$app::tixgrid->sizeColumn($indices{$colname},-size=> $cw{$colname} > 20 ? 100 : 'auto');
 	}
 
@@ -292,34 +290,64 @@ sub Tk::PGSelect {
 	my $f = shift;
 	my $mw = $f->Panel(-text=>'Annotations');
 	App::FixPanel($mw);
+	my $row = 0;
+	my $col = 0;
 	foreach(@app::proteinGroupsHead){
 		$mw->Checkbutton(-text=>$_,-variable=>\$app::selectionFlags{PG}->{$_},
-			-command=>\&App::GenerateColumnFilter)->grid(-sticky=>'w')
+			-command=>\&App::GenerateColumnFilter)
+			->grid( -column=>$col, -row=>++$row, -sticky=>'w')
 	}
+	$row--;
+	$mw->Button(-text=>'Apply', -command=>\&App::ApplyFilter)
+		->grid(-sticky=>'e', -column=>++$col, -row=>$row, -rowspan=>2)
+		unless $row < 0;
 	return $mw;
 }
 
 sub App::ParseFilter {
 	my @parts = split /\s/, $app::filter;
-	my $reps = 0;
+
 	my %pattern = ();
 	foreach my $part(@parts){
 		if($part eq 'replicates' || $part eq 'reps'){
-			$reps = 1;
+			$app::show_replicates = 1;
 		}
-		my ($key,$values) = split /\:/, $part;
-		$pattern{$key} = $values;
+		elsif($part eq 'stats' || $part eq 'statistics'){
+			$app::show_stats = 1;
+		}
+		else {
+			my ($key,$values) = split /\:/, $part;
+			$pattern{$key} = $values;
+		}
 	}
-	my $nk = $reps ? 'n' : 'k';
-	
-	my ($cells,$conds,$procs,$data,$pg) = map {$pattern{$_}} qw/cells conds procs data pg/;
+	my $nk = $app::show_replicates ? 'n' : 'k';
+	my $n1 = $app::show_stats ? '1' : 'n';
 
-	$procs .= '|normalized|medians';
-	$data .= '|data';
+
+	$pattern{procs} .= '|normalized|medians';
+	$pattern{data} = $app::show_stats 
+		? '[^/]+'  
+		: $pattern{data}.'|data';
+
+
+
+	
+	my ($cells,$conds,$procs,$data,$pg) = map {
+		if($pattern{$_} =~ /\|/){
+			$pattern{$_} = "(?:$pattern{$_})";
+		}
+		$pattern{$_}
+	} qw/cells conds procs data pg/;
+	delete $pattern{$_} foreach qw/cells conds procs data pg/;
+	foreach (keys %pattern){
+		print STDERR "Warning: pattern key ``$_'' not recognised!\n";
+	}
+
+
 
 	my $qr = $nk eq 'n'
-		? qr!n/s\:[^/]+/n\:(?:$cells)\.(?:$conds)/d\:(?:$procs)/k\:[^/]+/t\:(?:$data)/!
-		: qr!n/s\:[^/]+/n\:[^/]+/d\:(?:$procs)/k\:(?:$cells)\.(?:$conds)/t\:(?:$data)/!;
+		? qr!$n1/s\:[^/]+/n\:$cells\.$conds/d\:$procs/k\:[^/]+/t\:$data/!
+		: qr!$n1/s\:[^/]+/n\:[^/]+/d\:$procs/k\:$cells\.$conds/t\:$data/!;
 
 	my $qr2 = qr!$pg!;
 
@@ -336,6 +364,10 @@ sub App::EmptyGrid {
 }
 
 sub App::ApplyFilter {
+	if($app::show_stats){
+		return App::Stats();
+	}
+
 	my ($F,$P) = App::ParseFilter ();
 	App::EmptyGrid();
 	my $x = 0;
@@ -362,6 +394,7 @@ sub App::ApplyFilter {
 		$x++;
 	}
 	$app::tixgrid->configure(-leftmargin=>$app::leftMargin);
+
 	foreach my $key(sort keys %app::columnIndex){
 		next unless $key =~ /$F/;
 		$key =~ m!/s\:([^/]+)/!; my $s = $1;
@@ -507,8 +540,9 @@ sub App::GenerateColumnFilter {
 	my $pg = scalar(@pg) ? join('|', @pg) : '---';
 
 	my $showreps = $app::show_replicates ? 'reps ' : '';
+	my $showstats = $app::show_stats ? 'stats ' : '';
 
-	$app::filter = $showreps
+	$app::filter = $showreps . $showstats
 		. "cells:$cells conds:$conds data:$types procs:$procs pg:$pg";
 
 }
@@ -520,14 +554,20 @@ sub Tk::SelectColumns {
 	my $title = shift;
 	my $mw = $f->Panel(-text=>$title);
 	App::FixPanel($mw);
+	my $col = 0;
+	my $row = 0;
 	foreach (sort {App::Sortable($a) <=> App::Sortable($b)} keys %{$app::selectionFlags{$title}}){
 		next if $title eq 'Data Type' && /^data$/;
 		next if $title eq 'Processing Stage' && /^medians$|^normalized$/;
 		$mw->Checkbutton(-text=>$_,
 			-variable=>\$app::selectionFlags{$title}->{$_},
 			-command=>\&App::GenerateColumnFilter)
-				->grid(-sticky=>'w');
+				->grid(-sticky=>'w', -column=>$col, -row=>++$row);
 	}
+	$row--;
+	$mw->Button(-text=>'Apply', -command=>\&App::ApplyFilter)
+		->grid(-sticky=>'e', -column=>++$col, -row=>$row, -rowspan=>2)
+		unless $row < 0;
 	return $mw;
 }
 
@@ -555,6 +595,7 @@ sub Tk::MyApp {
 		-selectunit=>'cell',
 		-width=>10,
 		-height=>20,
+		-background=>'white',
 	)->pack(-expand=>1,-fill=>'both',-side=>'left');
 
 	$sf->configure('-sliderposition' => 350);
