@@ -19,7 +19,7 @@
 #     MIN_PERL_VERSION => q[5.006]
 #     NAME => q[Bio::MaxQuant::ProteinGroups::Response]
 #     PL_FILES => {  }
-#     PREREQ_PM => { Test::More=>q[0], Statistics::Reproducibility=>q[0.06] }
+#     PREREQ_PM => { Test::More=>q[0], Statistics::Reproducibility=>q[0.06], Math::SigFigs=>q[1.09], IO::File=>q[1.14], Text::CSV=>q[1.32], File::Path=>q[2.09] }
 #     TEST_REQUIRES => {  }
 #     VERSION_FROM => q[lib/Bio/MaxQuant/ProteinGroups/Response.pm]
 #     clean => { FILES=>q[Bio-MaxQuant-ProteinGroups-Response-*] }
@@ -62,11 +62,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = Bio::MaxQuant::ProteinGroups::Response
 NAME_SYM = Bio_MaxQuant_ProteinGroups_Response
-VERSION = 0.03
+VERSION = 0.04
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_03
+VERSION_SYM = 0_04
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.03
+XS_VERSION = 0.04
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -261,7 +261,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = Bio-MaxQuant-ProteinGroups-Response
-DISTVNAME = Bio-MaxQuant-ProteinGroups-Response-0.03
+DISTVNAME = Bio-MaxQuant-ProteinGroups-Response-0.04
 
 
 # --- MakeMaker macro section:
@@ -502,9 +502,13 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '    - t' >> META_new.yml
 	$(NOECHO) $(ECHO) '    - inc' >> META_new.yml
 	$(NOECHO) $(ECHO) 'requires:' >> META_new.yml
+	$(NOECHO) $(ECHO) '  File::Path: 2.09' >> META_new.yml
+	$(NOECHO) $(ECHO) '  IO::File: 1.14' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Math::SigFigs: 1.09' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Statistics::Reproducibility: 0.06' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Text::CSV: 1.32' >> META_new.yml
 	$(NOECHO) $(ECHO) '  perl: 5.006' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version: 0.03' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version: 0.04' >> META_new.yml
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
 	$(NOECHO) $(ECHO) Generating META.json
 	$(NOECHO) $(ECHO) '{' > META_new.json
@@ -541,13 +545,17 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '      },' >> META_new.json
 	$(NOECHO) $(ECHO) '      "runtime" : {' >> META_new.json
 	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '            "File::Path" : "2.09",' >> META_new.json
+	$(NOECHO) $(ECHO) '            "IO::File" : "1.14",' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Math::SigFigs" : "1.09",' >> META_new.json
 	$(NOECHO) $(ECHO) '            "Statistics::Reproducibility" : "0.06",' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Text::CSV" : "1.32",' >> META_new.json
 	$(NOECHO) $(ECHO) '            "perl" : "5.006"' >> META_new.json
 	$(NOECHO) $(ECHO) '         }' >> META_new.json
 	$(NOECHO) $(ECHO) '      }' >> META_new.json
 	$(NOECHO) $(ECHO) '   },' >> META_new.json
 	$(NOECHO) $(ECHO) '   "release_status" : "stable",' >> META_new.json
-	$(NOECHO) $(ECHO) '   "version" : "0.03"' >> META_new.json
+	$(NOECHO) $(ECHO) '   "version" : "0.04"' >> META_new.json
 	$(NOECHO) $(ECHO) '}' >> META_new.json
 	-$(NOECHO) $(MV) META_new.json $(DISTVNAME)/META.json
 
@@ -853,7 +861,11 @@ ppd :
 	$(NOECHO) $(ECHO) '    <AUTHOR>Jimi &lt;j@0na.me&gt;</AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <PERLCORE VERSION="5,006,0,0" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="File::Path" VERSION="2.09" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="IO::File" VERSION="1.14" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Math::SigFigs" VERSION="1.09" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Statistics::Reproducibility" VERSION="0.06" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Text::CSV" VERSION="1.32" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <ARCHITECTURE NAME="darwin-thread-multi-2level-5.16" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <CODEBASE HREF="" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    </IMPLEMENTATION>' >> $(DISTNAME).ppd

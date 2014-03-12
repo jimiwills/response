@@ -32,11 +32,15 @@
       },
       "runtime" : {
          "requires" : {
+            "File::Path" : "2.09",
+            "IO::File" : "1.14",
+            "Math::SigFigs" : "1.09",
             "Statistics::Reproducibility" : "0.06",
+            "Text::CSV" : "1.32",
             "perl" : "5.006"
          }
       }
    },
    "release_status" : "stable",
-   "version" : "0.03"
+   "version" : "0.04"
 }
