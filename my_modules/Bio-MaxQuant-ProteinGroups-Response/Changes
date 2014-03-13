@@ -1,5 +1,8 @@
 Revision history for Bio-MaxQuant-ProteinGroups-Response
 
+0.06    2014-03-13/22:27
+        Dependencies Tweaked
+
 0.04    2014-03-12/09:49
         Updated prerequisites. Added cell differences.
 

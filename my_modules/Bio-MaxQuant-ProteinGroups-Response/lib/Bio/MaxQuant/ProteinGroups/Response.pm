@@ -7,7 +7,7 @@ use warnings FATAL => 'all';
 
 use Carp;
 
-use Statistics::Reproducibility;
+use Statistics::Reproducibility 0.08;
 use Text::CSV;
 use IO::File;
 use File::Path qw(make_path);
@@ -21,11 +21,11 @@ Bio::MaxQuant::ProteinGroups::Response - Analyze MQ proteinGroups for differenti
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 
 =head1 SYNOPSIS
