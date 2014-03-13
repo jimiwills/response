@@ -127,60 +127,141 @@ sub App::FixPanel {
 
 sub Tk::GridMenu {
 	my $f = shift;
+
+
 	my $m = $app::gridmenu = $f->Menu(-type=>'normal',-tearoff=>0);
-	$m->add('command',-label=>'');
 	$m->configure(-postcommand=>sub {
+		#####
+		$m->delete(0,'end');
+		#####
 		my $text = $app::tixgrid->entrycget($app::x,$app::y,'-text');
-		$m->entryconfigure(0, -label=>$text);
-	});
-	$m->add('separator');
-	$m->add('command',-label=>'Edit',-command=>sub {
-		my $v = $app::tixgrid->Ask(
-			"Edit Cell",
-			"Edit Cell ($app::x,$app::y)...",
-			$app::tixgrid->entrycget($app::x, $app::y, '-text')
+		$m->add('command', -label=>$text);
+		$m->add('separator');
+		$m->add('command',-label=>'Edit',-command=>sub {
+			my $v = $app::tixgrid->Ask(
+				"Edit Cell",
+				"Edit Cell ($app::x,$app::y)...",
+				$app::tixgrid->entrycget($app::x, $app::y, '-text')
+			);
+			$app::tixgrid->entryconfigure($app::x, $app::y, -text=>$v)
+				if $v;
+		});
+		$m->add('separator');
+		$m->command(
+			-label=>"View rows matching this value with...",
 		);
-		$app::tixgrid->entryconfigure($app::x, $app::y, -text=>$v)
-			if $v;
-	});
-	$m->add('command',-label=>'row stuff here (eg select, annotate)');
-	$m->add('separator');
-	$m->add('command',-label=>'Column Width',-command=>sub {
-		my %size = split /\s/, $app::tixgrid->sizeColumn($app::x);
-		my $r = $app::tixgrid->Ask('Column Width',
-			'Column width can be "default", "auto" or a positive integer',$size{-size});
-		return unless $r;
-		$app::tixgrid->sizeColumn($app::x, -size=>$r);
-	});
-	$m->add('separator');
 
-	$m->add('command',-label=>'export this view',-command=>sub {
-		my $fn = $m->getSaveFile(
-			-title=>'Export...',
-			-defaultextension => '.txt',
-			-initialdir => $App::Config{'directory'},
-			-filetypes => $app::filetypes,
-		);
-		return unless $fn;
-		App::SetDirectory($fn);
-		my $io = IO::File->new($fn,'w') or $m->messageBox(-title=>'Error', -message=>$!);
-		foreach my $x(0..$app::W-1){
-			my @parts = map {$app::tixgrid->entrycget($x, $_, '-text')} (0..3);
-			my $head = join('/', map {$_ ? $_ : ()} @parts);
-			print $io "\t" if $x;
-			print $io $head;
+		# here we want to populate the menu with the current
+		# saved column filters
+		my $cell = $app::tixgrid->entrycget($app::x, $app::y, '-text');
+		$cell =~ s/\s/\\s/g;
+		my ($xs,$ys) = $app::flip_view ?  ([0,1,2,3],[$app::y]) : ([$app::x],[0,1,2,3]);
+		my @heads = ();
+		foreach my $x(@$xs){
+			foreach my $y(@$ys){
+				my $t =  $app::tixgrid->entrycget($x, $y, '-text');
+				next unless defined $t;
+				$t =~ s/\s/_/g;
+				push @heads, $t;
+			}
 		}
-		print $io "\n";
+		my $colspec = join('*', @heads);
+		my $sl = $app::columnFilterBrowser->Subwidget('slistbox');
+		foreach my $t($sl->get(0,'end')){
+			$m->add(
+				'command',-label=>length($t) > 20 ? substr($t,0,17).'...' : $t,
+				-command=> sub {
+					$app::rowfilter = "$colspec=$cell";
+					$app::columnfilter = "$t";
+					App::ApplyFilter();
+				}
+			);
+		}
 
 
-		foreach my $y(4..$app::H-1){
+		$m->add('separator');
+		$m->add('command',-label=>'Filter on this column...',-command=>sub{
+			my ($colspecs,$operator,$search,$row,$col) = ([],'',$text,0,0);
+			if($colspec !~ /\*/){
+				$colspecs = ["annot*$colspec"];
+			}
+			else {
+				my @h = split /\*/, $colspec;
+				my $h1 = pop @h;
+				my $h2 = pop @h;
+				push @$colspecs, $h1;
+				push @$colspecs, "$h2*$h1";
+				if(@h){
+					my $h3 = pop @h;
+					push @$colspecs, "$h3*$h2*$h1";
+				}
+			}
+			my @operators = ('less than','less than or equal to','equal to','greater than or equal to',
+						'greater than', 'containing', 'not containing');
+			$operator = $operators[0];
+			my @allops = ('<<','<<=','==','>>=','>>','~~','##');
+			my @anyops = ('<','<=','=','>=','>','~','#');
+			my (%allops,%anyops);
+			@anyops{@operators} = @anyops;
+			@allops{@operators} = @allops;
+			my $db = $f->DialogBox(-title=>'Filter on column...',-buttons=>[qw/Ok Cancel/]);
+
+			my $any_or_all = 'any';
+			
+			$db->Label(-text=>'Keep rows with values in')->pack;
+			my $f = $db->Frame->pack;
+				$f->Checkbutton(-onvalue=>'any',-offvalue=>'all',-variable=>\$any_or_all,-text=>'Any')->pack(-side=>'left');
+				$f->Checkbutton(-onvalue=>'all',-offvalue=>'any',-variable=>\$any_or_all,-text=>'All')->pack(-side=>'left');
+			$db->Label(-text=>'columns matching')->pack;
+			$db->BrowseEntry(-options=>$colspecs,-variable=>\$colspec)->pack;
+			$db->Label(-text=>'that are')->pack;
+			$db->BrowseEntry(-options=>\@operators,-variable=>\$operator,-state=>'readonly')->pack;
+			$db->Label(-text=>'the value:')->pack;
+			$db->Entry(-textvariable=>\$search)->pack;
+			if($db->Show eq 'Ok'){
+				my $op = $any_or_all eq 'any' ? $anyops{$operator} : $allops{$operator};
+				$app::rowfilter .= " $colspec$op$search";
+				App::ApplyFilter();
+			}
+		});
+		$m->add('command',-label=>'Column Width',-command=>sub {
+			my %size = split /\s/, $app::tixgrid->sizeColumn($app::x);
+			my $r = $app::tixgrid->Ask('Column Width',
+				'Column width can be "default", "auto" or a positive integer',$size{-size});
+			return unless $r;
+			$app::tixgrid->sizeColumn($app::x, -size=>$r);
+		});
+		$m->add('separator');
+
+		$m->add('command',-label=>'export this view',-command=>sub {
+			my $fn = $m->getSaveFile(
+				-title=>'Export...',
+				-defaultextension => '.txt',
+				-initialdir => $App::Config{'directory'},
+				-filetypes => $app::filetypes,
+			);
+			return unless $fn;
+			App::SetDirectory($fn);
+			my $io = IO::File->new($fn,'w') or $m->messageBox(-title=>'Error', -message=>$!);
 			foreach my $x(0..$app::W-1){
+				my @parts = map {$app::tixgrid->entrycget($x, $_, '-text')} (0..3);
+				my $head = join('/', map {$_ ? $_ : ()} @parts);
 				print $io "\t" if $x;
-				print $io $app::tixgrid->entrycget($x, $y, '-text');
+				print $io $head;
 			}
 			print $io "\n";
-		}
-		close($io);
+
+
+			foreach my $y(4..$app::H-1){
+				foreach my $x(0..$app::W-1){
+					print $io "\t" if $x;
+					print $io $app::tixgrid->entrycget($x, $y, '-text');
+				}
+				print $io "\n";
+			}
+			close($io);
+		});
+
 	});
 }
 
@@ -239,7 +320,10 @@ sub Tk::RefreshColumnFilters {
 	$fff->Checkbutton(-text=>"stats\nsummary",-variable=>\$app::show_stats,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
 	$fff->Checkbutton(-text=>"flip\nview",-variable=>\$app::flip_view,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
 
-	$fff->Button(-text=>'Apply Filter',-command=>\&App::ApplyFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
+
+	$fff->Button(-text=>'<',-command=>\&App::ApplyLastFilter, -padx=>0)->pack(-expand=>1,-fill=>'x',-side=>'left');
+	$fff->Button(-text=>'Apply Filter',-command=>\&App::ApplyFilter, -padx=>0)->pack(-expand=>1,-fill=>'x',-side=>'left');
+	$fff->Button(-text=>'>',-command=>\&App::ApplyNextFilter, -padx=>0)->pack(-expand=>1,-fill=>'x',-side=>'left');
 
 	$app::selection_controls{ffpanel} = $ff;
 
@@ -593,7 +677,37 @@ sub Logic::AND {
 	return 1;
 }
 
+sub App::PushFilterStack {
+	if(@app::filterstack && $app::filterstackpointer < $#app::filterstack){
+		@app::filterstack = @app::filterstack[0..$app::filterstackpointer];
+	}
+	push @app::filterstack, [$app::columnfilter, $app::experimentfilter, $app::rowfilter];
+	if(@app::filterstack > 50){
+		shift @app::filterstack;
+	}
+	$app::filterstackpointer = $#app::filterstack;
+}
+sub App::ApplyStackFilter {
+	($app::columnfilter, $app::experimentfilter, $app::rowfilter) 
+	  = @{$app::filterstack[$app::filterstackpointer]};
+	App::ApplyFilter(1);
+}
+
+sub App::ApplyLastFilter {
+	return if $app::filterstackpointer <= 0;
+	$app::filterstackpointer--;
+	App::ApplyStackFilter();
+}
+
+sub App::ApplyNextFilter {
+	return if $app::filterstackpointer >= $#app::filterstack;
+	$app::filterstackpointer++;
+	App::ApplyStackFilter();
+}
+
 sub App::ApplyFilter {
+
+	App::PushFilterStack() unless shift;
 
 	App::RowFilter ();
 
@@ -858,7 +972,7 @@ sub Tk::MyApp {
 		-background=>'white',
 	)->pack(-expand=>1,-fill=>'both',-side=>'left');
 
-	$sf->configure('-sliderposition' => 350);
+	$sf->configure('-sliderposition' => 400);
 
 	$app::tixgrid->GridMenu();
 
