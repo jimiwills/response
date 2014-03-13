@@ -235,8 +235,9 @@ sub Tk::RefreshColumnFilters {
 	App::LoadRowFilters();
 
 	my $fff = $ff->Frame()->pack(-expand=>1,-fill=>'x');
-	$fff->Checkbutton(-text=>'show replicates',-variable=>\$app::show_replicates,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
-	$fff->Checkbutton(-text=>'show statistics',-variable=>\$app::show_stats,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
+	$fff->Checkbutton(-text=>"include\nreplicates",-variable=>\$app::show_replicates,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
+	$fff->Checkbutton(-text=>"stats\nsummary",-variable=>\$app::show_stats,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
+	$fff->Checkbutton(-text=>"flip\nview",-variable=>\$app::flip_view,-command=>\&App::GenerateColumnFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
 
 	$fff->Button(-text=>'Apply Filter',-command=>\&App::ApplyFilter)->pack(-expand=>1,-fill=>'x',-side=>'left');
 
@@ -327,8 +328,8 @@ sub App::Stats {
 
 	my $nextrow = 3;
 	my $nextcol = 1;
+
 	my %indices = ();
-	my %cw = ();
 
 	foreach my $key(sort keys %app::columnIndex){
 		next unless $key =~ /$F/;
@@ -343,39 +344,40 @@ sub App::Stats {
 		if(! exists $indices{$colname}){
 			$indices{$colname} = $nextcol++ ;
 			my @cn = ($s,$d,$k);
-			$cw{$colname} = 0;
 			foreach my $y(0..2){
-				$app::tixgridsets{"$indices{$colname} $y"} = 1;
-				$app::tixgrid->set($indices{$colname},$y,-text=>$cn[$y],
+				my $x = $indices{$colname};
+				my $i = $y;
+				($x,$y) = ($y,$x) if $app::flip_view;
+				$app::tixgridsets{"$x $y"} = 1;
+				$app::tixgrid->set($x,$y,-text=>$cn[$i],
 					-style=>$app::topmarginstyle);
-				my $l = length $cn[$y];
-				$cw{$colname} = $l if $l > $cw{$colname};
+				($x,$y) = ($y,$x) if $app::flip_view;
 			}
 		}
  
 		if(! exists $indices{$rowname}){
 			$indices{$rowname} = $nextrow++ ;
-			$app::tixgridsets{"0 $indices{$rowname}"} = 1;
-			$app::tixgrid->set(0,$indices{$rowname},-text=>$t,
+			my ($x,$y) = (0, $indices{$rowname});
+			($x,$y) = ($y,$x) if $app::flip_view;
+			$app::tixgridsets{"$x $y"} = 1;
+			$app::tixgrid->set($x,$y,-text=>$t,
 					-style=>$app::leftmarginstyle);
-			my $l = length $t;
-			$cw{$colname} = $l if $l > $cw{$colname};
+			($x,$y) = ($y,$x) if $app::flip_view;
 		}
 
 		my $value = $app::columnIndex{$key}->[0];
-
-		$app::tixgridsets{"$indices{$colname} $indices{$rowname}"} = 1;
-		$app::tixgrid->set($indices{$colname},$indices{$rowname},-text=>$value,
+		my ($x,$y) = ($indices{$colname},$indices{$rowname});
+		($x,$y) = ($y,$x) if $app::flip_view;
+		$app::tixgridsets{"$x $y"} = 1;
+		$app::tixgrid->set($x,$y,-text=>$value,
 				-style=>$app::mainstyle);
-		my $l = length $value;
-		$cw{$colname} = $l if $l > $cw{$colname};
+		($x,$y) = ($y,$x) if $app::flip_view;
 	}
 	$app::W = $nextcol;
 	$app::H = $nextrow;
+	($app::W,$app::H) = ($app::H,$app::W) if $app::flip_view;
 
-	foreach my $colname(keys %cw){
-		$app::tixgrid->sizeColumn($indices{$colname},-size=> $cw{$colname} > 20 ? 100 : 'auto');
-	}
+
 
 	App::TixGridFix();
 }
@@ -409,6 +411,7 @@ sub App::ParseFilter {
 
 	$app::show_replicates = 0;
 	$app::show_stats = 0;
+	$app::flip_view = 0;
 
 	my %checks = ();
 
@@ -420,6 +423,9 @@ sub App::ParseFilter {
 		}
 		elsif($part eq 'stats' || $part eq 'statistics'){
 			$app::show_stats = 1;
+		}
+		elsif($part eq 'flip'){
+			$app::flip_view = 1;
 		}
 		else {
 			my ($key,$values) = split /\:/, $part;
@@ -503,11 +509,13 @@ sub App::RowFilter {
 		return;
 	}
 
+	my %CI = (%app::columnIndex, map {("annot/$_"=>$app::proteinGroups{$_})} keys %app::proteinGroups);
+
 	my $COR = sub {
 		my $c = shift;
 		my @c = split /\*/,$c;
 		my @list = ();
-		foreach my $cn (keys %app::columnIndex){
+		foreach my $cn (keys %CI){
 			push @list, $cn
 				if Logic::AND(\@c,sub{return $_[1] =~ /\b$_[0]\b/;},$cn);
 		}
@@ -538,17 +546,19 @@ sub App::RowFilter {
 
 	my $rf = $app::rowfilter;
 	$rf =~ s!^[^/]+/!!g;
+	$rf =~ s/(?:^\s+|\s+$)//g;
 
 	my @OR = (
 		map {
 			[map {
+						s/(?:^\s+|\s+$)//g;
 						my @o = split (/($patt)/, $_, 3);
 						$o[0] = &$COR($o[0]);
 						\@o
 				} 	split /\s+/
 			]
 		} 
-		split /\sOR\s/, $rf
+		split /\s+OR\s+/, $rf
 	);
 
 	foreach my $i(0..$app::n-1){
@@ -558,7 +568,7 @@ sub App::RowFilter {
 					Logic::AND($and, sub {
 							my ($statement,$patt,$i) = @_;
 							my ($c,$o,$v) = @$statement;
-							return &{$operators{$o}}([map {$app::columnIndex{$_}->[$i]} @$c],$v);
+							return &{$operators{$o}}([map {$CI{$_}->[$i]} @$c],$v);
 						}, 
 					$patt,$i);
 				}, 
@@ -595,8 +605,10 @@ sub App::ApplyFilter {
 
 	App::EmptyGrid();
 	my $x = 0;
-	$app::leftMargin = 0;
+	my $leftMargin = 0;
+	my $topMargin = 4;
 	my $ymax = 0;
+
 
 	foreach my $key(@app::proteinGroupsHead){
 		next unless $key =~ /$P/;
@@ -604,21 +616,20 @@ sub App::ApplyFilter {
 		my @col = @{$app::proteinGroups{$key}};
 		my $y = 0;
 		foreach ('','','',$key,@col[@app::filteredIndices]){
+			($x,$y) = ($y,$x) if $app::flip_view;
 			$app::tixgridsets{"$x $y"} = 1;
 			$app::tixgrid->set($x,$y,-text=>$_,
-				-style=>$y < 4 ? $app::topmarginstyle : $app::leftmarginstyle);
-			my $l = length $_;
-			$maxw = $l if $l > $maxw;
+				-style=>$y < $topMargin ? $app::topmarginstyle : $app::leftmarginstyle);
+			($x,$y) = ($y,$x) if $app::flip_view;
 			$y ++;
 		}
-		$ymax = $y if $y > $ymax;
-		$app::leftMargin ++;
-
-		$app::tixgrid->sizeColumn($x,-size=> $maxw > 20 ? 100 : 'auto');
+		$leftMargin ++;
 
 		$x++;
 	}
-	$app::tixgrid->configure(-leftmargin=>$app::leftMargin);
+
+	$app::tixgrid->configure(-leftmargin=>$app::flip_view ? $topMargin : $leftMargin);
+	$app::tixgrid->configure(-topmargin=>$app::flip_view ? $leftMargin : $topMargin);
 
 	foreach my $key(sort keys %app::columnIndex){
 		next unless $key =~ /$F/;
@@ -628,36 +639,39 @@ sub App::ApplyFilter {
 		$key =~ m!/t\:([^/]+)/!; my $t = $1;
 		my @col = @{$app::columnIndex{$key}};
 		my $y = 0;
-		my $maxw = 0;
 		foreach ($s,$d,$k,$t,@col[@app::filteredIndices]){
+			($x,$y) = ($y,$x) if $app::flip_view;
 			$app::tixgridsets{"$x $y"} = 1;
 			$app::tixgrid->set($x,$y,-text=>$_,
-				-style=>$y < 4 ? $app::topmarginstyle : $app::mainstyle);
-			my $l = length $_;
-			$maxw = $l if $l > $maxw;
+				-style=>$y < $topMargin ? $app::topmarginstyle : $app::mainstyle);
+			($x,$y) = ($y,$x) if $app::flip_view;
 			$y++;
 		}
 		$ymax = $y if $y > $ymax;
 
-		$app::tixgrid->sizeColumn($x,-size=> $maxw > 20 ? 100 : 'auto');
 		$x++;
 	}
 	$app::W = $x;
 	$app::H = $ymax;
+	($app::H,$app::W) = ($app::W,$app::H) if $app::flip_view;
 	App::TixGridFix();
 
 }
 
 sub App::TixGridFix {
 	foreach my $x(0..$app::W-1){
+		my $L = 0;
 		foreach my $y(0..$app::H-1){
 			if(exists $app::tixgridsets{"$x $y"}){
 				delete $app::tixgridsets{"$x $y"}; # OK, it's already set
+				my $l = length($app::tixgrid->entrycget($x,$y,'-text')) || 0;
+				$L = $l if $l > $L;
 			}
 			else {
 				$app::tixgrid->set($x,$y,-text=>'');
 			}
 		}
+		$app::tixgrid->sizeColumn($x,-size=> $L > 20 ? 120 : 'auto');
 	}
 }
 
@@ -783,10 +797,11 @@ sub App::GenerateColumnFilter {
 
 	my $showreps = $app::show_replicates ? 'reps ' : '';
 	my $showstats = $app::show_stats ? 'stats ' : '';
+	my $flipview = $app::flip_view ? 'flip ' : '';
 
 	$app::experimentfilter = " cells:$cells conds:$conds ";
 
-	$app::columnfilter = $showreps . $showstats
+	$app::columnfilter = $flipview  . $showreps . $showstats
 		. " data:$types procs:$procs pg:$pg";
 
 
