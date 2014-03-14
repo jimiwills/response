@@ -22,6 +22,7 @@ use File::Basename;
 use File::HomeDir;
 use Config::Simple;
 use Tk::BrowseEntry;
+use Text::CSV_PP;
 
 $app::top = MainWindow->new();
 

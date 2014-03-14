@@ -10,12 +10,12 @@ This software targets a specific problem.  We have an experiment in which we tre
 with different drugs/hormone.  We then perform SILAC quantitative proteomics to compare each cell/condition with a pooled
 standard.  In the end we have an experiment with 3 dimensions:
 
-|      | Cell 1 | Cell 2 | Cell 2 | Cell 4 |
+|      | Cell 1 | Cell 2 | Cell 3 | Cell 4 |
 |-----|-----|-------|-------|------|
-|Condition 1 | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 |
-|Condition 2 | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 |
-|Condition 3 | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 |
-|Condition 4 | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 | | Replicates 1, 2 & 3 |
+|Condition 1 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 |
+|Condition 2 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 |
+|Condition 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 |
+|Condition 4 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 | Replicates 1, 2 & 3 |
 
 This software combines data from the replicate experiments (which have been processed using MaxQuant)
 and estimates p-values and other statistics for each protein that summarize significant:
